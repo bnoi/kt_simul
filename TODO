@@ -1,0 +1,22 @@
+TODO
+====
+
+Hight priority
+--------------
+
+Medium priority
+---------------
+
+Low priority
+------------
+
+* review simu data loading (simuio.read()) -> too slow ?
+* test on mac os x (should work pretty well)
+* test on windows 7 (wont work without hard work !)
+* gestion des collisions ?
+* install a frozen workflow (see pyinstaller) (cython issues?)
+
+BUGS
+====
+
+* GUI : random invert state (green and red) on chromosome when animation from loaded simulation

@@ -1,0 +1,472 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Theory behind the model &mdash; kt_simul 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="kt_simul 1.0 documentation" href="index.html" />
+    <link rel="next" title="How to install kt_simul" href="install.html" />
+    <link rel="prev" title="Welcome to kt_simul’s documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="install.html" title="How to install kt_simul"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to kt_simul’s documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">kt_simul 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="theory-behind-the-model">
+<h1>Theory behind the model<a class="headerlink" href="#theory-behind-the-model" title="Permalink to this headline">¶</a></h1>
+<p>TODO: AJOUTER INTRODUCTION TRADUIRE EN ANGLAIS
+JAI FOUTU EN VRAC LES NOTES QUE JAI PRIS</p>
+<div class="section" id="improving-the-model">
+<h2>Improving the model<a class="headerlink" href="#improving-the-model" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>Lenght dependance</dt>
+<dd><p class="first last">fait varier les sites d&#8217;attachement ou la force</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">améliorer gradient de aurora en ajoutant un paramètre, actuellement <img class="math" src="_images/math/c0e320d1d565b81f5dd92c06fac169b097861912.png" alt="\frac{d\alpha}{d}"/></p>
+</li>
+<li><p class="first"><img class="math" src="_images/math/957334057aafc9c35892f435cac01b37c71d2be6.png" alt="k_{\alpha}"/> (coef d&#8217;attachement) dépend aussi du kt opposé</p>
+</li>
+</ul>
+</div>
+<div class="section" id="anisotropie">
+<h2>Anisotropie<a class="headerlink" href="#anisotropie" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>graphe de <img class="math" src="_images/math/f01c662a123be7a0247da7723a6461ecb1b250dd.png" alt="\Delta G"/> en fonction de la position x</li>
+<li>pente anisotropique(pente du graphe) &lt; 0 qd force de déplacement &gt; à la charge (force de friction de ce qui est transporté par la kinésine, ici le chromatide par exemple)</li>
+<li>energie reçu (chimique -&gt; mécanique): <img class="math" src="_images/math/2c26eb64474c7c09f9524f9e82b716ea9fbd3032.png" alt="\Delta G = \Delta G_{ATP-&gt;ADP}"/></li>
+<li>en cas d&#8217;anisotropie nulle = diffusion</li>
+<li>evolution de l&#8217;anistropie avec le temps : linéaire et pente négative</li>
+</ul>
+</div>
+<div class="section" id="oscillateur">
+<h2>Oscillateur<a class="headerlink" href="#oscillateur" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><img class="math" src="_images/math/f85e46080b562e32b04f3343b3c0237c366f365f.png" alt="v(t) = \frac{d\theta}{dt}(t)"/></li>
+<li>notion d&#8217;espace de phase : vitesse en fonction de la position (cercle dont le rayon diminue dans le cas d&#8217;un pendule par exemple)</li>
+<li>vecteur d&#8217;état : ensemble des positions (1D, 2D, 3D, etc)</li>
+<li>notion de régime amorti et suramorti</li>
+</ul>
+</div>
+<div class="section" id="kt-model">
+<h2>KT model<a class="headerlink" href="#kt-model" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="first docutils">
+<dt>piston <span class="classifier-delimiter">:</span> <span class="classifier">force % à la vitesse</span></dt>
+<dd><p class="first last"><img class="math" src="_images/math/9b33de9d14ae0103750ff1f33fc1318dfcd0a59f.png" alt="\vec{F} = \mu\vec{v}"/> avec <img class="math" src="_images/math/2d8c833ed800824727cd7bd2fb9de1a12ad7e674.png" alt="\mu"/> : coef de friction</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ressort <span class="classifier-delimiter">:</span> <span class="classifier">force en fonction de la position (etirement)</span></dt>
+<dd><p class="first last"><img class="math" src="_images/math/e5b6a0f18b2384b64a5744596e2ea9ddf7ac1e21.png" alt="\vec{F} = k(x - x_{0})"/></p>
+</dd>
+</dl>
+</li>
+<li><p class="first">kinetochores modélisés par un système piston + ressort</p>
+</li>
+</ul>
+<div class="section" id="bilan-des-forces">
+<h3>Bilan des forces<a class="headerlink" href="#bilan-des-forces" title="Permalink to this headline">¶</a></h3>
+<img alt="schematic views" class="align-center" src="_images/schema.png" style="width: 700px;" />
+<div class="section" id="forces-at-the-right-spb">
+<h4>Forces at the right SPB<a class="headerlink" href="#forces-at-the-right-spb" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">Friction forces (viscous drag):  <img class="math" src="_images/math/9a4f2aeee336fcbcce8306dfbf5576bcc995490b.png" alt="F_s^f = -\mu_s \dot{x_s}^R"/></p>
+</li>
+<li><p class="first">Midzone force generators (applied at the right SPB):</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/13aa1581eefbe30c225f0c7f4baa7cc13e5357c0.png" alt="F_{mid} = F_z\left(1 - (\dot{x}^R_s - \dot{x}_s^L)/V_z\right) =
+F_z\left(1 - 2\dot{x}^R_s / V_z\right)"/></p>
+</div></div></blockquote>
+</li>
+<li><p class="first">Total kinetochore microtubules force generators:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/9aa6ce8ff092f8025dd8e002762f88f1f5273538.png" alt="F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} &amp; - \rho_{nm}^A\,F_k\left( 1 -
+  (\dot{x}^A_{nm} - \dot{x}^R_s)/V_k\right)\\
+&amp; + \lambda_{nm}^A\,F_k\left(1 -
+  (\dot{x}^A_{nm} + \dot{x}^R_s)/V_k\right)\\
+&amp; - \rho_{nm}^B\,F_k\left( 1 -
+  (\dot{x}^B_{nm} - \dot{x}^R_s)/V_k\right)\\
+&amp; + \lambda_{nm}^A\,F_k\left(1 -
+  (\dot{x}^B_{nm} + \dot{x}^R_s)/V_k\right)"/></p>
+</div></div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="forces-at-the-left-spb">
+<h4>Forces at the left SPB<a class="headerlink" href="#forces-at-the-left-spb" title="Permalink to this headline">¶</a></h4>
+<p>Because of the reference frame definition, <img class="math" src="_images/math/1c5d099ac3905a4b967e65b3dd7173d7e952b42c.png" alt="\dot{x_s}^R =
+-\dot{x_s}^L\,\forall t"/>. Here we substituted <img class="math" src="_images/math/d5d80f2ed2d38cf6d1f0825927b8a1c3ddf2c130.png" alt="x_s^L"/> with <img class="math" src="_images/math/3916f241f7120c4eb8b9b11f0efab7231de51598.png" alt="-x_s^R"/></p>
+<ul>
+<li><p class="first">Friction forces (viscous drag):  <img class="math" src="_images/math/7db7a883d9137b34f6a319bfae98c37eedecf740.png" alt="F_f^L = \mu_s \dot{x_s}^R"/></p>
+</li>
+<li><dl class="first docutils">
+<dt>Midzone force generators:</dt>
+<dd><div class="first last math">
+<p><img src="_images/math/d68e8802a6edc88a2222003a29178a3cb7e26c29.png" alt="F_{mid}^L = - F_z\left(1 - 2\dot{x}^R_s / V_z\right)"/></p>
+</div></dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Total kinetochore microtubules force generators:</dt>
+<dd><div class="first last math">
+<p><img src="_images/math/ff569be632ad0d3e0d05618a1ba46ec448f1525c.png" alt="F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} &amp; - \lambda_{nm}^A\,F_k\left(1 +
+  (\dot{x}^A_{nm} + \dot{x}^R_s)/V_k\right)\\
+&amp; - \lambda_{nm}^B\,F_k\left(1 +
+  (\dot{x}^B_{nm} + \dot{x}^R_s)/V_k\right)"/></p>
+</div></dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="forces-at-centromere">
+<h4>Forces at centromere <img class="math" src="_images/math/7f176663958e876e37afc7cfedf5adfebda08f2e.png" alt="An"/><a class="headerlink" href="#forces-at-centromere" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">Drag: <img class="math" src="_images/math/df03e503bf3f6e4da44dd959bc65ab86a7a366b0.png" alt="F_c^f = -\mu_c \dot{x_n}^A"/></p>
+</li>
+<li><dl class="first docutils">
+<dt>Cohesin bond (Hook spring) restoring force exerted by</dt>
+<dd><p class="first">centromere. We want the centromeres to be able to cross each
+over. In one dimension, this introduces a discontinuity. In the
+previous version, the &#8216;swap&#8217; mechanism was solving this directly
+(as <img class="math" src="_images/math/18fc18a66926b39254d09908f38cf0ab8c24ddb7.png" alt="x_A"/> and <img class="math" src="_images/math/ece892073dc68e12f7ece8c6a511e0c9e2c75b19.png" alt="x_B"/> are exchanged). This is not possible any more, as the &#8216;swap&#8217; mechanism is now irrelevant, as there is no prefered
+side for a given centromere.}:</p>
+<div class="last math">
+<p><img src="_images/math/d0a8a47bf705e027a02ca12ee45f0bfaa192dbdb.png" alt="F_{BA} =
+\kappa_c (x_n^B - x_n^A - d_0) &amp;\mathrm{if}\quad x_n^A \leq x_n^B\\
+\kappa_c (x_n^B - x_n^A + d_0) &amp;\mathrm{if}\quad x_n^A &gt; x_n^B\\"/></p>
+</div></dd>
+</dl>
+<p>With <img class="math" src="_images/math/0df153bc9b013118d752adf2bcbf854edc17a165.png" alt="F_{AB} = - F_{BA}"/>.</p>
+</li>
+<li><p class="first">Total visco-elastic bond between the centromere A and the attachment
+sites:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/14376e041f19c9e88c86876e24b9446c62669b3e.png" alt="F_v^T = \sum_{m = 1}^{M_k} -\kappa_k(x_n^A - x_{nm}^A)
+- \mu_k(\dot{x}_n^A - \dot{x}_{nm}^A)"/></p>
+</div></div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="forces-at-attachment-site">
+<h4>Forces at attachment site <img class="math" src="_images/math/5cf8eeaebdf4433e61183ab92eed1b2bb65a4ab5.png" alt="Anm"/><a class="headerlink" href="#forces-at-attachment-site" title="Permalink to this headline">¶</a></h4>
+<ul>
+<li><p class="first">Visco-elastic bond between the centromere A and the
+attachment sites:</p>
+<div class="math">
+<p><img src="_images/math/433f5d406963386933184b835412e3a05c5ec043.png" alt="F_v =  \kappa_k(x_n^A - x_{nm}^A)
++ \mu_k(\dot{x}_n^A - \dot{x}_{nm}^A)"/></p>
+</div></li>
+<li><p class="first">Kinetochore microtubules force generators:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/cac88cc1451a83de7f998bc388f18467b129de79.png" alt="F_{kMT}^A &amp;= F_{kMT}^{RA} + F_{kMT}^{LA}\\
+F_{kMT}^{RA} &amp;= \rho_{nm}^A\,F_k\left(1 - \frac{\dot{x}^A_{nm} -
+  \dot{x}^R_s}{V_k}\right)\\
+F_{kMT}^{LA} &amp;=  \lambda_{nm}^A\,F_k\left(-1 - \frac{\dot{x}^A_{nm} -
+  \dot{x}^L_s}{V_k}\right)\\"/></p>
+</div></div></blockquote>
+</li>
+</ul>
+<p>With <img class="math" src="_images/math/d0ce5d3e12e62f806fe1d8576dee4ddf5b0c4a6b.png" alt="F_k = 1"/> and <img class="math" src="_images/math/0c05893eb9f75e5e29a1cf2d431422366cfb78bc.png" alt="V_k = 1"/> (for now on, we are taking <img class="math" src="_images/math/d8f60ea5bcead88beedbd19d4e75f9272ea75193.png" alt="F_k"/> as
+unit force and <img class="math" src="_images/math/40b514f3d50ab12888fa4886e266bb6a1e8a7e9f.png" alt="V_k"/> as unit speed), this gives:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/c9e6b06a4f529208db0bf60c2464334b029d87c0.png" alt="F_{kMT}^A = \rho_{nm}^A\,\left(\dot{x}^R_s - \dot{x}^A_{nm} + 1\right)%
+ - \lambda_{nm}^A\,\left(\dot{x}^R_s + \dot{x}^A_{nm} + 1\right)"/></p>
+</div></div></blockquote>
+<p>Eventually, substituting <img class="math" src="_images/math/5e5e87487eb45bdca403f9f745abc970048eb842.png" alt="\lambda^A_{nm} - \rho^A_{nm}"/> with <img class="math" src="_images/math/a211357f8cc38d65c578fdf30c4a5398522322ec.png" alt="\pi_{nm}^A"/> and <img class="math" src="_images/math/55ac6a32e214397a83c28dac3da2bef829d2185d.png" alt="\lambda^A_{nm} + \rho^A_{nm}"/> with <img class="math" src="_images/math/3ac153e5d321b39d6b14b2d8fc76622d2ecebff9.png" alt="|\pi_{nm}^A|"/>:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/0628802a954aed0eb4771e49a6feceb34917300d.png" alt="F_{kMT}^A =  \pi_{nm}^A(\dot{x}^R_s + 1) - |\pi_{nm}^A|\dot{x}^A_{nm}"/></p>
+</div></div></blockquote>
+</div>
+</div>
+<div class="section" id="coefficient-d-attachement-et-detachement">
+<h3>Coefficient d&#8217;attachement et détachement<a class="headerlink" href="#coefficient-d-attachement-et-detachement" title="Permalink to this headline">¶</a></h3>
+<p>The attachment sites attach or detach stochastically with rates <img class="math" src="_images/math/c908a67f8252f9c7039e86518d2fee7cf712fa9c.png" alt="k_a^{R/L}"/>
+and <img class="math" src="_images/math/fa145f78bfaca1b8d08bff9f43f43aded7104528.png" alt="k_d"/>, i.e:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/ef16dbf6fab9d8aad991bcd2f0f82eb9f0d7af66.png" alt="p_{nm}^A = 1 \xrightarrow{\quad k_d \quad} p_{nm}^A = 0 \xrightarrow{\quad k_a^R \quad} p_{nm}^A = 1\\
+p_{nm}^A= -1 \xrightarrow{\quad k_d \quad} p_{nm}^A = 0 \xrightarrow{\quad k_a^L \quad} p_{nm}^A = -1\\"/></p>
+</div></div></blockquote>
+<p>The detachment rate depends on the position of the attached site with
+respect to the chromosome center:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/d9e105c58190f938ccf9114f1c494ab320a35081.png" alt="k_d = k_ad_\alpha / d, \mbox{with } d = \left| x^A_{nm} -
+\left(x^A_{n}+ x^B_{n}\right) / 2 \right|"/></p>
+</div></div></blockquote>
+<p>The attachment rate depends on the state of the other attachment
+sites:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/d3a62cf1c56ce4160d5b67133475a751e537e481.png" alt="k_a^R = k_a\left( 1/2 + \beta\frac{N_n^{AR} - N_n^{AL}}
+{2\left(N_n^{AR} + N_n^{AL}\right)}\right)"/></p>
+</div></div></blockquote>
+<p>In the discrete time step model, the rates are calculated at each
+time step for each attachment site.</p>
+</div>
+<div class="section" id="parameters-and-measures">
+<h3>Parameters and measures<a class="headerlink" href="#parameters-and-measures" title="Permalink to this headline">¶</a></h3>
+<img alt="parameters" class="align-center" src="_images/parameters.png" style="width: 700px;" />
+<img alt="measures" class="align-center" src="_images/measures.png" />
+</div>
+<div class="section" id="equation-differientielle-du-premier-ordre">
+<h3>Equation differientielle du premier ordre<a class="headerlink" href="#equation-differientielle-du-premier-ordre" title="Permalink to this headline">¶</a></h3>
+<p>In the viscous nucleoplasm, inertia is negligible. Newton first
+principle thus reduces to: $ sum F = 0 $. This force balance equation
+can be written for each elements of the spindle.
+To simplify further, the equations for the right and left SPBs can be
+combined:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/4bb50706ec223de946cebe44dfd2439633808d20.png" alt="\mu_s\dot{x}^R_s + F_{z}\left(1 - 2\dot{x}^R_s/V_z\right)
++ \sum_{n,m} - \rho_{nm}^A\,\left(\dot{x}^R_s - \dot{x}^A_{nm} +
+  1\right) &amp;= 0 \, \mbox{for the right SPB}\\
+\mu_s\dot{x}^R_s - F_{z}\left(1 - 2\dot{x}^R_s/V_z\right)%
++ \sum_{n,m} \lambda_{nm}^A\,\left(\dot{x}^R_s + \dot{x}^A_{nm} +
+  1\right) &amp;= 0 \, \mbox{for the left SPB}\\"/></p>
+</div></div></blockquote>
+<p>The difference of those two expressions gives, with the same substitutions as before:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/3c635f1da958f2f150ea43ebd8a4284892dd1ce1.png" alt="\mu_s\dot{x}^R_s + 2F_{z}\left(1 - 2\dot{x}^R_s/V_z\right)
++ \sum_{n,m}- (|\pi_{nm}^A|  + |\pi_{nm}^B|)(\dot{x}^R_s + 1)
++ \pi_{nm}^A \dot{x}_{nm}^A + \pi_{nm}^B \dot{x}_{nm}^B= 0"/></p>
+</div></div></blockquote>
+<p>All the equations are gathered together in the system of equations:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/fc51bf0bdc8c9e41436ab0e7e8e67b025a805d52.png" alt="\mathbf{A}\dot{X} + \mathbf{B}X + C = 0"/></p>
+</div></div></blockquote>
+<p>The vector <img class="math" src="_images/math/6a47ca0fe7cb276abc022af6ac88ddae1a9d6894.png" alt="X"/> has <img class="math" src="_images/math/647e0bd3354fc34a747aebc84de6d39210c2140f.png" alt="1 + 2N(M_k + 1)"/> elements and is defined as
+follow (Note that the left SPB is omitted in <img class="math" src="_images/math/6a47ca0fe7cb276abc022af6ac88ddae1a9d6894.png" alt="X"/>.):</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/3b2cc10d8e1d7dd180f3826b95c72dd30aa01696.png" alt="X = \{x_s^R, \{x_n^A, \{x_{nm}^A\},  x_n^B,
+\{x_{nm}^B \}\}\}\mbox{ with } n \in 1 \cdots N
+\mbox{ and } m \in 1 \cdots M_k"/></p>
+</div></div></blockquote>
+<p>In matrix form, we have:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/fa3632ea302b57a3e474f867a80c1c24e4927a37.png" alt="X = &amp;
+\begin{pmatrix}
+  x_s^R\\
+  x_n^A\\
+  x_{nm}^A\\
+  x_n^B\\
+  x_{nm}^B\\
+\end{pmatrix} =
+\begin{pmatrix}
+  \text{right SPB}\\
+  \text{centromere }A, n\\
+  \text{attachment site }A, n,m\\
+  \text{centromere }B, n\\
+  \text{attachment site }B, n,m\\
+\end{pmatrix}\\
+A = &amp;
+\begin{pmatrix}
+  - 2 \mu_s - 4 F_z/V_z - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)&amp; \hdots &amp; \pi_{nm}^A &amp;
+  \hdots &amp;  \pi_{nm}^B\\
+  \hdots &amp;  -\mu_c - M_k \mu_k&amp; \mu_k &amp; \hdotsfor{2}\\
+  \pi_{nm}^A &amp; \mu_k &amp; - \mu_k - |\pi_{nm}^A| &amp; \hdotsfor{2}\\
+  \hdotsfor{3} &amp; -\mu_c - M_k \mu_k &amp; \mu_k\\
+  \pi_{nm}^B &amp; \hdotsfor{2} &amp; \mu_k &amp; - \mu_k - |\pi_{nm}^B| \\
+\end{pmatrix}, \\
+B = &amp;
+\begin{pmatrix}
+  \,0\, &amp; \hdotsfor{4}\\
+  \hdots &amp; - \kappa_c - M_k \kappa_k &amp; \kappa_k &amp;
+  \kappa_c &amp; \hdots \\
+  \hdots &amp; \kappa_k &amp; -\kappa_k &amp;  \hdotsfor{2}\\
+  \hdots &amp; \kappa_c &amp; \hdots &amp;
+  -\kappa_c - M_k \kappa_k &amp; \kappa_k \\
+  \hdotsfor{3}  &amp; \kappa_k &amp; - \kappa_k\\
+\end{pmatrix}\\
+C = &amp;
+\begin{pmatrix}
+  2Fz - \sum_{n,m}(|\pi_{nm}^A| + |\pi_{nm}^B|) \\
+  - \delta_n \kappa_c d_0\\
+  \pi_{nm}^A\\
+  \delta_n \kappa_c d_0\\
+  \pi_{nm}^B\\
+\end{pmatrix}
+\mathrm{with}\, \delta_n =
+\begin{cases}
+  1  &amp;\mathrm{if}\quad  x_n^A &lt; x_n^B\\
+  -1 &amp;\mathrm{if}\quad  x_n^A &gt; x_n^B\\
+\end{cases}"/></p>
+</div></div></blockquote>
+<p>As is actually done in the python implementation,
+<img class="math" src="_images/math/019e9892786e493964e145e7c5cf7b700314e53b.png" alt="A"/> can be decomposed into a time invariant part <img class="math" src="_images/math/7cce761941ab4b57ae903d05b8fa0568ebbdd98f.png" alt="A_0"/> and a
+variable part <img class="math" src="_images/math/2ad14c81978b68932f8ec828750c02438f581967.png" alt="A_t"/> with:\</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/3b847feea2dc973d8c91b0db031c61776e6d5f0b.png" alt="A_0 &amp;=
+\begin{pmatrix}
+  - 2 \mu_s - 4 F_z/V_z &amp; \hdotsfor{4}\\
+  \hdots &amp;  -\mu_c - M_k \mu_k&amp; \mu_k &amp; \hdotsfor{2}\\
+  \hdots &amp; \mu_k &amp; - \mu_k &amp; \hdotsfor{2}\\
+  \hdotsfor{3} &amp; -\mu_c - M_k \mu_k &amp; \mu_k\\
+  \hdotsfor{3} &amp; \mu_k &amp; - \mu_k\\
+\end{pmatrix}\\
+A_t &amp;=
+\begin{pmatrix}
+  - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)&amp; \hdots &amp; \pi_{nm}^A &amp;
+  \hdots &amp;  \pi_{nm}^B\\
+  \hdotsfor{5}\\
+  \pi_{nm}^A &amp; \hdots &amp; - |\pi_{nm}^A| &amp; \hdotsfor{2}\\
+  \hdotsfor{5}\\
+  \pi_{nm}^B &amp; \hdotsfor{3} &amp; - |\pi_{nm}^B| \\
+\end{pmatrix}\\"/></p>
+</div></div></blockquote>
+<p>For the sake of clarity, <img class="math" src="_images/math/ff5fb3d775862e2123b007eb4373ff6cc1a34d4e.png" alt="B"/> can be decomposed in a kinetochore and a
+cohesin part, <img class="math" src="_images/math/6e993e67d0424886053e404a4fddc8af4d18d46b.png" alt="B = B_c + B_k"/>:</p>
+<blockquote>
+<div><div class="math">
+<p><img src="_images/math/17ad3cef3ad732ee0126ee51585fafbb3e7e4e78.png" alt="B = \kappa_k
+\begin{pmatrix}
+    \,0\, &amp; \hdotsfor{4}\\
+    \hdots &amp;  - M_k  &amp; 1 &amp; \hdotsfor{2} \\
+    \hdots &amp; 1 &amp; -1 &amp;  \hdotsfor{2}\\
+    \hdots &amp;  \hdotsfor{2} &amp; - M_k  &amp; 1 \\
+    \hdotsfor{3}  &amp; 1 &amp; - 1\\
+\end{pmatrix}
++ \kappa_c
+\begin{pmatrix}
+    \,0\, &amp; \hdotsfor{4}\\
+    \hdots &amp; - 1 &amp; \hdots &amp; 1  &amp; \hdots \\
+    \hdotsfor{5}\\
+    \hdots &amp; 1 &amp; \hdots &amp; -1 &amp; \hdots \\
+    \hdotsfor{5}\\
+\end{pmatrix}"/></p>
+</div></div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Theory behind the model</a><ul>
+<li><a class="reference internal" href="#improving-the-model">Improving the model</a></li>
+<li><a class="reference internal" href="#anisotropie">Anisotropie</a></li>
+<li><a class="reference internal" href="#oscillateur">Oscillateur</a></li>
+<li><a class="reference internal" href="#kt-model">KT model</a><ul>
+<li><a class="reference internal" href="#bilan-des-forces">Bilan des forces</a><ul>
+<li><a class="reference internal" href="#forces-at-the-right-spb">Forces at the right SPB</a></li>
+<li><a class="reference internal" href="#forces-at-the-left-spb">Forces at the left SPB</a></li>
+<li><a class="reference internal" href="#forces-at-centromere">Forces at centromere <img class="math" src="_images/math/7f176663958e876e37afc7cfedf5adfebda08f2e.png" alt="An"/></a></li>
+<li><a class="reference internal" href="#forces-at-attachment-site">Forces at attachment site <img class="math" src="_images/math/5cf8eeaebdf4433e61183ab92eed1b2bb65a4ab5.png" alt="Anm"/></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#coefficient-d-attachement-et-detachement">Coefficient d&#8217;attachement et détachement</a></li>
+<li><a class="reference internal" href="#parameters-and-measures">Parameters and measures</a></li>
+<li><a class="reference internal" href="#equation-differientielle-du-premier-ordre">Equation differientielle du premier ordre</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to kt_simul&#8217;s documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">How to install kt_simul</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/theory.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="install.html" title="How to install kt_simul"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to kt_simul’s documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">kt_simul 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, glyg.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

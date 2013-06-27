@@ -1,0 +1,215 @@
+<?xml version="1.0"?>
+<experiment datafile="data.npy" date="Tue Oct 16 17:20:01 2012">
+  <parameters>
+    <param max="2000." min="0.1" name="span" step="10." value="900.0">
+      <unit>s</unit>
+      <description>Simulation duration</description>
+    </param>
+  <param max="2." min="0.1" name="dt" step="0.1" value="0.5">
+      <unit>s</unit>
+      <description>Time step</description>
+    </param>
+  <param max="1000." min="0." name="t_A" step="1." value="720.0">
+      <unit>s</unit>
+      <description>Anaphase A transition</description>
+    </param>
+  
+  <param max="100" min="0" name="d_alpha" step="0.005" value="0.05">
+      <unit>&#181;m</unit>
+      <description>Aurora Pdet modifier</description>
+    </param>
+  <param max="100" min="0" name="orientation" step="1" value="1">
+      <unit> </unit>
+      <description>Orientation effect </description>
+    </param>
+  <param max="1" min="0" name="sac" step="1" value="1">
+      <unit> </unit>
+      <description>Non zero: spindle assembly checkpt </description>
+    </param>
+  <param max="1." min="0." name="k_a" step="0.001" value="0.06">
+      <unit>Hz</unit>
+      <description>MT free attachement frequency</description>
+    </param>  
+  
+  <param max="2000." min="1." name="mus" step="1." value="500.0">
+      <unit>pN.s/&#181;m</unit>
+      <description>Spb drag coefficient</description>
+    </param>
+  <param max="15." min="0." name="L0" step="0.1" value="0.3">
+      <unit>&#181;m</unit>
+      <description>Spindle initial length</description>
+    </param>
+  
+  <param max="23" min="0" name="N" step="1" value="3">
+      <unit> </unit>
+      <description>Number of chromosomes</description>
+    </param>
+  <param max="100" min="0" name="Mk" step="1" value="4">
+      <unit> </unit>
+      <description>Number of attachment sites</description>
+    </param>
+
+<param max="1." min="0." name="k_d0" step="0.001" value="0.06">
+      <unit>Hz</unit>
+      <description>MT free detachement frequency</description>
+    </param>
+<param max="200." min="1." name="kappa_c" step="0" value="44.4444444444">
+      <unit>pN/&#181;m</unit>
+      <description>Cohesin spring constant</description>
+    </param>
+<param max="200." min="1." name="kappa_k" step="0" value="100.0">
+      <unit>pN/&#181;m</unit>
+      <description>Chromatid spring  constant</description>
+    </param>
+<param max="2000." min="0.1" name="muc" step="0" value="444.444444444">
+      <unit>pN.s/&#181;m</unit>
+      <description>Chromatid drag coefficient</description>
+    </param>
+<param max="2000." min="1." name="muk" step="0" value="1200.0">
+      <unit>pN.s/&#181;m</unit>
+      <description>Kt structural friction coef.</description>
+    </param>
+<param max="1." min="0.01" name="d0" step="0" value="0.1">
+      <unit>&#181;m</unit>
+      <description>Kinetochore - kinetochore rest length</description>
+    </param>
+<param max="0.1" min="0.005" name="Vk" step="0" value="0.03">
+      <unit>&#181;m/s</unit>
+      <description>Kineto poleward mvt max. speed</description>
+    </param>
+<param max="0.1" min="0.005" name="Vmz" step="0" value="0.02">
+      <unit>&#181;m/s</unit>
+      <description>Midzone force max. speed</description>
+    </param>
+<param max="100." min="0.1" name="Fk" step="0" value="10.0">
+      <unit>pN</unit>
+      <description>Kineto polward mvmt stall force</description>
+    </param>
+<param max="1000." min="1." name="Fmz" step="0" value="118.650793651">
+      <unit>pN</unit>
+      <description>Midzone stall Force</description>
+    </param>
+
+<param max="2." min="0." name="ld_slope" step="0" value="0.0">
+      <unit> </unit>
+      <description>Fk length dependance, slope</description>
+    </param>
+<param max="2." min="0." name="ld0" step="0" value="1.0">
+      <unit> </unit>
+      <description>Fk length dependance, base</description>
+    </param>
+  </parameters><measures>
+    <param max="0.01" min="0." name="metaph_rate" step="0.001" value="0.002">
+      <unit>&#181;m/s</unit>
+      <description>Metaphase elongation rate</description>
+    </param>
+  <param max="0.2" min="0." name="anaph_rate" step="0.001" value="0.02">
+      <unit>&#181;m/s</unit>
+      <description>Anaphase elongation rate</description>
+    </param>
+  <param max="0.2" min="0." name="poleward_speed" step="0.001" value="0.03">
+      <unit>&#181;m/s</unit>
+      <description>Kt poleward speed</description>
+    </param>
+  <param max="2." min="0." name="mean_metaph_k_dist" step="0.1" value="0.3">
+      <unit>&#181;m</unit>
+      <description>Mean kt-kt distance</description>
+    </param>
+  <param max="2." min="0." name="max_metaph_k_dist" step="0.1" value="1.">
+      <unit>&#181;m</unit>
+      <description>Max kt-kt distance</description>
+    </param>
+  <param max="1." min="0." name="obs_d0" step="0.01" value="0.1">
+      <unit>&#181;m</unit>
+      <description>kt-kt equilibrium distance</description>
+    </param>
+  <param max="0.2" min="0." name="oi_dist" step="0.01" value="0.2">
+      <unit>&#181;m</unit>
+      <description>Max outer-inner plate distance</description>
+    </param>
+  <param max="60." min="5." name="tau_k" step="0.1" value="12.">
+      <unit>s</unit>
+      <description>Kt pair relaxation rate</description>
+    </param>
+  <param max="60." min="5." name="tau_c" step="0.1" value="10.">
+      <unit>s</unit>
+      <description>Merotelic kt relaxation rate</description>
+    </param>
+  </measures><trajectory column="0" name="rightspb" units="mu m">
+    <description>right spb trajectory</description>
+  </trajectory><trajectory column="1" name="leftspb" units="mu m">
+    <description>left spb trajectory</description>
+  </trajectory><trajectory column="2" index="0" name="centromereA" units="mu m">
+    <description>chromosome 0 centromere A trajectory</description>
+  </trajectory><numbercorrect column="3" index="0" name="centromereA" />
+  <numbererroneous column="4" index="0" name="centromereA" />
+  <trajectory column="5" index="0" units="mu m">
+    <description>chromosome 0 left kinetochore trajectory</description>
+  </trajectory><numbercorrect column="6" index="0" name="centromereB" />
+  <numbererroneous column="7" index="0" name="centromereB" />
+  <trajectory cen_tag="A" column="8" index="(0, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="9" index="(0, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="10" index="(0, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="11" index="(0, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="12" index="(0, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="13" index="(0, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="14" index="(0, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="15" index="(0, 3)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="16" index="(0, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="17" index="(0, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="18" index="(0, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="19" index="(0, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="20" index="(0, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="21" index="(0, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="22" index="(0, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="23" index="(0, 3)" name="plugsite" units="" />
+  <trajectory column="24" index="1" name="centromereA" units="mu m">
+    <description>chromosome 1 centromere A trajectory</description>
+  </trajectory><numbercorrect column="25" index="1" name="centromereA" />
+  <numbererroneous column="26" index="1" name="centromereA" />
+  <trajectory column="27" index="1" units="mu m">
+    <description>chromosome 1 left kinetochore trajectory</description>
+  </trajectory><numbercorrect column="28" index="1" name="centromereB" />
+  <numbererroneous column="29" index="1" name="centromereB" />
+  <trajectory cen_tag="A" column="30" index="(1, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="31" index="(1, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="32" index="(1, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="33" index="(1, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="34" index="(1, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="35" index="(1, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="36" index="(1, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="37" index="(1, 3)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="38" index="(1, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="39" index="(1, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="40" index="(1, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="41" index="(1, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="42" index="(1, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="43" index="(1, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="44" index="(1, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="45" index="(1, 3)" name="plugsite" units="" />
+  <trajectory column="46" index="2" name="centromereA" units="mu m">
+    <description>chromosome 2 centromere A trajectory</description>
+  </trajectory><numbercorrect column="47" index="2" name="centromereA" />
+  <numbererroneous column="48" index="2" name="centromereA" />
+  <trajectory column="49" index="2" units="mu m">
+    <description>chromosome 2 left kinetochore trajectory</description>
+  </trajectory><numbercorrect column="50" index="2" name="centromereB" />
+  <numbererroneous column="51" index="2" name="centromereB" />
+  <trajectory cen_tag="A" column="52" index="(2, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="53" index="(2, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="54" index="(2, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="55" index="(2, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="56" index="(2, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="57" index="(2, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="A" column="58" index="(2, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="A" column="59" index="(2, 3)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="60" index="(2, 0)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="61" index="(2, 0)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="62" index="(2, 1)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="63" index="(2, 1)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="64" index="(2, 2)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="65" index="(2, 2)" name="plugsite" units="" />
+  <trajectory cen_tag="B" column="66" index="(2, 3)" name="plugsite" units="mu m" />
+  <state cen_tag="B" column="67" index="(2, 3)" name="plugsite" units="" />
+  <observations />
+</experiment>

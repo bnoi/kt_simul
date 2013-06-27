@@ -1,0 +1,229 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>kt_simul.core.simul_spindle &mdash; kt_simul 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kt_simul 1.0 documentation" href="../index.html" />
+    <link rel="up" title="kt_simul.core" href="../core.html" />
+    <link rel="next" title="kt_simul.core.spindle_dynamics" href="kt_simul.core.spindle_dynamics.html" />
+    <link rel="prev" title="kt_simul.core.xml_handler" href="kt_simul.core.xml_handler.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="kt_simul.core.spindle_dynamics.html" title="kt_simul.core.spindle_dynamics"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="kt_simul.core.xml_handler.html" title="kt_simul.core.xml_handler"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kt_simul 1.0 documentation</a> &raquo;</li>
+          <li><a href="../api.html" >Explore the API</a> &raquo;</li>
+          <li><a href="../core.html" accesskey="U"><tt class="docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">kt_simul.core</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-kt_simul.core.simul_spindle">
+<span id="kt-simul-core-simul-spindle"></span><h1>kt_simul.core.simul_spindle<a class="headerlink" href="#module-kt_simul.core.simul_spindle" title="Permalink to this headline">¶</a></h1>
+<p>This module provides the core simulation functionalities.</p>
+<p>See Gay et al. J. Cell Biol., 2012 <a class="reference external" href="http://dx.doi.org/10.1083/jcb.201107124">http://dx.doi.org/10.1083/jcb.201107124</a>
+The original framework was adapted from:
+Civelekoglu-Scholey et al. Biophys. J. 90(11), 2006
+<a class="reference external" href="http://dx.doi.org/10.1529/biophysj.105.078691">http://dx.doi.org/10.1529/biophysj.105.078691</a></p>
+<dl class="class">
+<dt id="kt_simul.core.simul_spindle.Metaphase">
+<em class="property">class </em><tt class="descclassname">kt_simul.core.simul_spindle.</tt><tt class="descname">Metaphase</tt><big>(</big><em>paramtree=None</em>, <em>measuretree=None</em>, <em>paramfile='/home/hadim/.phd/dev/kt_simul/kt_simul/default/params.xml'</em>, <em>measurefile='/home/hadim/.phd/dev/kt_simul/kt_simul/default/measures.xml'</em>, <em>initial_plug='random'</em>, <em>reduce_p=True</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#kt_simul.core.simul_spindle.Metaphase" title="Permalink to this definition">¶</a></dt>
+<dd><p>An instance of the Metaphase class is a wrapper around
+the whole simulation.</p>
+<p><strong>Typical usage</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">kt_simul.simul_spindle</span> <span class="kn">import</span> <span class="n">Metaphase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span> <span class="o">=</span> <span class="n">Metaphase</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">simul</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">show_trajs</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m</span><span class="o">.</span><span class="n">write_results</span><span class="p">(</span><span class="s">&#39;examples/docstring_results.xml&#39;</span><span class="p">,</span>
+<span class="go">                    &#39;examples/docstring_data.npy&#39;)</span>
+</pre></div>
+</div>
+<p><strong>From an already runned simulation</strong></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">kt_simul.simul_spindle</span> <span class="kn">import</span> <span class="n">Metaphase</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m1</span> <span class="o">=</span> <span class="n">get_fromfile</span><span class="p">(</span><span class="s">&#39;examples/docstring_results.xml&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m1</span><span class="o">.</span><span class="n">show_one</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c">#This shows the trajactory of the chromosome 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m2</span> <span class="o">=</span> <span class="n">Metaphase</span><span class="p">(</span><span class="n">m1</span><span class="o">.</span><span class="n">paramtree</span><span class="p">,</span> <span class="n">m1</span><span class="o">.</span><span class="n">measuretree</span><span class="p">)</span> <span class="c">#A new simulation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">m2</span><span class="o">.</span><span class="n">simul</span><span class="p">(</span><span class="n">ablat</span> <span class="o">=</span> <span class="mi">600</span><span class="p">)</span> <span class="c">#this time with spindle ablation</span>
+</pre></div>
+</div>
+<dl class="method">
+<dt id="kt_simul.core.simul_spindle.Metaphase.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>paramtree=None</em>, <em>measuretree=None</em>, <em>paramfile='/home/hadim/.phd/dev/kt_simul/kt_simul/default/params.xml'</em>, <em>measurefile='/home/hadim/.phd/dev/kt_simul/kt_simul/default/measures.xml'</em>, <em>initial_plug='random'</em>, <em>reduce_p=True</em>, <em>verbose=False</em><big>)</big><a class="headerlink" href="#kt_simul.core.simul_spindle.Metaphase.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Metaphase instanciation method</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>duration</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The duration of the mitosis in seconds (defaults to 900)</li>
+<li><strong>paramtree</strong> (<em>ParamTree instance or None</em>) &#8211; The paramtree contains the parameters for the simulation
+if paramtree is None, the parameters are read
+from the file paramfile. Defaults to None.</li>
+<li><strong>measuretree</strong> (<em>ParamTree instance or None</em>) &#8211; The measuretree contains the observed characteristics
+of the mitosis e.g. metaphase spindle elongation rate, etc.
+if measuretree is None, the measures are read from the file
+indicated by the measurefile argument. Defaults to None.</li>
+<li><strong>paramfile</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Path to a xml file to read the parameters from. Defaults to the
+file params.xml in the module&#8217;s default directory. Other parameter
+files can be produced by editing and changing the default one.
+If the paramtree argument is not None,  paramfile is ignored</li>
+<li><strong>measurefile</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Path to a xml file to read the measures from. Defaults to the
+file measures.xml in the module&#8217;s default directory.
+Other measure files can be produced by editing and changing
+the default one. If the measuretree argument is not None, measurefile
+is ignored</li>
+<li><strong>initial_plug</strong> (<em>string or None</em>) &#8211; <p>Defines globally the initial attachment states.
+This argument can have the following values:</p>
+<blockquote>
+<div><ul>
+<li>&#8216;null&#8217;: all kinetochores are detached</li>
+<li>&#8216;amphitelic&#8217;: all chromosmes are amphitelic</li>
+<li><dl class="first docutils">
+<dt>&#8216;random&#8217;: all attachement site can be bound to</dt>
+<dd>either pole or deteched with equal prob.</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>&#8216;monotelic&#8217;: right kinetochores are attached to the same pole,</dt>
+<dd>left ones are detached</dd>
+</dl>
+</li>
+<li>&#8216;syntelic&#8217; : all kinetochores are attached to the same pole</li>
+</ul>
+</div></blockquote>
+</li>
+<li><strong>reduce_p</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; If True, changes the parameters according to the measures
+so that the simulation average behaviour complies with
+the data in the measures dictionary</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kt_simul.core.simul_spindle.Metaphase.evaluate">
+<tt class="descname">evaluate</tt><big>(</big><big>)</big><a class="headerlink" href="#kt_simul.core.simul_spindle.Metaphase.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Passes all the evaluations in eval_simul.py
+results are stored in the self.observations dictionnary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="kt_simul.core.simul_spindle.Metaphase.simul">
+<tt class="descname">simul</tt><big>(</big><em>ablat=None</em>, <em>ablat_pos=0.0</em><big>)</big><a class="headerlink" href="#kt_simul.core.simul_spindle.Metaphase.simul" title="Permalink to this definition">¶</a></dt>
+<dd><p>The simulation main loop.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ablat</strong> (<em>float, optional</em>) &#8211; Timepoint at which ablation takes place. If None (default)
+no ablation is performed.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="kt_simul.core.xml_handler.html"
+                        title="previous chapter">kt_simul.core.xml_handler</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="kt_simul.core.spindle_dynamics.html"
+                        title="next chapter">kt_simul.core.spindle_dynamics</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/generated/kt_simul.core.simul_spindle.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="kt_simul.core.spindle_dynamics.html" title="kt_simul.core.spindle_dynamics"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="kt_simul.core.xml_handler.html" title="kt_simul.core.xml_handler"
+             >previous</a> |</li>
+        <li><a href="../index.html">kt_simul 1.0 documentation</a> &raquo;</li>
+          <li><a href="../api.html" >Explore the API</a> &raquo;</li>
+          <li><a href="../core.html" ><tt class="docutils literal docutils literal docutils literal docutils literal docutils literal"><span class="pre">kt_simul.core</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, glyg.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

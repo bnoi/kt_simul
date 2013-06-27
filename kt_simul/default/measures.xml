@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<measures>
+  <param max="0.01" min="0." name="metaph_rate" step="0.001" value="0.002">
+    <unit>&#181;m/s</unit>
+    <description>Metaphase elongation rate</description>
+  </param>
+  <param max="0.2" min="0." name="anaph_rate" step="0.001" value="0.02">
+    <unit>&#181;m/s</unit>
+    <description>Anaphase elongation rate</description>
+  </param>
+  <param max="0.2" min="0." name="poleward_speed" step="0.001" value="0.03">
+    <unit>&#181;m/s</unit>
+    <description>Kt poleward speed</description>
+  </param>
+  <param max="2." min="0." name="mean_metaph_k_dist" step="0.1" value="0.3">
+    <unit>&#181;m</unit>
+    <description>Mean kt-kt distance</description>
+  </param>
+  <param max="2." min="0." name="max_metaph_k_dist" step="0.1" value="1.">
+    <unit>&#181;m</unit>
+    <description>Max kt-kt distance</description>
+  </param>
+  <param max="2." min="0." name="mean_kt_spb_dist" step="0.1" value="1">
+    <unit>&#181;m</unit>
+    <description>Mean kt-spb distance</description>
+  </param>
+  <param max="1." min="0." name="obs_d0" step="0.01" value="0.1">
+    <unit>&#181;m</unit>
+    <description>kt-kt equilibrium distance</description>
+  </param>
+  <param max="0.2" min="0." name="oi_dist" step="0.01" value="0.2">
+    <unit>&#181;m</unit>
+    <description>Max outer-inner plate distance</description>
+  </param>
+  <param max="60." min="5." name="tau_k" step="0.1" value="12.">
+    <unit>s</unit>
+    <description>Kt pair relaxation rate</description>
+  </param>
+  <param max="60." min="5." name="tau_c" step="0.1" value="10.">
+    <unit>s</unit>
+    <description>Merotelic kt relaxation rate</description>
+  </param>
+</measures>

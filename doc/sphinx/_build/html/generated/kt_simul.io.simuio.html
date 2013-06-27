@@ -1,0 +1,193 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>kt_simul.io.simuio &mdash; kt_simul 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="kt_simul 1.0 documentation" href="../index.html" />
+    <link rel="up" title="kt_simul.io" href="../io.html" />
+    <link rel="next" title="kt_simul.draw" href="../draw.html" />
+    <link rel="prev" title="kt_simul.io.simuio" href="" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../draw.html" title="kt_simul.draw"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="#" title="kt_simul.io.simuio"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">kt_simul 1.0 documentation</a> &raquo;</li>
+          <li><a href="../api.html" >Explore the API</a> &raquo;</li>
+          <li><a href="../io.html" accesskey="U"><tt class="docutils literal docutils literal"><span class="pre">kt_simul.io</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-kt_simul.io.simuio">
+<span id="kt-simul-io-simuio"></span><h1>kt_simul.io.simuio<a class="headerlink" href="#module-kt_simul.io.simuio" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="kt_simul.io.simuio.SimuIO">
+<em class="property">class </em><tt class="descclassname">kt_simul.io.simuio.</tt><tt class="descname">SimuIO</tt><big>(</big><em>meta_instance=None</em><big>)</big><a class="headerlink" href="#kt_simul.io.simuio.SimuIO" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="kt_simul.io.simuio.SimuIO.__init__">
+<tt class="descname">__init__</tt><big>(</big><em>meta_instance=None</em><big>)</big><a class="headerlink" href="#kt_simul.io.simuio.SimuIO.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>meta_instance</strong> (<em>Metaphase instance</em>) &#8211; Should have been already perform a simulation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kt_simul.io.simuio.SimuIO.read">
+<tt class="descname">read</tt><big>(</big><em>xmlfname='results.xml'</em><big>)</big><a class="headerlink" href="#kt_simul.io.simuio.SimuIO.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a simul_spindle.Metaphase from a XML file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xmlfname</strong> (<em>string, optional</em>) &#8211; The xml file where results from the existing
+simulation are.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">a Metaphase instance</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="kt_simul.io.simuio.SimuIO.save">
+<tt class="descname">save</tt><big>(</big><em>xmlfname='results.xml'</em>, <em>datafname='data.npy'</em><big>)</big><a class="headerlink" href="#kt_simul.io.simuio.SimuIO.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Saves the results of the simulation in two files
+with the parameters, measures and observations in one file
+and the trajectories in the other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xmlfname</strong> (<em>string, optional</em>) &#8211; name of the xml file where parameters and observations will be written</li>
+<li><strong>datafname</strong> (<em>string, optional</em>) &#8211; <p>name of the file where the trajectories will be written
+file type is determined by the file suffix:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>.npy <span class="classifier-delimiter">:</span> <span class="classifier">data are stored in numpy&#8217;s binary format</span></dt>
+<dd>(less portable but quite efficient)</dd>
+</dl>
+</li>
+<li><a href="#id3"><span class="problematic" id="id4">*</span></a>.txt : simple text</li>
+<li><a href="#id5"><span class="problematic" id="id6">*</span></a>.txt.gz : text files compressed transparently</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Any other suffix will be saved as plain text. Column index for
+each trajectory is an attribute of the corresponding element
+in the xml file.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href=""
+                        title="previous chapter">kt_simul.io.simuio</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../draw.html"
+                        title="next chapter"><tt class="docutils literal docutils literal docutils literal"><span class="pre">kt_simul.draw</span></tt></a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/generated/kt_simul.io.simuio.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../draw.html" title="kt_simul.draw"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="#" title="kt_simul.io.simuio"
+             >previous</a> |</li>
+        <li><a href="../index.html">kt_simul 1.0 documentation</a> &raquo;</li>
+          <li><a href="../api.html" >Explore the API</a> &raquo;</li>
+          <li><a href="../io.html" ><tt class="docutils literal docutils literal"><span class="pre">kt_simul.io</span></tt></a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, glyg.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

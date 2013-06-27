@@ -1,0 +1,158 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>How to install kt_simul &mdash; kt_simul 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="kt_simul 1.0 documentation" href="index.html" />
+    <link rel="next" title="Explore the API" href="api.html" />
+    <link rel="prev" title="Theory behind the model" href="theory.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api.html" title="Explore the API"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="theory.html" title="Theory behind the model"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">kt_simul 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="how-to-install-kt-simul">
+<h1>How to install kt_simul<a class="headerlink" href="#how-to-install-kt-simul" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Package manager versions of the python libraries should work.</p>
+<ul class="simple">
+<li>Python &gt;= 2.5</li>
+<li>Numpy &gt;= 1.4 and Scipy &gt;= 0.9</li>
+<li>Cython &gt;= 0.14</li>
+<li>Qt4 and PySide (optional)</li>
+</ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>You should first clone the github version of this code, then
+use the setup script, whether via:</p>
+<blockquote>
+<div># python setup.py build</div></blockquote>
+<p>for a local install, or</p>
+<blockquote>
+<div># python setup.py install</div></blockquote>
+<p>for a system install.
+You will need a C compiler for the cython part.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">kt_simul.simul_spindle</span> <span class="kn">as</span> <span class="nn">sim</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metaph</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">Metaphase</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metaph</span><span class="o">.</span><span class="n">simul</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">metaph</span><span class="o">.</span><span class="n">show_one</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">help</span><span class="p">(</span><span class="n">metaph</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Should provide a first view of the simulation.
+Using the GUI:</p>
+<blockquote>
+<div># python [path_to_package]/kt_smul/gui/kineto_simulation.py</div></blockquote>
+<p>Further details can be found by looking at the code.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">How to install kt_simul</a><ul>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="theory.html"
+                        title="previous chapter">Theory behind the model</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">Explore the API</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/install.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="api.html" title="Explore the API"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="theory.html" title="Theory behind the model"
+             >previous</a> |</li>
+        <li><a href="index.html">kt_simul 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, glyg.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
