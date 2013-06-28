@@ -1,6 +1,6 @@
 import argparse
 
-from kt_simul.draw.animate import Animator
+from kt_simul.gui.animation import Animator
 from kt_simul.io.simuio import SimuIO
 from kt_simul.core.simul_spindle import Metaphase
 

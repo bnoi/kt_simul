@@ -30,7 +30,7 @@ LICENCE
 -------
 
 This code is provided under the GPL compatible CeCILL licence (see
-LICENCE.txt for full details).
+LICENCE for full details).
 
 DEPENDENCIES
 ------------
@@ -48,11 +48,15 @@ INSTALLATION
 You should first clone the github version of this code, then
 use the setup script, whether via:
 
-  # python setup.py build
+```
+python setup.py build
+```
 
 for a local install, or
 
-  # python setup.py install
+```
+python setup.py install
+```
 
 for a system install.
 You will need a C compiler for the cython part.
@@ -71,7 +75,9 @@ help(metaph)
 Should provide a first view of the simulation.
 Using the GUI:
 
-    python [path_to_package]/kt_smul/gui/kineto_simulation.py
+```
+python [path_to_package]/kt_smul/gui/kineto_simulation.py
+```
 
 Further details can be found by looking at the code.
 
