@@ -3,10 +3,11 @@
 Handler for the parameters xml files -- to allow phase space exploration
 """
 
-import numpy as np
 import StringIO
-
 from xml.etree.ElementTree import parse, tostring
+
+import numpy as np
+import pandas as pd
 
 # Those strings should be respected in the xml file
 SPRING_UNIT = u'pN/µm'
@@ -159,6 +160,31 @@ class ParamTree(object):
         f = open(path, "w")
         f.write(tostring(self.root))
         f.close()
+
+    def to_df(self):
+        """
+        Convert self.tree to :class:`pandas.DataFrame`
+
+        Returns
+        -------
+        :class:`pandas.DataFrame`
+        """
+
+        attributs = {'name': [], 'value': [], 'min': [], 'max': [], 'step': []}
+        tags = {'unit': [], 'description': []}
+
+        for el in self.root.findall("param"):
+
+            for name in attributs:
+                attributs[name].append(el.get(name))
+            for name in tags:
+                tags[name].append(el.find(name).text)
+
+        attributs.update(tags)
+        df = pd.DataFrame.from_dict(attributs)
+        cols_ordered = ['name', 'value', 'unit', 'description', 'min', 'max', 'step']
+        df = df.reindex_axis(cols_ordered, axis=1)
+        return df
 
 
 class ResultTree(ParamTree):
