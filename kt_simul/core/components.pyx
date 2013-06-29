@@ -1,4 +1,8 @@
-# cython: profile=True
+"""
+Simulated objects declaration. 'Objects' are for example: centromeres,
+kinetochores, spindle pole body, etc.
+"""
+
 import logging
 
 import random
@@ -110,7 +114,7 @@ cdef class Chromosome(Organite):
 
     Parameters
     ----------
-    spindle: a :class:`~Spindle` instance
+    spindle : :class:`~Spindle` instance
 
     """
     def __init__(self, spindle, ch_id):
@@ -226,12 +230,12 @@ cdef class Centromere(Organite):
     The centromere is where the plugsites are bound to the
     chromosome and where the cohesin spring restoring force, as
     well as the friction coefficient, are applied.
-    This is a subclass of :class:`Organite`
+    This is a subclass of :class:`Organite`.
 
-    Parameters:
+    Parameters
     ----------
     chromosome: a :class:`~Chromosome` instance
-       the parent chromosome
+        the parent chromosome
     tag: {'A', 'B'}
        Side of the centromere. Note that the centromere
        side and the SPB side are not necesseraly related

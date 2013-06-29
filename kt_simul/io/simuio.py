@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 """
+Main module for save and read simulation.
 """
 
 import time
@@ -20,13 +20,14 @@ logger = logging.getLogger(__name__)
 
 class SimuIO():
     """
+    Parameters
+    ----------
+    meta_instance : :class:`~kt_simul.core.simul_spindle.Metaphase`
+        Should have been already perform a simulation
+
     """
 
     def __init__(self, meta_instance=None):
-        """
-        :param meta_instance: Should have been already perform a simulation
-        :type meta_instance: Metaphase instance
-        """
 
         if meta_instance:
             self.meta = meta_instance
@@ -43,13 +44,14 @@ class SimuIO():
         with the parameters, measures and observations in one file
         and the trajectories in the other.
 
-        :param simufname: A ZIP file which contains results.xml and data.npy
-        :type simfname: string
+        Parameters
+        ----------
+        simufname : string
+            A ZIP file which contains results.xml and data.npy:
+                - results.xml : name of the xml file where parameters and
+                                observations will be written
 
-            * results.xml : name of the xml file where parameters and
-                            observations will be written
-
-            * data.npy : data are stored in numpy's binary format
+                - data.npy : data are stored in numpy's binary format
 
         """
 
@@ -178,14 +180,18 @@ class SimuIO():
         """
         Creates a simul_spindle.Metaphase from a results.zip file.
 
-        :param simufname: The .zip file where results from the existing
-                          simulation are (zip which contains xml and npy)
-        :type simufname: string, optional
+        Parameters
+        ----------
+        simufname : string, optional
+            The .zip file where results from the existing simulation are (zip which contains xml and npy)
 
-        :param verbose: Set Metaphase verbose
-        :type verbose: bool
+        verbose : bool
+            Set Metaphase verbose
 
-        :return: a Metaphase instance
+        Returns
+        -------
+        :class:`~kt_simul.core.simul_spindle.Metaphase`
+
         """
 
         # Unzip results.xml and data.npy and put it in

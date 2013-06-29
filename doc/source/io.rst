@@ -1,10 +1,11 @@
-:mod:`kt_simul.io`
-==================
+Input and output : :mod:`kt_simul.io`
+=====================================
 
+.. currentmodule:: kt_simul.io
 .. automodule:: kt_simul.io
 
 .. autosummary::
-    :toctree: generated
-    :template: module.rst
+    :toctree: generated/
 
-    kt_simul.io.simuio
+    simuio
+    xml_handler

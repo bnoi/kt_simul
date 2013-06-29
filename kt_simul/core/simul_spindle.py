@@ -6,7 +6,6 @@ See Gay et al. J. Cell Biol., 2012 http://dx.doi.org/10.1083/jcb.201107124
 The original framework was adapted from:
 Civelekoglu-Scholey et al. Biophys. J. 90(11), 2006
 http://dx.doi.org/10.1529/biophysj.105.078691
-
 """
 
 import logging
@@ -16,7 +15,6 @@ import collections
 # Local imports
 from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.io.xml_handler import ParamTree
-from kt_simul.analysis import evaluations
 from kt_simul.core import parameters
 from kt_simul.utils.progress import print_progress
 from kt_simul.utils.format import pretty_dict
@@ -34,82 +32,74 @@ MEASURES = parameters.MEASURES
 
 
 class Metaphase(object):
+
     """
     An instance of the Metaphase class is a wrapper around
     the whole simulation.
 
-    **Typical usage**
+    Launch a new simulation::
 
-    >>> from kt_simul.simul_spindle import Metaphase
-    >>> m = Metaphase()
-    >>> m.simul()
-    >>> m.show_trajs()
-    >>> m.write_results('examples/docstring_results.xml',
+        from kt_simul.simul_spindle import Metaphase
+        m = Metaphase()
+        m.simul()
+        m.show_trajs()
+        m.write_results('examples/docstring_results.xml',
                         'examples/docstring_data.npy')
 
-    **From an already runned simulation**
+    From an already runned simulation::
 
-    >>> from kt_simul.simul_spindle import Metaphase
-    >>> m1 = get_fromfile('examples/docstring_results.xml')
-    >>> m1.show_one(1) #This shows the trajactory of the chromosome 1
-    >>> m2 = Metaphase(m1.paramtree, m1.measuretree) #A new simulation
-    >>> m2.simul(ablat = 600) #this time with spindle ablation
+        from kt_simul.simul_spindle import Metaphase
+        m1 = get_fromfile('examples/docstring_results.xml')
+        m1.show_one(1) #This shows the trajactory of the chromosome 1
+        m2 = Metaphase(m1.paramtree, m1.measuretree) #A new simulation
+        m2.simul(ablat = 600) #this time with spindle ablation
+
+    Parameters
+    ----------
+
+    paramtree : :class:`~kt_simul.io.xml_handler.ParamTree` instance or None
+        The paramtree contains the parameters for the simulation
+        if paramtree is None, the parameters are read
+        from the file paramfile. Defaults to None.
+
+    measuretree : :class:`~kt_simul.io.xml_handler.ParamTree` instance or None
+        The measuretree contains the observed characteristics
+        of the mitosis e.g. metaphase spindle elongation rate, etc.
+        if measuretree is None, the measures are read from the file
+        indicated by the measurefile argument. Defaults to None.
+
+    paramfile : str
+        Path to a xml file to read the parameters from. Defaults to the
+        file params.xml in the module's default directory. Other parameter
+        files can be produced by editing and changing the default one.
+        If the paramtree argument is not None,  paramfile is ignored
+
+    measurefile : str
+        Path to a xml file to read the measures from. Defaults to the
+        file measures.xml in the module's default directory.
+        Other measure files can be produced by editing and changing
+        the default one. If the measuretree argument is not None, measurefile
+        is ignored
+
+    initial_plug : string or None
+        Defines globally the initial attachment states. This argument can have the following values:
+            - 'null': all kinetochores are detached
+            - 'amphitelic': all chromosmes are amphitelic
+            - 'random': all attachement site can be bound to either pole or deteched with equal prob.
+            - 'monotelic': right kinetochores are attached to the same pole, left ones are detached
+            - 'syntelic' : all kinetochores are attached to the same pole
+
+    reduce_p : bool
+        If True, changes the parameters according to the measures
+        so that the simulation average behaviour complies with
+        the data in the measures dictionary
 
     """
 
     def __init__(self,  paramtree=None, measuretree=None,
-                 paramfile=PARAMFILE, measurefile=MEASUREFILE,
+                 paramfile=None, measurefile=None,
                  initial_plug='random', reduce_p=True,
                  verbose=False):
-
-        """
-        Metaphase instanciation method
-
-
-        :param duration: The duration of the mitosis in seconds (defaults to 900)
-        :type duration: float
-
-        :param paramtree: The paramtree contains the parameters for the simulation
-            if paramtree is None, the parameters are read
-            from the file paramfile. Defaults to None.
-        :type paramtree: ParamTree instance or None
-
-        :param measuretree: The measuretree contains the observed characteristics
-            of the mitosis e.g. metaphase spindle elongation rate, etc.
-            if measuretree is None, the measures are read from the file
-            indicated by the measurefile argument. Defaults to None.
-        :type measuretree: ParamTree instance or None
-
-        :param paramfile: Path to a xml file to read the parameters from. Defaults to the
-            file params.xml in the module's default directory. Other parameter
-            files can be produced by editing and changing the default one.
-            If the paramtree argument is not None,  paramfile is ignored
-        :type paramfile: string
-
-        :param measurefile: Path to a xml file to read the measures from. Defaults to the
-            file measures.xml in the module's default directory.
-            Other measure files can be produced by editing and changing
-            the default one. If the measuretree argument is not None, measurefile
-            is ignored
-        :type measurefile: string
-
-        :param initial_plug: Defines globally the initial attachment states.
-            This argument can have the following values:
-                * 'null': all kinetochores are detached
-                * 'amphitelic': all chromosmes are amphitelic
-                * 'random': all attachement site can be bound to
-                        either pole or deteched with equal prob.
-                * 'monotelic': right kinetochores are attached to the same pole,
-                           left ones are detached
-                * 'syntelic' : all kinetochores are attached to the same pole
-        :type initial_plug: string or None
-
-        :param reduce_p: If True, changes the parameters according to the measures
-            so that the simulation average behaviour complies with
-            the data in the measures dictionary
-        :type reduce_p: bool
-
-        """
 
         # Enable or disable log console
         self.verbose = verbose
@@ -118,6 +108,11 @@ class Metaphase(object):
             logger.disabled = True
         else:
             logger.disabled = False
+
+        if not paramfile:
+            paramfile = PARAMFILE
+        if not measurefile:
+            measurefile = MEASUREFILE
 
         if paramtree is None:
             self.paramtree = ParamTree(paramfile)
@@ -181,16 +176,20 @@ class Metaphase(object):
         """
         The simulation main loop.
 
-        :param ablat: Timepoint at which ablation takes place. If None (default)
+        Parameters
+        ----------
+
+        ablat : float, optional
+            Timepoint at which ablation takes place. If None (default)
             no ablation is performed.
-        :type ablat: float, optional
 
         """
 
         # Check is simulation has already be done
         if self.KD.simulation_done:
             raise SimulationAlreadyDone("""A simulation is already done on this
-instance. Please create another Metaphase instance to launch a new simulation.""")
+                instance. Please create another Metaphase instance
+                to launch a new simulation.""")
 
         kappa_c = self.KD.params['kappa_c']
 
@@ -219,7 +218,7 @@ instance. Please create another Metaphase instance to launch a new simulation.""
                     print_progress(-1)
                     if self.verbose:
                         logger.info("Anaphase onset at %i / %i" %
-                                        (time_point, self.num_steps))
+                                   (time_point, self.num_steps))
                     log_anaphase_onset = True
 
             self.KD.one_step(time_point)
@@ -241,62 +240,64 @@ instance. Please create another Metaphase instance to launch a new simulation.""
             ch.cen_A.calc_toa()
             ch.cen_B.calc_toa()
 
-    def evaluate(self, name=None, groups=[],
-                 debug=False,
-                 verbose=False,
-                 draw=False,
-                 run_all=False):
-        """
-        Passes all the evaluations in kt_simul.analysis.valuations module
-        results are stored in the self.observations dictionnary
+    # def evaluate(self, name=None, groups=[],
+    #              debug=False,
+    #              verbose=False,
+    #              draw=False,
+    #              run_all=False):
+    #     """
+    #     Passes all the evaluations in kt_simul.analysis.valuations module
+    #     results are stored in the self.observations dictionnary
 
-        TODO: most of the code of this method should be moved to
-        kt_simul.analysis.evaluations.__init__
-        """
-        if not self.KD.simulation_done:
-            logger.info("No simulation was runned")
-            return False
+    #     TODO: most of the code of this method should be moved to
+    #     kt_simul.analysis.evaluations.__init__
+    #     """
+    #     if not self.KD.simulation_done:
+    #         logger.info("No simulation was runned")
+    #         return False
 
-        if not name and verbose:
-            logger.info("Starting evaluations")
-        all_evaluations = evaluations.find_evaluations(name=name, groups=groups, run_all=run_all)
+    #     if not name and verbose:
+    #         logger.info("Starting evaluations")
+    # all_evaluations = evaluations.find_evaluations(name=name, groups=groups,
+    # run_all=run_all)
 
-        if not all_evaluations:
-            if verbose:
-                logger.info("No evaluations found")
-            return False
+    #     if not all_evaluations:
+    #         if verbose:
+    #             logger.info("No evaluations found")
+    #         return False
 
-        for evaluation in all_evaluations:
-            if verbose:
-                logger.info("Running %s" % evaluation.name)
-            if debug:
-                result = evaluation().run(self.KD, draw)
-                if verbose:
-                    logger.info("%s done" % evaluation.name)
-            else:
-                try:
-                    result = evaluation().run(self.KD, draw)
-                    if verbose:
-                        logger.info("%s done" % evaluation.name)
-                except Exception as e:
-                    result = np.nan
-                    if verbose:
-                        logger.info("%s returns errors : %s" % (evaluation.name, e))
+    #     for evaluation in all_evaluations:
+    #         if verbose:
+    #             logger.info("Running %s" % evaluation.name)
+    #         if debug:
+    #             result = evaluation().run(self.KD, draw)
+    #             if verbose:
+    #                 logger.info("%s done" % evaluation.name)
+    #         else:
+    #             try:
+    #                 result = evaluation().run(self.KD, draw)
+    #                 if verbose:
+    #                     logger.info("%s done" % evaluation.name)
+    #             except Exception as e:
+    #                 result = np.nan
+    #                 if verbose:
+    # logger.info("%s returns errors : %s" % (evaluation.name, e))
 
-            if name and not run_all:
-                return result
-            else:
-                current_name = evaluation.name.replace(" ", "_")
-                self.observations[current_name] = result
+    #         if name and not run_all:
+    #             return result
+    #         else:
+    #             current_name = evaluation.name.replace(" ", "_")
+    #             self.observations[current_name] = result
 
-        if verbose:
-            logger.info("All evaluations processed")
+    #     if verbose:
+    #         logger.info("All evaluations processed")
 
-        return self.observations
+    #     return self.observations
 
-    def get_report(self, time = 0):
+    def get_report(self, time=0):
         """
         Print simulation state about a specific time point
+
         """
         params = self.paramtree.relative_dic
 
@@ -338,20 +339,25 @@ instance. Please create another Metaphase instance to launch a new simulation.""
 
     def _anaphase_test(self, time_point):
         """
-        Returns True if anaphase has been executed.
         At anaphase onset, set the cohesin spring constent to 0 and
         self.KD.anaphase to True.
+
+        Returns
+        -------
+        bool
+            True if anaphase has been executed.
+
         """
 
         t_A = int(self.KD.params['t_A'])
         dt = self.KD.params['dt']
         t = time_point * dt
-        if self.KD.anaphase :
+        if self.KD.anaphase:
             return True
         if t >= t_A and self._plug_checkpoint():
-            if self.delay == -1 :
+            if self.delay == -1:
                 self.delay = t - t_A
-                #Then we just get rid of cohesin
+                # Then we just get rid of cohesin
                 self.KD.params['kappa_c'] = 0.
                 self.KD.calc_B()
                 nb_mero = self._mero_checkpoint()
@@ -363,16 +369,20 @@ instance. Please create another Metaphase instance to launch a new simulation.""
                 return True
         return False
 
-    def _ablation(self, time_point, pos = None):
+    def _ablation(self, time_point, pos=None):
         """
         Simulates a laser ablation: detaches all the kinetochores
         and sets the midzone stall force Fmz to 0
 
-        :param pos: Position of the laser beam within the spindle
-        :type pos: float or None, optional
+        Parameters
+        ----------
+
+        pos : float or None, optional
+            Position of the laser beam within the spindle
 
         """
-        if pos == None: pos = self.KD.spbR.pos
+        if pos == None:
+            pos = self.KD.spbR.pos
         if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
             logger.warning('Missed shot, same player play again!')
             return
@@ -392,30 +402,38 @@ instance. Please create another Metaphase instance to launch a new simulation.""
         If the spindle assembly checkpoint is active, returns True
         if all chromosomes are plugged by at least one kMT, False
         otherwise.
+
         """
         sac = self.KD.params['sac']
         if sac == 0:
             return True
-        for ch in self.KD.chromosomes :
+        for ch in self.KD.chromosomes:
             if not ch.cen_A.is_attached() or not ch.cen_B.is_attached():
                 return False
         return True
 
     def _mero_checkpoint(self):
         """
-        :return: The total number of merotellic kT
+        Returns
+        -------
+
+        int
+            The total number of merotellic kT
         """
         nb_mero = 0
-        for ch in self.KD.chromosomes :
-            if np.any(ch.erroneous()) :
+        for ch in self.KD.chromosomes:
+            if np.any(ch.erroneous()):
                 nb_mero += sum(ch.erroneous())
-                #print "active checkpoint"
+                # print "active checkpoint"
         return nb_mero
 
     def _mplate_checkpoint(self):
         """
-        :return: Returns True if each kinetochore is in the proper half
-        of the spindle
+        Returns
+        -------
+        bool
+            Returns True if each kinetochore is in the proper half
+            of the spindle
         """
         for ch in self.KD.chromosomes:
             ktR = ch.cen_A.pos
@@ -423,6 +441,7 @@ instance. Please create another Metaphase instance to launch a new simulation.""
             if min(ktR, ktL) <= 0 and max(ktR, ktL) >= 0:
                 return True
         return True
+
 
 class SimulationAlreadyDone(Exception):
     pass

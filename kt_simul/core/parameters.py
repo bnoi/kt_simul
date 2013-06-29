@@ -10,8 +10,8 @@ from kt_simul.io.xml_handler import ParamTree
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
-PARAMFILE = os.path.join(ROOT_DIR, 'default', 'params.xml')
-MEASUREFILE = os.path.join(ROOT_DIR, 'default', 'measures.xml')
+PARAMFILE = os.path.join(ROOT_DIR, 'data', 'params.xml')
+MEASUREFILE = os.path.join(ROOT_DIR, 'data', 'measures.xml')
 MEASURETREE = ParamTree(MEASUREFILE, adimentionalized=False)
 MEASURES = MEASURETREE.absolute_dic
 
@@ -23,13 +23,15 @@ def reduce_params(paramtree, measuretree):
     This functions changes the parameters so that
     the dynamical characteristics complies with the measures [1]_.
 
-    input:
-    -----
-    paramtree : xml_handler.ParamTree instance
-    measuretree : xml_handler.MeasureTree
+    Parameters
+    ----------
 
-    paramtree is modified in place
+    paramtree : :class:`~kt_simul.io.xml_handler.ParamTree` instance
+        Modified in place.
+    measuretree : :class:`~kt_simul.io.xml_handler.MeasureTree` instance
 
+    References
+    ----------
     .. [1] G. Gay, T.Courthéoux, C. Reyes, S. Tournier, Y. Gachet.
            J. Cell Biol 2012 http://dx.doi.org/10.1083/jcb.201107124
 

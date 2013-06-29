@@ -5,6 +5,4 @@ Explore the API
    :maxdepth: 2
 
    core
-   analysis
    io
-   draw

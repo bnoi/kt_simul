@@ -1,8 +1,13 @@
 Theory behind the model
 =======================
 
-TODO: AJOUTER INTRODUCTION TRADUIRE EN ANGLAIS
-JAI FOUTU EN VRAC LES NOTES QUE JAI PRIS
+.. warning::
+    This document is a mix between french and english. It's currently being
+    rewritten to be more intelligible.
+
+.. todo::
+    AJOUTER INTRODUCTION TRADUIRE EN ANGLAIS JAI FOUTU EN VRAC LES NOTES
+    QUE JAI PRIS
 
 Improving the model
 -------------------
@@ -47,7 +52,7 @@ KT model
 Bilan des forces
 ^^^^^^^^^^^^^^^^
 
-.. image:: ./images/schema.png
+.. image:: ./_static/images/schema.png
     :width: 700px
     :align: center
     :alt: schematic views
@@ -184,12 +189,12 @@ time step for each attachment site.
 Parameters and measures
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: ./images/parameters.png
+.. image:: ./_static/images/parameters.png
     :width: 700px
     :align: center
     :alt: parameters
 
-.. image:: ./images/measures.png
+.. image:: ./_static/images/measures.png
     :align: center
     :alt: measures
 

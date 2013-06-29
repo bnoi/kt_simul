@@ -1,4 +1,4 @@
 """
-Core classes for the simulation
+Core classes for the simulation.
 """
 

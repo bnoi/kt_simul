@@ -1,5 +1,5 @@
-Welcome to kt_simul's documentation
-===================================
+Welcome to KtSimul's documentation
+==================================
 
 This python module provides the simulation of mitotic spindle elements (for now, the
 kinetochore and the spindle pole bodies), during cell division in
@@ -19,7 +19,7 @@ accurately describes fission yeast chromosome segregation* J. Cell Biol 2012 ``d
 This article should be used for any citation of this work.
 
 Contents
-========
+--------
 
 .. toctree::
    :maxdepth: 2
@@ -28,22 +28,20 @@ Contents
    install
    api
 
-Funding
-=======
+Contributors
+------------
 
-This project is funded by the French National Research Agency as:
-   *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
+Current developpers are:
+    - Guillaume Gay <gllm.gay@gmail.com> (original author)
+    - Hadrien Mary <hadrien.mary@gmail.com>
+
+Funding
+-------
+
+This project is funded by the French National Research Agency as: *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
 
 License
-=======
+-------
 
 This code is provided under the GPL compatible CeCILL licence (see
 LICENCE.txt for full details).
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
