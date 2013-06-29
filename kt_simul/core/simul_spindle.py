@@ -16,7 +16,7 @@ import collections
 from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.io.xml_handler import ParamTree
 from kt_simul.core import parameters
-from kt_simul.utils.progress import print_progress
+from kt_simul.utils.progress import pprogress
 from kt_simul.utils.format import pretty_dict
 
 logger = logging.getLogger(__name__)
@@ -29,6 +29,10 @@ PARAMFILE = parameters.PARAMFILE
 MEASUREFILE = parameters.MEASUREFILE
 MEASURETREE = parameters.MEASURETREE
 MEASURES = parameters.MEASURES
+
+
+class SimulationAlreadyDone(Exception):
+    pass
 
 
 class Metaphase(object):
@@ -163,13 +167,7 @@ class Metaphase(object):
                 lines.append(line)
         except AttributeError:
             pass
-        lines.append('')
-        lines.append('Observations:')
-        if len(self.observations.keys()) > 0:
-            for line in str(self.observations).split(','):
-                lines.append(line)
-        else:
-            lines.append('Not yet evaluated')
+
         return '\n'.join(lines)
 
     def simul(self, ablat=None, ablat_pos=0.):
@@ -203,7 +201,7 @@ class Metaphase(object):
             progress = int((time_point * 100.0) / self.num_steps)
 
             if self.verbose and progress != bef:
-                print_progress(int(progress))
+                pprogress(int(progress))
                 bef = progress
 
             # Ablation test
@@ -215,7 +213,7 @@ class Metaphase(object):
             # Anaphase transition ?
             if self._anaphase_test(time_point):
                 if not log_anaphase_onset:
-                    print_progress(-1)
+                    pprogress(-1)
                     if self.verbose:
                         logger.info("Anaphase onset at %i / %i" %
                                    (time_point, self.num_steps))
@@ -226,7 +224,7 @@ class Metaphase(object):
                 # print self.KD.At_mat
 
         if self.verbose:
-            print_progress(-1)
+            pprogress(-1)
 
         if self.verbose:
             logger.info('Simulation done')
@@ -239,60 +237,6 @@ class Metaphase(object):
             ch.calc_erroneous_history()
             ch.cen_A.calc_toa()
             ch.cen_B.calc_toa()
-
-    # def evaluate(self, name=None, groups=[],
-    #              debug=False,
-    #              verbose=False,
-    #              draw=False,
-    #              run_all=False):
-    #     """
-    #     Passes all the evaluations in kt_simul.analysis.valuations module
-    #     results are stored in the self.observations dictionnary
-
-    #     TODO: most of the code of this method should be moved to
-    #     kt_simul.analysis.evaluations.__init__
-    #     """
-    #     if not self.KD.simulation_done:
-    #         logger.info("No simulation was runned")
-    #         return False
-
-    #     if not name and verbose:
-    #         logger.info("Starting evaluations")
-    # all_evaluations = evaluations.find_evaluations(name=name, groups=groups,
-    # run_all=run_all)
-
-    #     if not all_evaluations:
-    #         if verbose:
-    #             logger.info("No evaluations found")
-    #         return False
-
-    #     for evaluation in all_evaluations:
-    #         if verbose:
-    #             logger.info("Running %s" % evaluation.name)
-    #         if debug:
-    #             result = evaluation().run(self.KD, draw)
-    #             if verbose:
-    #                 logger.info("%s done" % evaluation.name)
-    #         else:
-    #             try:
-    #                 result = evaluation().run(self.KD, draw)
-    #                 if verbose:
-    #                     logger.info("%s done" % evaluation.name)
-    #             except Exception as e:
-    #                 result = np.nan
-    #                 if verbose:
-    # logger.info("%s returns errors : %s" % (evaluation.name, e))
-
-    #         if name and not run_all:
-    #             return result
-    #         else:
-    #             current_name = evaluation.name.replace(" ", "_")
-    #             self.observations[current_name] = result
-
-    #     if verbose:
-    #         logger.info("All evaluations processed")
-
-    #     return self.observations
 
     def get_report(self, time=0):
         """
@@ -441,7 +385,3 @@ class Metaphase(object):
             if min(ktR, ktL) <= 0 and max(ktR, ktL) >= 0:
                 return True
         return True
-
-
-class SimulationAlreadyDone(Exception):
-    pass

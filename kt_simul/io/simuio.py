@@ -6,10 +6,10 @@ import time
 import logging
 import StringIO
 import zipfile
+import xml.etree.ElementTree as ET
 
 import numpy as np
-
-from xml.etree.ElementTree import Element, SubElement, tostring
+import pandas as pd
 
 from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.core.simul_spindle import Metaphase
@@ -32,158 +32,150 @@ class SimuIO():
         if meta_instance:
             self.meta = meta_instance
             self.KD = self.meta.KD
-            self.timelapse = self.meta.timelapse
-            self.num_steps = self.meta.num_steps
             self.paramtree = self.meta.paramtree
             self.measuretree = self.meta.measuretree
-            self.observations = self.meta.observations
 
-    def save(self, simufname="results.zip", verbose=False):
+    def save(self, simufname, metadata=None, verbose=False):
         """
-        Saves the results of the simulation in two files
-        with the parameters, measures and observations in one file
-        and the trajectories in the other.
+        Save :class:`~kt_simul.core.simul_spindle.Metaphase` instance to
+        HDF5 file. Each of the following element will be stored via
+        :class:`pandas.DataFrame` or :class:`pandas.Series` object.
 
         Parameters
         ----------
-        simufname : string
-            A ZIP file which contains results.xml and data.npy:
-                - results.xml : name of the xml file where parameters and
-                                observations will be written
-
-                - data.npy : data are stored in numpy's binary format
+        simufname : str
+            Filename to save HDF5 file.
+        metadata : dict
+            Will be stored as a :class:`pandas.Series`. (Not implemented)
+        verbose : bool
+            Enable verbose mode.
 
         """
 
+        KD = self.meta.KD
+        paramtree = self.meta.paramtree
+        measuretree = self.meta.measuretree
+        timelapse = self.meta.timelapse
         chromosomes = self.KD.chromosomes
 
-        # Store matrices insisde wavelist
-        wavelist = []
+        time_index = pd.MultiIndex.from_arrays([timelapse], names=['t'])
 
-        xmlout = ""
-        xmlout += '<?xml version="1.0"?>\n'
-        today = time.asctime()
-        experiment = Element("experiment", date=today)
-        experiment.append(self.paramtree.root)
-        experiment.append(self.measuretree.root)
+        df_to_save = ['params', 'measures', 'spbs', 'kts', 'plug_sites']
 
-        # right SPB
-        spbR = SubElement(experiment, "trajectory", name="rightspb",
-                          column='0', units='mu m')
-        SubElement(spbR, "description").text = "right spb trajectory"
-        spbRtraj = np.array(self.KD.spbR.traj)
-        wavelist.append(spbRtraj)
+        """
+        spbs DataFrame look like that:
 
-        # left SPB
-        spbL = SubElement(experiment, "trajectory", name="leftspb",
-                          column='1', units='mu m')
-        SubElement(spbL, "description").text = "left spb trajectory"
-        spbLtraj = np.array(self.KD.spbL.traj)
-        wavelist.append(spbLtraj)
+                               x
+        t   label side
+        0.0 spb   A     0.150000
+            spbL  B    -0.150000
+        0.5 spb   A     0.154235
+            spbL  B    -0.154235
+        1.0 spb   A     0.158469
+            spbL  B    -0.158469
+        1.5 spb   A     0.162702
+            spbL  B    -0.162702
+        2.0 spb   A     0.166934
+            spbL  B    -0.166934
+        """
+        spbR = pd.DataFrame(KD.spbR.traj, columns=['x'], index=time_index)
+        spbL = pd.DataFrame(KD.spbL.traj, columns=['x'],index=time_index)
 
-        col_num = 2
-        # chromosomes
-        for n, ch in enumerate(chromosomes):
-            rch = SubElement(experiment, "trajectory",
-                            name="centromereA",
-                            index=str(n),
-                            column=str(col_num),
-                            units='mu m')
-            text = "chromosome %i centromere A trajectory" % n
-            SubElement(rch, "description").text = text
-            wavelist.append(ch.cen_A.traj)
-            col_num += 1
+        spbs = pd.concat({('spb', 'A'): spbR, ('spb', 'B'): spbL}, names=['label', 'side'])
+        spbs = spbs.reorder_levels([2, 0, 1]).sort()
 
-            SubElement(experiment, "numbercorrect", name="centromereA",
-                       index=str(n), column=str(col_num))
-            wavelist.append(ch.correct_history[:, 0])
-            col_num += 1
-            SubElement(experiment, "numbererroneous",
-                       name="centromereA", index=str(n),
-                       column=str(col_num))
-            wavelist.append(ch.erroneous_history[:, 0])
-            col_num += 1
+        """
+        kts DataFrame look like that:
 
-            lch = SubElement(experiment, "trajectory", index=str(n),
-                             column=str(col_num), units='mu m')
-            text = "chromosome %s left kinetochore trajectory" % n
-            SubElement(lch, "description").text = text
-            wavelist.append(np.array(ch.cen_B.traj))
-            col_num += 1
-            SubElement(experiment, "numbercorrect", name="centromereB",
-                       index=str(n), column=str(col_num))
-            wavelist.append(ch.correct_history[:, 1])
-            col_num += 1
+                                  x
+        t   id label side
+        0.0 0  kt    A    -0.077064
+                     B     0.022936
+            1  kt    A    -0.037428
+                     B     0.062572
+            2  kt    A    -0.136443
+                     B    -0.036443
+        0.5 0  kt    A    -0.077004
+                     B     0.021358
+            1  kt    A    -0.038169
+                     B     0.062300
+            2  kt    A    -0.133598
+                     B    -0.035392
+        1.0 0  kt    A    -0.077090
+                     B     0.019869
+            1  kt    A    -0.038920
+                     B     0.062042
+            2  kt    A    -0.130846
+                     B    -0.034284
 
-            SubElement(experiment, "numbererroneous", name="centromereB",
-                       index=str(n), column=str(col_num))
-            wavelist.append(ch.erroneous_history[:, 1])
-            col_num += 1
+        plug_sites DataFrame looks like that:
 
-            #Plug Sites
-            for m, plugsite in enumerate(ch.cen_A.plugsites):
-                SubElement(experiment, "trajectory", name="plugsite",
-                           index=str((n, m)), cen_tag='A',
-                           column=str(col_num), units='mu m')
-                wavelist.append(plugsite.traj)
-                col_num += 1
 
-                SubElement(experiment, "state", name="plugsite",
-                           index=str((n, m)), cen_tag='A',
-                           column=str(col_num), units='')
-                wavelist.append(plugsite.state_hist)
-                col_num += 1
+                                          x  state_hist
+        t   id label side plug_id
+        0.0 0  kt    A    0       -0.077064          -1
+                          1       -0.077064          -1
+                          2       -0.077064          -1
+                          3       -0.077064          -1
+                     B    0        0.022936           1
+                          1        0.022936           1
+                          2        0.022936           1
+                          3        0.022936           1
+            1  kt    A    0       -0.037428          -1
+                          1       -0.037428          -1
+                          2       -0.037428          -1
+                          3       -0.037428          -1
+                     B    0        0.062572           1
+                          1        0.062572           0
+                          2        0.062572           1
+        """
+        chromosomes_dic = {}
+        plugsites_dic = {}
 
-            for m, plugsite in enumerate(ch.cen_B.plugsites):
+        for i, chromosome in enumerate(chromosomes):
+            ktA = chromosome.cen_A
+            ktB = chromosome.cen_B
 
-                SubElement(experiment, "trajectory", name="plugsite",
-                           index=str((n, m)), cen_tag='B',
-                           column=str(col_num), units='mu m')
-                wavelist.append(plugsite.traj)
-                col_num += 1
+            chromosomes_dic[(i, 'kt', 'A')] = pd.DataFrame(ktA.traj, columns=['x'], index=time_index)
+            chromosomes_dic[(i, 'kt', 'B')] = pd.DataFrame(ktB.traj, columns=['x'], index=time_index)
 
-                SubElement(experiment, "state", name="plugsite",
-                           index=str((n, m)), cen_tag='B',
-                           column=str(col_num), units='')
-                wavelist.append(plugsite.state_hist)
-                col_num += 1
+            for j, (psA, psB) in enumerate(zip(ktA.plugsites, ktB.plugsites)):
+                psA_df = pd.DataFrame.from_dict({'x': psA.traj, 'state_hist': psA.state_hist})
+                psA_df.index = time_index
+                plugsites_dic[(i, 'kt', 'A', j)] = psA_df
 
-        # Observations
-        obs_elem = SubElement(experiment, "observations")
-        if not hasattr(self, 'observations'):
-            self.evaluate()
-        for key, val in self.observations.items():
-            SubElement(obs_elem, key).text = str(val)
+                psB_df = pd.DataFrame.from_dict({'x': psB.traj, 'state_hist': psB.state_hist})
+                psB_df.index = time_index
+                plugsites_dic[(i, 'kt', 'B', j)] = psB_df
 
-        # Now we write down the whole experiment XML element
-        indent(experiment)
-        xmlout += tostring(experiment)
+        kts = pd.concat(chromosomes_dic, names=['id', 'label', 'side'])
+        kts = kts.reorder_levels([3, 0, 1, 2]).sort()
 
-        # And the data in the file datafname
-        datafile = StringIO.StringIO()
-        data = np.vstack(wavelist).T
-        np.save(datafile, data)
+        plug_sites = pd.concat(plugsites_dic, names=['id', 'label', 'side', 'plug_id'])
+        plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
+        plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
 
-        # Pack xmlfile and datafile in a zip archive
-        zipf = zipfile.ZipFile(simufname, "w",
-            compression=zipfile.ZIP_DEFLATED)
-        zipf.writestr("results.xml", xmlout)
-        zipf.writestr("data.npy", datafile.getvalue())
-        zipf.close()
+        # Get ParamTree as Dataframe
+        params = self.paramtree.to_df()
+        measures = self.measuretree.to_df()
 
-        datafile.close()
+        store = pd.HDFStore(simufname)
+        for dfname in df_to_save:
+            store[dfname] = locals()[dfname]
+        store.close()
 
         if verbose:
             logger.info("Simulation saved to file %s " % simufname)
 
-    def read(self, simufname="results.zip", verbose=False):
+    def read(self, simufname, verbose=False):
         """
         Creates a simul_spindle.Metaphase from a results.zip file.
 
         Parameters
         ----------
         simufname : string, optional
-            The .zip file where results from the existing simulation are (zip which contains xml and npy)
+            The .zip file where results from the existing simulation are
+            (zip which contains xml and npy)
 
         verbose : bool
             Set Metaphase verbose
@@ -194,68 +186,74 @@ class SimuIO():
 
         """
 
-        # Unzip results.xml and data.npy and put it in
-        # tempfile
-        try:
-            zipf = zipfile.ZipFile(simufname, "r")
-        except:
-            logger.info("%s does not appear to be a Zipfile" % simufname)
-            return False
+        store = pd.HDFStore(simufname)
 
-        # Test if simu results file are in the archive
-        if "results.xml" not in zipf.namelist() or "data.npy" not in zipf.namelist():
-            logger.info("%s does not contain results.xml and data.npy" % simufname)
-            return False
-
-        xmltemp = StringIO.StringIO(zipf.read("results.xml"))
-        datatemp = StringIO.StringIO(zipf.read("data.npy"))
-
-        restree = ResultTree(xmltemp, datatemp)
-
-        param_root = restree.root.find('parameters')
+        param_root = SimuIO().build_tree(store['params'])
         paramtree = ParamTree(root=param_root)
         params = paramtree.relative_dic
-        measure_root = restree.root.find('measures')
+
+        measure_root = SimuIO().build_tree(store['measures'])
         measuretree = ParamTree(root=measure_root,
                                 adimentionalized=False)
 
-        metaphase = Metaphase(paramtree=paramtree,
-                              measuretree=measuretree,
-                              verbose=verbose)
-
-        traj_matrix = restree.get_all_trajs()
-        correct_matrix = restree.get_all_correct()
-        erroneous_matrix = restree.get_all_erroneous()
-        state_hist_matrix = restree.get_all_plug_state()
+        meta = Metaphase(paramtree=paramtree, measuretree=measuretree, verbose=False)
         KD = KinetoDynamics(params)
-        KD.spbR.traj = traj_matrix[:, 0]
-        KD.spbL.traj = traj_matrix[:, 1]
-        col_num = 2
-        state_num = 0
-        for n, ch in enumerate(KD.chromosomes):
-            ch.cen_A.traj = traj_matrix[:, col_num]
-            ch.cen_A.pos = ch.cen_A.pos
-            col_num += 1
-            ch.cen_B.traj = traj_matrix[:, col_num]
-            ch.cen_B.pos = ch.cen_B.pos
-            col_num += 1
-            ch.erroneous_history = (erroneous_matrix[:, n * 2: n * 2 + 2])
-            ch.correct_history = (correct_matrix[:, n * 2: n * 2 + 2])
-            for plugsite in ch.cen_A.plugsites:
-                plugsite.traj = traj_matrix[:, col_num]
-                col_num += 1
-                plugsite.state_hist = state_hist_matrix[:, state_num]
+
+        spbs = store['spbs']
+        KD.spbL.traj = spbs.xs('A', level='side').values.T[0]
+        KD.spbR.traj = spbs.xs('B', level='side').values.T[0]
+
+        kts = store['kts']
+        plug_sites = store['plug_sites']
+        store.close()
+
+        for ch, (ch_id, ch_df) in zip(KD.chromosomes, kts.groupby(level="id")):
+            ch.cen_A.traj = ch_df.xs('A', level='side')['x'].values.T
+            ch.cen_B.traj = ch_df.xs('B', level='side')['x'].values.T
+
+            for i, plugsite in enumerate(ch.cen_A.plugsites):
+                ps = plug_sites.xs((ch_id, 'A', i), level=['id', 'side', 'plug_id'])
+                plugsite.traj = ps['x']
+                plugsite.state_hist = ps['state_hist']
                 plugsite.plug_state = plugsite.state_hist[-1]
-                state_num += 1
-            for plugsite in ch.cen_B.plugsites:
-                plugsite.traj = traj_matrix[:, col_num]
-                col_num += 1
-                plugsite.state_hist = state_hist_matrix[:, state_num]
+
+            for i, plugsite in enumerate(ch.cen_B.plugsites):
+                ps = plug_sites.xs((ch_id, 'B', i), level=['id', 'side', 'plug_id'])
+                plugsite.traj = ps['x']
+                plugsite.state_hist = ps['state_hist']
                 plugsite.plug_state = plugsite.state_hist[-1]
-                state_num += 1
 
-        metaphase.KD = KD
+            ch.calc_erroneous_history()
+            ch.calc_correct_history()
 
-        metaphase.KD.simulation_done = True
+        meta.KD = KD
+        meta.KD.simulation_done = True
 
-        return metaphase
+        return meta
+
+    def build_tree(self, df):
+        """
+        Build :class:`ElementTree` instance from :class:`pandas.DataFrame`.
+
+        Parameters
+        ----------
+
+        df : :class:`pandas.DataFrame`
+            df should come from ParamTree.to_df() method.
+
+        Returns
+        -------
+        :class:`ElementTree`
+        """
+
+        root = ET.Element("parameters")
+        tags = ['unit', 'description']
+        for i, p in df.iterrows():
+            et = ET.SubElement(root, "param")
+            for key, value in p.iteritems():
+                if key not in tags:
+                    et.set(key, value)
+                else:
+                    subet = ET.SubElement(et, key)
+                    subet.text = value
+        return root
