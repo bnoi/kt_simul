@@ -5,7 +5,7 @@ Python model of chromosome mouvements during mitosis in Fission Yeast http://mit
 
 This python module provides the simulation of mitotic spindle elements (for now, the
 kinetochore and the spindle pole bodies), during cell division in
-fission yeast.
+fission yeast. For more details see [online documentation](http://bnoi.github.io/kt_simul/ "kt_simul documentation").
 
 If you're interested in this work, please contact :
 
@@ -20,19 +20,19 @@ accurately describes fission yeast chromosome segregation* J. Cell Biol 2012 ``d
 
 This article should be used for any citation of this work.
 
-FUNDING
+Funding
 -------
 
 This project is funded by the French National Research Agency as:
    *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
 
-LICENCE
+Licence
 -------
 
 This code is provided under the GPL compatible CeCILL licence (see
 LICENCE for full details).
 
-DEPENDENCIES
+Dependencies
 ------------
 
 Package manager versions of the python libraries should work.
@@ -42,7 +42,7 @@ Package manager versions of the python libraries should work.
 - Cython >= 0.14
 - Qt4 and PySide (optional)
 
-INSTALLATION
+Installation
 ------------
 
 You should first clone the github version of this code, then
@@ -61,7 +61,7 @@ python setup.py install
 for a system install.
 You will need a C compiler for the cython part.
 
-USAGE:
+Usage
 -----
 
 ```python
