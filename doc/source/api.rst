@@ -6,3 +6,4 @@ Explore the API
 
    core
    io
+   pool

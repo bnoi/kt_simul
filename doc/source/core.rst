@@ -1,4 +1,3 @@
-
 Main simulation components : :mod:`kt_simul.core`
 =================================================
 

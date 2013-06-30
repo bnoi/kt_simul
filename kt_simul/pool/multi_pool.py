@@ -34,6 +34,11 @@ class FolderNotExistException(Exception):
 
 
 class MultiPool:
+    """
+    MultiPool
+
+    TODO: Add doc
+    """
 
     def __init__(self, multi_pool_path,
                  parameters,
