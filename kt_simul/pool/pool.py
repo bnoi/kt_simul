@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 class FolderExistException(Exception):
     pass
 
+
 class FolderNotExistException(Exception):
     pass
 
@@ -37,10 +38,10 @@ class Pool:
     """
 
     def __init__(self, simu_path,
-                 load=False,
-                 n_simu=100,
                  paramtree=None,
                  measuretree=None,
+                 load=False,
+                 n_simu=100,
                  initial_plug='random',
                  parallel=True,
                  verbose=True):
@@ -66,7 +67,6 @@ class Pool:
             else:
                 os.makedirs(self.simu_path)
 
-            self.metaphases = []
             self.metaphases_path = []
             self.simus_run = False
             self.digits = int(math.log10(self.n_simu)) + 1
@@ -88,12 +88,13 @@ class Pool:
 
         else:
             if not os.path.isdir(self.simu_path):
-                raise FolderNotExistException("%s does not exists." % self.simu_path)
+                raise FolderNotExistException(
+                    "%s does not exists." % self.simu_path)
 
             store = pd.HDFStore(os.path.join(self.simu_path, "metadata.h5"))
             self.paramtree = ParamTree(root=build_tree(store['params']))
             self.measuretree = ParamTree(root=build_tree(store['measures']),
-                adimentionalized=False)
+                                         adimentionalized=False)
 
             self.n_simu = store['metadata']['n_simu']
             self.parallel = store['metadata']['parallel']
@@ -101,14 +102,13 @@ class Pool:
             store.close()
 
             self.metaphases_path = []
-            self.metaphases = []
             self.digits = int(math.log10(self.n_simu)) + 1
 
             for i in range(self.n_simu):
                 fname = "simu_%s.h5" % (str(i).zfill(self.digits))
-                self.metaphases_path.append(os.path.join(self.simu_path, fname))
+                self.metaphases_path.append(
+                    os.path.join(self.simu_path, fname))
 
-            self._load_metaphases()
             self.simus_run = True
 
     def run(self):
@@ -127,7 +127,7 @@ class Pool:
 
             ncore = multiprocessing.cpu_count() + 1
             logger.info('Parallel mode enabled: %i cores will be used to run %i simulations' %
-                     (ncore, self.n_simu))
+                       (ncore, self.n_simu))
             pool = multiprocessing.Pool(
                 processes=ncore, initializer=init_worker)
 
@@ -141,9 +141,9 @@ class Pool:
                            'reduce_p': True}
 
         arguments = itertools.izip(itertools.repeat(simu_parameters),
-            itertools.repeat(self.simu_path),
-            range(self.n_simu),
-            itertools.repeat(self.digits))
+                                   itertools.repeat(self.simu_path),
+                                   range(self.n_simu),
+                                   itertools.repeat(self.digits))
 
         try:
             # Launch simulation
@@ -158,7 +158,6 @@ class Pool:
                 if self.verbose:
                     pprogress((i + 1) / self.n_simu * 100, "(%i / %i)" %
                               (i + 1, self.n_simu))
-                self.metaphases_path.append(result)
 
             if self.verbose:
                 pprogress(-1)
@@ -169,27 +168,23 @@ class Pool:
             raise CanceledByUserException(
                 'Simulation has been canceled by user')
 
-        # Sort results and remove index used to sort
-        logger.info('Reordering results')
-        self.metaphases_path.sort(key=lambda x: x[0])
-        self.metaphases_path = [x[1] for x in self.metaphases_path]
-
-        self._load_metaphases()
-
         logger.info("Pool simulations are done")
         self.simus_run = True
 
-    def _load_metaphases(self):
+    def load_metaphases(self):
         """
         """
         logger.info("Load Metaphase in memory")
+        metaphases = []
         for i, fname in enumerate(self.metaphases_path):
             if self.verbose:
                     pprogress((i + 1) / self.n_simu * 100)
             fpath = os.path.join(self.simu_path, fname)
-            self.metaphases.append(SimuIO().read(fpath))
+            metaphases.append(SimuIO().read(fpath))
         if self.verbose:
                 pprogress(-1)
+
+        return metaphases
 
 def _run_one_simulation(args):
     """
