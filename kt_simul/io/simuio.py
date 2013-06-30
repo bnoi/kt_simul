@@ -188,11 +188,11 @@ class SimuIO():
 
         store = pd.HDFStore(simufname)
 
-        param_root = SimuIO().build_tree(store['params'])
+        param_root = build_tree(store['params'])
         paramtree = ParamTree(root=param_root)
         params = paramtree.relative_dic
 
-        measure_root = SimuIO().build_tree(store['measures'])
+        measure_root = build_tree(store['measures'])
         measuretree = ParamTree(root=measure_root,
                                 adimentionalized=False)
 
@@ -231,29 +231,29 @@ class SimuIO():
 
         return meta
 
-    def build_tree(self, df):
-        """
-        Build :class:`ElementTree` instance from :class:`pandas.DataFrame`.
+def build_tree(df):
+    """
+    Build :class:`ElementTree` instance from :class:`pandas.DataFrame`.
 
-        Parameters
-        ----------
+    Parameters
+    ----------
 
-        df : :class:`pandas.DataFrame`
-            df should come from ParamTree.to_df() method.
+    df : :class:`pandas.DataFrame`
+        df should come from ParamTree.to_df() method.
 
-        Returns
-        -------
-        :class:`ElementTree`
-        """
+    Returns
+    -------
+    :class:`ElementTree`
+    """
 
-        root = ET.Element("parameters")
-        tags = ['unit', 'description']
-        for i, p in df.iterrows():
-            et = ET.SubElement(root, "param")
-            for key, value in p.iteritems():
-                if key not in tags:
-                    et.set(key, value)
-                else:
-                    subet = ET.SubElement(et, key)
-                    subet.text = value
-        return root
+    root = ET.Element("parameters")
+    tags = ['unit', 'description']
+    for i, p in df.iterrows():
+        et = ET.SubElement(root, "param")
+        for key, value in p.iteritems():
+            if key not in tags:
+                et.set(key, value)
+            else:
+                subet = ET.SubElement(et, key)
+                subet.text = value
+    return root

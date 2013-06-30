@@ -1,7 +1,7 @@
 import sys
 
 
-def pprogress(percent):
+def pprogress(percent, suffix_message=None, size=50):
     """
     Print a progress bar
     percent = -1 to end and remove the progress bar
@@ -13,20 +13,20 @@ def pprogress(percent):
         sys.stdout.flush()
         return
 
-    # Size of the progress bar
-    size = 50
-
     # Compute current progress
     progress = (percent + 1) * size / 100
 
     # Build progress bar
     bar = "["
-    for i in range(progress - 1):
+    for i in range(int(progress) - 1):
         bar += "="
     bar += ">"
-    for i in range(size - progress):
+    for i in range(size - int(progress)):
         bar += " "
     bar += "]"
+
+    if suffix_message:
+        bar += "  " + suffix_message
 
     # Write progress bar
     sys.stdout.write("\r%d%% " % (percent + 1) + bar)
