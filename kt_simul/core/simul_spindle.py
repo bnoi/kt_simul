@@ -385,3 +385,68 @@ class Metaphase(object):
             if min(ktR, ktL) <= 0 and max(ktR, ktL) >= 0:
                 return True
         return True
+
+    def show(self):
+        """
+        Quickly show kymograph of current simulation.
+        Matplotlib is required.
+        """
+
+        import matplotlib.pyplot as plt
+
+        duration = self.KD.duration
+        dt = self.KD.dt
+        steps = self.KD.num_steps
+        anaphase = self.KD.params['t_A']
+        times = np.arange(0, duration, dt)
+        spbA = self.KD.spbL.traj
+        spbB = self.KD.spbR.traj
+        kts = self.KD.chromosomes
+
+        fig = plt.figure(figsize=(14,8))
+
+        tot = 5
+        ax1 = plt.subplot2grid((tot, 1), (0, 0), rowspan=1)
+        ax2 = plt.subplot2grid((tot, 1), (1, 0), rowspan=3, sharex=ax1)
+        ax3 = plt.subplot2grid((tot, 1), (4, 0), rowspan=1, sharex=ax1)
+
+        colors = ["red",
+                  "green",
+                  "blue"]
+
+        # Draw kymo
+        ax2.plot(times, spbA, color='black')
+        ax2.plot(times, spbB, color='black')
+
+        for color, kt in zip(colors, kts):
+            ax2.plot(times, kt.cen_A.traj, color=color, alpha=0.5)
+            ax2.plot(times, kt.cen_B.traj, color=color, alpha=0.5)
+        ax2.grid()
+
+        for lab in ax1.xaxis.get_majorticklabels():
+            lab.set_visible(False)
+        for lab in ax2.xaxis.get_majorticklabels():
+            lab.set_visible(False)
+
+        ax2.axvline(anaphase, color='black')
+
+        ax1.grid()
+        ax3.grid()
+
+        for color, kt in zip(colors, kts):
+            correctA = kt.correct_history.T[1]
+            correctB = kt.correct_history.T[0]
+            errA = kt.erroneous_history.T[1]
+            errB = kt.erroneous_history.T[0]
+
+            ax3.plot(times, correctA, color=color, alpha=0.5)
+            ax3.plot(times, errA, color=color, alpha=0.5)
+
+            ax1.plot(times, correctB, color=color, alpha=0.5)
+            ax1.plot(times, errB, color=color, alpha=0.5)
+
+        ax3.set_xlabel('Time (s)')
+        ax2.set_ylabel('Distance from center (um)')
+
+        ax1.set_yticks(range(5))
+        ax3.set_yticks(range(5))
