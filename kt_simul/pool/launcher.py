@@ -1,6 +1,5 @@
 """
 Launcher can run several simulation with same parameters.
-It handle data storing.
 """
 
 import os
