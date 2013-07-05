@@ -4,13 +4,15 @@ This packages contains the kinetochore dynamics simulation
 modules provided:
     - core : main simulation
     - gui: a subpackage with a GUI of the simulation
+    - io: input/output functions
 """
-__all__ = ["core", "gui"]
+
+__all__ = ["core", "gui", "io"]
+__version__ = "1.0"
 
 import logging
 import os
 import sys
-import numpy
 
 from .utils.color_system import color
 
@@ -45,29 +47,3 @@ formatter = logging.Formatter(logformat, "%Y-%m-%d %H:%M:%S")
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
-
-import pyximport
-
-# Compile Cython file
-if os.name == 'nt':
-    if os.environ.has_key('CPATH'):
-        os.environ['CPATH'] = os.environ['CPATH'] + numpy.get_include()
-    else:
-        os.environ['CPATH'] = numpy.get_include()
-
-    # XXX: we're assuming that MinGW is installed in C:\MinGW (default)
-    if os.environ.has_key('PATH'):
-        os.environ['PATH'] = os.environ['PATH'] + ';C:\MinGW\bin'
-    else:
-        os.environ['PATH'] = 'C:\MinGW\bin'
-
-    mingw_setup_args = { 'options': { 'build_ext': { 'compiler': 'mingw32' } } }
-    pyximport.install(setup_args=mingw_setup_args)
-
-elif os.name == 'posix':
-    if os.environ.has_key('CFLAGS'):
-        os.environ['CFLAGS'] = os.environ['CFLAGS'] + ' -I' + numpy.get_include()
-    else:
-        os.environ['CFLAGS'] = ' -I' + numpy.get_include()
-
-    pyximport.install()

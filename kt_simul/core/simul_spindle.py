@@ -12,7 +12,9 @@ import logging
 import numpy as np
 import collections
 
-# Local imports
+import pyximport
+pyximport.install()
+
 from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.io.xml_handler import ParamTree
 from kt_simul.core import parameters

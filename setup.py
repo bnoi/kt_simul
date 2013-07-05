@@ -1,33 +1,10 @@
-#!/usr/bin/env python
-
-from distutils.core import setup
-from distutils.extension import Extension
-from Cython.Distutils import build_ext
-
-ext_modules = [Extension("spindle_dynamics", ["spindle_dynamics.pyx"])]
-
-setup(name='kt_simul',
-      version='0.6',
-      description='Kinetochore dynamics simulation',
-      author='Guillaume Gay',
-      author_email='gllm.gay@gmail.com',
-      url='https://github.com/glyg/Kinetochore-segregation',
-      cmdclass = {'build_ext': build_ext},
-      packages = ['kt_simul'],
-      package_data = {'kt_simul': ['data/*.xml',
-                                    '*.pyx', '*.pyd',
-                                    'data/images/*.svg',
-                                    'data/images/*.png']},
-      )
-
-
 # -*- coding: utf-8 -*-
-
 from setuptools import setup, find_packages
 
-import peak_detection
+import kt_simul
 
-install_requires = ['numpy', 'scipy', 'pandas', 'cython', 'scikit-image']
+install_requires = ['cython', 'numpy', 'numexpr',
+                    'tables', 'pandas', 'matplotlib']
 
 def install_requirements(install_requires):
     """
@@ -44,31 +21,37 @@ def install_requirements(install_requires):
 
 install_requirements(install_requires)
 
+from Cython.Distutils import build_ext
+from Cython.Distutils import Extension
+
+ext_modules = [Extension("spindle_dynamics", ["spindle_dynamics.pyx"])]
+
 setup(
-    name='peak_detection',
-    version=peak_detection.__version__,
+    name='kt_simul',
+    version=kt_simul.__version__,
     packages=find_packages(),
     author="BNOI Project",
     author_email="bnoi.project@gmail.com",
-    description="""Python implementation of the Gaussian peak detection
-                   described in Segré et al. Nature Methods (2008).
-                   See https://github.com/bnoi/peak_detection for details.""",
+    description="""Python model of chromosome mouvements during mitosis in
+                   Fission Yeast""",
     long_description=open('README.md').read(),
     install_requires=install_requires,
     include_package_data=True,
-    url='https://github.com/bnoi/peak_detection',
+    url='https://github.com/bnoi/kt_simul.git',
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 5 - Production/Stable",
-        "License :: OSI Approved :: BSD License",
+        "License :: OSI Approved",
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 2.7",
-        "Topic :: Scientific/Engineering :: Image Recognition",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
+    license="CeCILL",
     entry_points={
         'console_scripts': [
             #'proclame-sm = sm_lib.core:proclamer',
         ],
     },
+    cmdclass = {'build_ext': build_ext}
 )
