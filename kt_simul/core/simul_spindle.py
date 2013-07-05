@@ -392,6 +392,8 @@ class Metaphase(object):
         Matplotlib is required.
         """
 
+        import matplotlib
+        matplotlib.use('Qt4Agg')
         import matplotlib.pyplot as plt
 
         duration = self.KD.duration
@@ -450,3 +452,5 @@ class Metaphase(object):
 
         ax1.set_yticks(range(5))
         ax3.set_yticks(range(5))
+
+        plt.show()

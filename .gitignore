@@ -36,3 +36,5 @@ nosetests.xml
 
 *.ipynb_checkpoints
 doc/build/
+build/
+dist/

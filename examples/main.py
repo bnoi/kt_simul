@@ -1,13 +1,27 @@
-from kt_simul.core import simul_spindle as sim
-from kt_simul.io import SimuIO
-from kt_simul.draw import Drawer
+from kt_simul.io.xml_handler import ParamTree
+from kt_simul.core.simul_spindle import Metaphase
+from kt_simul.io.simuio import SimuIO
+from kt_simul.core import parameters
 
-meta = sim.Metaphase(verbose = True)
+PARAMFILE = parameters.PARAMFILE
+MEASUREFILE = parameters.MEASUREFILE
+
+# Change some parameters
+paramtree = ParamTree(PARAMFILE)
+paramtree.change_dic('dt', 10)
+paramtree.change_dic('span', 2000)
+paramtree.change_dic('t_A', 1750)
+
+measuretree = ParamTree(MEASUREFILE, adimentionalized=False)
+
+# Init simu
+meta = Metaphase(verbose=True, paramtree=paramtree, measuretree=measuretree, initial_plug='random')
+
+# Launch simu
 meta.simul()
 
-d = Drawer(meta)
-d.show_all(fname = "trajs.pdf")
-d.show_one(fname = "one.png")
+# Save results
+SimuIO(meta).save("simu.h5")
 
-io = SimuIO(meta)
-io.save("results.xml", "data.npy")
+# Show trajectories (matplotlib needed)
+meta.show()
