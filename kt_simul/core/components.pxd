@@ -1,11 +1,10 @@
-# cython: profile=True
 import random
 import numpy as np
 cimport numpy as np
 cimport cython
 from cpython cimport bool
 
-__all__ = [ "Spb", "Chromosome",
+__all__ = ["Spb", "Chromosome",
            "Centromere", "PlugSite", "Spindle"]
 
 ITYPE = np.int

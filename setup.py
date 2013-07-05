@@ -22,9 +22,7 @@ def install_requirements(install_requires):
 install_requirements(install_requires)
 
 from Cython.Distutils import build_ext
-from Cython.Distutils import Extension
-
-ext_modules = [Extension("spindle_dynamics", ["spindle_dynamics.pyx"])]
+from Cython.Build import cythonize
 
 setup(
     name='kt_simul',
@@ -53,5 +51,6 @@ setup(
             #'proclame-sm = sm_lib.core:proclamer',
         ],
     },
-    cmdclass = {'build_ext': build_ext}
+    cmdclass={'build_ext': build_ext},
+    ext_modules=cythonize(["kt_simul/core/*.pyx"]),
 )

@@ -1,4 +1,3 @@
-# cython: profile=True
 # -*- coding: utf-8 -*-
 """
 This module defines all the objects considered in the simulation,
@@ -15,10 +14,8 @@ cimport cython
 cimport numpy as np
 from cpython cimport bool
 
-
 from components cimport Spindle, Spb, Chromosome, Centromere, PlugSite
 from components import Spindle, Spb, Chromosome, Centromere, PlugSite
-
 
 __all__ = ["KinetoDynamics"]
 
