@@ -103,6 +103,8 @@ SimuIO(meta).save("simu.h5")
 meta.show()
 ```
 
+![Chromosomes trajectories](examples/trajectories.png "Chromosomes trajectories")
+
 Simulation can be "played" with Qt based GUI:
 
 ```python
@@ -112,6 +114,4 @@ anim = Animator(meta)
 anim.play()
 ```
 
-An example of chromosomes trajectories given by `meta.show()` command:
-
-![Chromosomes trajectories](examples/trajectories.png "Chromosomes trajectories")
+![GUI](examples/gui.gif "GUI")
