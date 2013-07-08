@@ -128,6 +128,9 @@ class MultiPool:
             paramtree = self.paramtree
             measuretree = self.measuretree
 
+            if not isinstance(parameters, list):
+                parameters = [parameters]
+
             names = map(lambda x: x[0], self.parameters)
             for i, parameter in enumerate(parameters):
                 if self.trees[i] == 'paramtree':

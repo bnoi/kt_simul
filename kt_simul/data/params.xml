@@ -44,7 +44,7 @@
     <unit> </unit>
     <description>Number of chromosomes</description>
   </param>
-  <param max="100" min="0" name="Mk" step="1" value="4">
+  <param max="100" min="0" name="Mk" step="1" value="3">
     <unit> </unit>
     <description>Number of attachment sites</description>
   </param>

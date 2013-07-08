@@ -175,16 +175,9 @@ class Pool:
         """
         """
         logger.info("Load Metaphase in memory")
-        metaphases = []
         for i, fname in enumerate(self.metaphases_path):
-            if self.verbose:
-                    pprogress((i + 1) / self.n_simu * 100)
             fpath = os.path.join(self.simu_path, fname)
-            metaphases.append(SimuIO().read(fpath))
-        if self.verbose:
-                pprogress(-1)
-
-        return metaphases
+            yield SimuIO().read(fpath)
 
 def _run_one_simulation(args):
     """
