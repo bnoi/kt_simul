@@ -1,15 +1,15 @@
 <?xml version="1.0"?>
 <parameters>
   <!-- Time related parameters -->
-  <param max="2000." min="0.1" name="span" step="10." value="900.0">
+  <param max="2000." min="0.1" name="span" step="10." value="2000.0">
     <unit>s</unit>
     <description>Simulation duration</description>
   </param>
-  <param max="2." min="0.1" name="dt" step="0.1" value="0.5">
+  <param max="2." min="0.1" name="dt" step="0.1" value="10">
     <unit>s</unit>
     <description>Time step</description>
   </param>
-  <param max="1000." min="0." name="t_A" step="1." value="720">
+  <param max="1000." min="0." name="t_A" step="1." value="1750">
     <unit>s</unit>
     <description>Anaphase A transition</description>
   </param>

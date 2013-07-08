@@ -74,7 +74,7 @@ def reduce_params(paramtree, measuretree):
     if d_alpha != 0:
         k_d_eff = k_a * d_alpha / (mean_metaph_k_dist / 2)
     else:
-        logger.warning("Things don't go well without Aurora ")
+        #logger.warning("Things don't go well without Aurora ")
         k_d_eff = k_d0
 
     # alpha_mean = float(mean_attachment(k_a/fd_eff) / Mk)

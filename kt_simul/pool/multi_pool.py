@@ -122,7 +122,7 @@ class MultiPool:
         sys.stdout.flush()
         for i, (parameters, rows) in enumerate(self.simus_path.iterrows()):
             if self.verbose:
-                pprogress((i + 1) / n * 100)
+                pprogress((i) / n * 100)
                 sys.stdout.flush()
 
             paramtree = self.paramtree

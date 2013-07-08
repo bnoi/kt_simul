@@ -4,7 +4,7 @@ Run and play simulation animation in 2D (need PySide)
 
 import logging
 
-from PySide import QtGui, QtCore
+from PyQt4 import QtGui, QtCore
 
 from kt_simul.gui.animation import InteractiveCellWidget
 

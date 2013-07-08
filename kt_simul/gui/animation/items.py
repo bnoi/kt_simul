@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from PySide import QtCore, QtGui
+from PyQt4 import QtCore, QtGui
 
 SPB_WIDTH = 0.5
 SPB_HEIGHT = 0.7

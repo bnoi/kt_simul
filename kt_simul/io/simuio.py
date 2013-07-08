@@ -11,8 +11,8 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import pandas as pd
 
-from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.core.simul_spindle import Metaphase
+from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.io.xml_handler import ParamTree, indent, ResultTree
 
 logger = logging.getLogger(__name__)
