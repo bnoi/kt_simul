@@ -3,6 +3,7 @@ Main module for save and read simulation.
 """
 
 import time
+import os
 import logging
 import StringIO
 import zipfile
@@ -35,7 +36,7 @@ class SimuIO():
             self.paramtree = self.meta.paramtree
             self.measuretree = self.meta.measuretree
 
-    def save(self, simufname, metadata=None, verbose=False):
+    def save(self, simufname, metadata=None, save_tree=True, verbose=False):
         """
         Save :class:`~kt_simul.core.simul_spindle.Metaphase` instance to
         HDF5 file. Each of the following element will be stored via
@@ -59,8 +60,6 @@ class SimuIO():
         chromosomes = self.KD.chromosomes
 
         time_index = pd.MultiIndex.from_arrays([timelapse], names=['t'])
-
-        df_to_save = ['params', 'measures', 'spbs', 'kts', 'plug_sites']
 
         """
         spbs DataFrame look like that:
@@ -155,10 +154,15 @@ class SimuIO():
         plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
         plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
 
-        # Get ParamTree as Dataframe
-        params = self.paramtree.to_df()
-        measures = self.measuretree.to_df()
+        df_to_save = ['spbs', 'kts', 'plug_sites']
+        if save_tree:
+            # Get ParamTree as Dataframe
+            params = self.paramtree.to_df()
+            measures = self.measuretree.to_df()
+            df_to_save = ['params', 'measures', 'spbs', 'kts', 'plug_sites']
 
+        if os.path.isfile(simufname):
+            os.remove(simufname)
         store = pd.HDFStore(simufname)
         for dfname in df_to_save:
             store[dfname] = locals()[dfname]
@@ -167,7 +171,7 @@ class SimuIO():
         if verbose:
             logger.info("Simulation saved to file %s " % simufname)
 
-    def read(self, simufname, verbose=False):
+    def read(self, simufname, paramtree=None, measuretree=None, verbose=False):
         """
         Creates a simul_spindle.Metaphase from a results.zip file.
 
@@ -188,13 +192,15 @@ class SimuIO():
 
         store = pd.HDFStore(simufname)
 
-        param_root = build_tree(store['params'])
-        paramtree = ParamTree(root=param_root)
+        if not paramtree:
+            param_root = build_tree(store['params'])
+            paramtree = ParamTree(root=param_root)
         params = paramtree.relative_dic
 
-        measure_root = build_tree(store['measures'])
-        measuretree = ParamTree(root=measure_root,
-                                adimentionalized=False)
+        if not measuretree:
+            measure_root = build_tree(store['measures'])
+            measuretree = ParamTree(root=measure_root,
+                                    adimentionalized=False)
 
         meta = Metaphase(paramtree=paramtree, measuretree=measuretree, verbose=False)
         KD = KinetoDynamics(params)

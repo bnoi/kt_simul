@@ -109,6 +109,8 @@ class MultiPool:
             self.initial_plug = store['metadata']['initial_plug']
             store.close()
 
+            self.load_pools()
+
     def run(self,):
         """
         """
@@ -158,37 +160,22 @@ class MultiPool:
         if self.verbose:
             pprogress(-1)
 
+        self.load_pools()
         logger.info("Simulations are done")
         self.simus_run = True
 
-    def iter_pools(self, func, verbose=True):
+    def load_pools(self):
         """
-        func will recieves a list of metaphases and list of parameters for this
-        pool. This function is usefull because it provides some cleanup memory
-        and progressbar.
         """
-
-        results = []
-        n = self.simus_path.shape[0]
-        for i, (parameters, rows) in enumerate(self.simus_path.iterrows()):
-            if verbose:
-                pprogress((i + 1) / n * 100)
-
-            relpath = rows['relpath']
-            pool_path = os.path.join(self.multi_pool_path, relpath)
+        self.pools = []
+        for dalpha, pool_path in self.simus_path.iterrows():
+            simu_path = os.path.join(self.multi_pool_path, pool_path['relpath'])
             pool_params = {'load': True,
-                           'simu_path': pool_path,
-                           'verbose': False
+                           'simu_path': simu_path,
+                           'verbose': True
                            }
-            pool = Pool(**pool_params)
-            metas = pool.load_metaphases()
-
-            results.append(func(parameters, metas))
-
-        if verbose:
-            pprogress(-1)
-
-        return results
+            self.pools.append(Pool(**pool_params))
+        return self.pools
 
     def _build_path( self):
         names_set = itertools.repeat(map(lambda x: x[0], self.parameters))

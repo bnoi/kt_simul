@@ -176,7 +176,9 @@ class Pool:
         """
         for i, fname in enumerate(self.metaphases_path):
             fpath = os.path.join(self.simu_path, fname)
-            yield SimuIO().read(fpath)
+            yield SimuIO().read(fpath,
+                paramtree=self.paramtree,
+                measuretree=self.measuretree)
 
 def _run_one_simulation(args):
     """
@@ -187,5 +189,5 @@ def _run_one_simulation(args):
     fpath = os.path.join(simu_path, fname)
     meta = Metaphase(**simu_parameters)
     meta.simul()
-    SimuIO(meta).save(fpath)
+    SimuIO(meta).save(fpath, save_tree=False)
     return (i, fname)
