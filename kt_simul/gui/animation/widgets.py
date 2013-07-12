@@ -8,7 +8,7 @@ import os
 from kt_simul.gui.animation.items import CellItem
 
 FRAME_RATE = 25  # image/seconds
-
+VIEW_BORDER = 0.15 # 15%
 
 class InteractiveCellWidget(QtGui.QWidget):
     """
@@ -147,10 +147,13 @@ class ViewCellWidget(QtGui.QGraphicsView):
         self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.setResizeAnchor(QtGui.QGraphicsView.AnchorViewCenter)
 
-        scene.setSceneRect(-9, -4, 18, 8)
+        height = self.cell.height + self.cell.height * VIEW_BORDER
+        width = self.cell.width + self.cell.width * VIEW_BORDER
+
+        scene.setSceneRect(-width / 2, - height / 2, width, height)
         self.setScene(scene)
         scene.addItem(self.cell)
-        self.scale(40, 40)
+        self.scale(30, 30)
 
     def wheelEvent(self, event):
         self.scaleView(math.pow(2.0, event.delta() / 240.0))
@@ -158,6 +161,6 @@ class ViewCellWidget(QtGui.QGraphicsView):
     def scaleView(self, scaleFactor):
         factor = self.matrix().scale(scaleFactor, scaleFactor).mapRect(
             QtCore.QRectF(0, 0, 1, 1)).width()
-        if factor < 0.1 or factor > 200:
+        if factor < 5 or factor > 200:
             return
         self.scale(scaleFactor, scaleFactor)

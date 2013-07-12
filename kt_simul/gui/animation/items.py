@@ -4,6 +4,8 @@ from PyQt4 import QtCore, QtGui
 
 import numpy as np
 
+CELL_BORDER = 2
+
 SPB_WIDTH = 0.5
 SPB_HEIGHT = 0.7
 
@@ -45,6 +47,9 @@ class CellItem(QtGui.QGraphicsItem):
             self.cens_A.append(CentromereItem(n, -1, parent=self))
             self.cens_B.append(CentromereItem(n, 1, parent=self))
 
+        self.height = np.abs(self.N * ( self.Mk * PLUGSITE_HEIGHT) * 5) + CELL_BORDER
+        self.width = np.abs(self.mt.KD.spbR.traj.max() * 6 + CELL_BORDER)
+
         self.time_point = -1
         self.gotoTime(0)
 
@@ -71,16 +76,14 @@ class CellItem(QtGui.QGraphicsItem):
     def boundingRect(self):
         """
         As this is not easily changed (or not supposed to, we give a
-        large box
+        large box)
         """
-        height = np.abs(self.N * ( self.Mk * PLUGSITE_HEIGHT) * 5)
-        width = np.abs(self.mt.KD.spbR.traj[-1] * 6)
-        return QtCore.QRectF(-width / 2, - height / 2, width, height)
+        return QtCore.QRectF(-self.width / 2, - self.height / 2, self.width, self.height)
 
     def paint(self, painter, option, widget):
         painter.setBrush(QtCore.Qt.white)
         painter.setPen(QtGui.QPen(QtCore.Qt.black, 0.1))
-        painter.drawRoundedRect(self.boundingRect(), 30, 100,
+        painter.drawRoundedRect(self.boundingRect(), 80, 100,
             QtCore.Qt.RelativeSize)
 
 
