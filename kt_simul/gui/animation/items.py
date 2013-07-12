@@ -2,6 +2,8 @@
 
 from PyQt4 import QtCore, QtGui
 
+import numpy as np
+
 SPB_WIDTH = 0.5
 SPB_HEIGHT = 0.7
 
@@ -33,15 +35,15 @@ class CellItem(QtGui.QGraphicsItem):
         self.Mk = int(metaphase.KD.params['Mk'])
         self.mt = metaphase  # Metaphase instance
 
-        self.spbR = SPBItem(0, parent=self)
-        self.spbL = SPBItem(-1, parent=self)
+        self.spbR = SPBItem(-1, parent=self)
+        self.spbL = SPBItem(1, parent=self)
 
         self.cens_A = []
         self.cens_B = []
 
         for n in range(self.N):
             self.cens_A.append(CentromereItem(n, -1, parent=self))
-            self.cens_B.append(CentromereItem(n, 0, parent=self))
+            self.cens_B.append(CentromereItem(n, 1, parent=self))
 
         self.time_point = -1
         self.gotoTime(0)
@@ -71,8 +73,8 @@ class CellItem(QtGui.QGraphicsItem):
         As this is not easily changed (or not supposed to, we give a
         large box
         """
-        height = self.N * ( self.Mk * PLUGSITE_HEIGHT) * 5
-        width = self.mt.KD.spbR.traj[-1] * 6
+        height = np.abs(self.N * ( self.Mk * PLUGSITE_HEIGHT) * 5)
+        width = np.abs(self.mt.KD.spbR.traj[-1] * 6)
         return QtCore.QRectF(-width / 2, - height / 2, width, height)
 
     def paint(self, painter, option, widget):
@@ -96,7 +98,7 @@ class CentromereItem(QtGui.QGraphicsItem):
         self.n = n
         self.side = side
         self.ch = self.graphcell.mt.KD.chromosomes[n]
-        if side == 0:
+        if side == -1:
             self.traj = self.ch.cen_A.traj
         else:
             self.traj = self.ch.cen_B.traj
@@ -109,7 +111,7 @@ class CentromereItem(QtGui.QGraphicsItem):
 
         self.plugsites = []
         for m in range(Mk):
-            if side == 0:
+            if side == -1:
                 plugsite = self.ch.cen_A.plugsites[m]
             else:
                 plugsite = self.ch.cen_B.plugsites[m]
@@ -183,6 +185,12 @@ class PlugSiteItem(QtGui.QGraphicsItem):
         """
         Change color according to state at specific time_point
         """
+        if self.kineto.side == 0:
+            good_side = -1
+        else:
+            good_side = 1
+
+
         if self.sim.state_hist[time_point] == 0:
             brush = QtGui.QBrush(UNPLUGED_COLOR)
         elif self.sim.is_correct(time_point):
@@ -216,10 +224,10 @@ class SPBItem(QtGui.QGraphicsItem):
         QtGui.QGraphicsItem.__init__(self, parent=parent)
         self.graphcell = parent
         self.setFlag(QtGui.QGraphicsItem.ItemIsMovable)
-        if side == 0:
-            self.traj = self.graphcell.mt.KD.spbR.traj
-        else:
+        if side == -1:
             self.traj = self.graphcell.mt.KD.spbL.traj
+        else:
+            self.traj = self.graphcell.mt.KD.spbR.traj
 
         self.width = SPB_WIDTH
         self.height = SPB_HEIGHT

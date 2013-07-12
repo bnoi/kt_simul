@@ -57,7 +57,7 @@ cdef class Centromere(Organite):
     cdef public float toa
     cdef public np.ndarray plug_vector
     cdef public list plugsites
-    cdef void calc_plug_vector(Centromere)
+    cdef void _calc_plug_vector(Centromere)
     cdef float P_attachleft(Centromere)
     cdef int left_plugged(Centromere)
     cdef int right_plugged(Centromere)

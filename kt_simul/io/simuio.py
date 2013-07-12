@@ -80,7 +80,7 @@ class SimuIO():
         spbR = pd.DataFrame(KD.spbR.traj, columns=['x'], index=time_index)
         spbL = pd.DataFrame(KD.spbL.traj, columns=['x'],index=time_index)
 
-        spbs = pd.concat({('spb', 'A'): spbR, ('spb', 'B'): spbL}, names=['label', 'side'])
+        spbs = pd.concat({('spb', 'A'): spbL, ('spb', 'B'): spbR}, names=['label', 'side'])
         spbs = spbs.reorder_levels([2, 0, 1]).sort()
 
         """
@@ -216,21 +216,25 @@ class SimuIO():
         for ch, (ch_id, ch_df) in zip(KD.chromosomes, kts.groupby(level="id")):
             ch.cen_A.traj = ch_df.xs('A', level='side')['x'].values.T
             ch.cen_B.traj = ch_df.xs('B', level='side')['x'].values.T
+            ch.cen_A.tag = 'A'
+            ch.cen_B.tag = 'B'
 
             for i, plugsite in enumerate(ch.cen_A.plugsites):
                 ps = plug_sites.xs((ch_id, 'A', i), level=['id', 'side', 'plug_id'])
-                plugsite.traj = ps['x']
-                plugsite.state_hist = ps['state_hist']
+                plugsite.traj = ps['x'].values
+                plugsite.state_hist = ps['state_hist'].values
                 plugsite.plug_state = plugsite.state_hist[-1]
+                plugsite.tag = 'A'
 
             for i, plugsite in enumerate(ch.cen_B.plugsites):
                 ps = plug_sites.xs((ch_id, 'B', i), level=['id', 'side', 'plug_id'])
-                plugsite.traj = ps['x']
-                plugsite.state_hist = ps['state_hist']
+                plugsite.traj = ps['x'].values
+                plugsite.state_hist = ps['state_hist'].values
                 plugsite.plug_state = plugsite.state_hist[-1]
+                plugsite.tag = 'B'
 
-            ch.calc_erroneous_history()
-            ch.calc_correct_history()
+            ch.cen_A.calc_plug_vector()
+            ch.cen_B.calc_plug_vector()
 
         meta.KD = KD
         meta.KD.simulation_done = True

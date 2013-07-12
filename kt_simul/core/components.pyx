@@ -138,6 +138,7 @@ cdef class Chromosome(Organite):
         to centromere A bound to the right pole and centromere B bound
         to the left.
         """
+
         cdef int right_A, right_B
         right_A = self.cen_A.right_plugged() + self.cen_B.left_plugged()
         left_A =  self.cen_A.left_plugged() + self.cen_B.right_plugged()
@@ -274,7 +275,10 @@ cdef class Centromere(Organite):
                 return True
         return False
 
-    cdef void calc_plug_vector(self):
+    def calc_plug_vector(self):
+        self._calc_plug_vector()
+
+    cdef void _calc_plug_vector(self):
         cdef np.ndarray[ITYPE_t] state
         cdef PlugSite plugsite
         state = np.array([plugsite.plug_state for plugsite
