@@ -20,7 +20,7 @@ from kt_simul.io.simuio import build_tree
 from kt_simul.io.xml_handler import ParamTree
 from kt_simul.utils.progress import pprogress
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class FolderExistException(Exception):
@@ -48,9 +48,9 @@ class Pool:
 
         self.verbose = verbose
         if not self.verbose:
-            logger.disabled = True
+            log.disabled = True
         else:
-            logger.disabled = False
+            log.disabled = False
 
         self.simu_path = simu_path
 
@@ -117,7 +117,7 @@ class Pool:
         """
 
         if self.simus_run:
-            logger.error('Pool has already been simulated.')
+            log.error('Pool has already been simulated.')
             return False
 
         if self.parallel:
@@ -126,7 +126,7 @@ class Pool:
                 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
             ncore = multiprocessing.cpu_count() + 1
-            logger.info('Parallel mode enabled: %i cores will be used to run %i simulations' %
+            log.info('Parallel mode enabled: %i cores will be used to run %i simulations' %
                        (ncore, self.n_simu))
             pool = multiprocessing.Pool(
                 processes=ncore, initializer=init_worker)
@@ -168,7 +168,7 @@ class Pool:
             raise CanceledByUserException(
                 'Simulation has been canceled by user')
 
-        logger.info("Pool simulations are done")
+        log.info("Pool simulations are done")
         self.simus_run = True
 
     def load_metaphases(self):

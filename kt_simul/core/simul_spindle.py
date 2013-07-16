@@ -21,7 +21,7 @@ from kt_simul.core import parameters
 from kt_simul.utils.progress import pprogress
 from kt_simul.utils.format import pretty_dict
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 __all__ = ["Metaphase", "PARAMFILE", "MEASUREFILE"]
 
@@ -109,11 +109,11 @@ class Metaphase(object):
 
         # Enable or disable log console
         self.verbose = verbose
-        logger = logging.getLogger(__name__)
+        log = logging.getLogger(__name__)
         if not self.verbose:
-            logger.disabled = True
+            log.disabled = True
         else:
-            logger.disabled = False
+            log.disabled = False
 
         if not paramfile:
             paramfile = PARAMFILE
@@ -132,7 +132,7 @@ class Metaphase(object):
         if reduce_p:
             parameters.reduce_params(self.paramtree, self.measuretree)
 
-        logger.info('Parameters loaded')
+        log.info('Parameters loaded')
 
         params = self.paramtree.relative_dic
         # Reset explicitely the unit parameters to their
@@ -151,8 +151,8 @@ class Metaphase(object):
         self.delay = -1
         self.observations = {}
 
-        logger.info('Simulation initialized')
-        logger.disabled = False
+        log.info('Simulation initialized')
+        log.disabled = False
 
     def __str__(self):
         lines = []
@@ -194,7 +194,7 @@ class Metaphase(object):
         kappa_c = self.KD.params['kappa_c']
 
         if self.verbose:
-            logger.info('Running simulation')
+            log.info('Running simulation')
         bef = 0
         log_anaphase_onset = False
 
@@ -209,7 +209,7 @@ class Metaphase(object):
             # Ablation test
             if ablat == time_point:
                 if self.verbose:
-                    logger.info("Performing ablation")
+                    log.info("Performing ablation")
                 self._ablation(time_point, pos=ablat_pos)
 
             # Anaphase transition ?
@@ -217,7 +217,7 @@ class Metaphase(object):
                 if not log_anaphase_onset:
                     pprogress(-1)
                     if self.verbose:
-                        logger.info("Anaphase onset at %i / %i" %
+                        log.info("Anaphase onset at %i / %i" %
                                    (time_point, self.num_steps))
                     log_anaphase_onset = True
 
@@ -229,7 +229,7 @@ class Metaphase(object):
             pprogress(-1)
 
         if self.verbose:
-            logger.info('Simulation done')
+            log.info('Simulation done')
         self.KD.params['kappa_c'] = kappa_c
         delay_str = "delay = %2d seconds" % self.delay
         self.report.append(delay_str)
@@ -330,7 +330,7 @@ class Metaphase(object):
         if pos == None:
             pos = self.KD.spbR.pos
         if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
-            logger.warning('Missed shot, same player play again!')
+            log.warning('Missed shot, same player play again!')
             return
         self.KD.params['Fmz'] = 0.
         self.KD.params['k_a'] = 0.

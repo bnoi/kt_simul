@@ -16,7 +16,7 @@ from kt_simul.core.simul_spindle import Metaphase
 from kt_simul.core.spindle_dynamics import KinetoDynamics
 from kt_simul.io.xml_handler import ParamTree, indent, ResultTree
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class SimuIO():
@@ -169,7 +169,7 @@ class SimuIO():
         store.close()
 
         if verbose:
-            logger.info("Simulation saved to file %s " % simufname)
+            log.info("Simulation saved to file %s " % simufname)
 
     def read(self, simufname, paramtree=None, measuretree=None, verbose=False):
         """

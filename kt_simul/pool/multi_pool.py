@@ -22,7 +22,7 @@ from kt_simul.pool import Pool
 PARAMFILE = parameters.PARAMFILE
 MEASUREFILE = parameters.MEASUREFILE
 
-logger = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class FolderExistException(Exception):
@@ -53,9 +53,9 @@ class MultiPool:
 
         self.verbose = verbose
         if not self.verbose:
-            logger.disabled = True
+            log.disabled = True
         else:
-            logger.disabled = False
+            log.disabled = False
 
         self.multi_pool_path = multi_pool_path
 
@@ -115,12 +115,12 @@ class MultiPool:
         """
         """
         if self.simus_run:
-            logger.error('Pool has already been simulated.')
+            log.error('Pool has already been simulated.')
             return False
 
         n = self.simus_path.shape[0]
-        logger.info('Run simulations for %i different set of parameters' % n)
-        logger.info('Each set of parameters runs %s simulations' % self.n_simu)
+        log.info('Run simulations for %i different set of parameters' % n)
+        log.info('Each set of parameters runs %s simulations' % self.n_simu)
         sys.stdout.flush()
         for i, (parameters, rows) in enumerate(self.simus_path.iterrows()):
             if self.verbose:
@@ -161,7 +161,7 @@ class MultiPool:
             pprogress(-1)
 
         self.load_pools()
-        logger.info("Simulations are done")
+        log.info("Simulations are done")
         self.simus_run = True
 
     def load_pools(self):
