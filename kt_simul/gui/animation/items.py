@@ -1,5 +1,10 @@
 #-*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 from PyQt4 import QtCore, QtGui
 
 import numpy as np
@@ -60,7 +65,6 @@ class CellItem(QtGui.QGraphicsItem):
     def gotoTime(self, time_point):
         if time_point >= self.mt.KD.num_steps - 1:
             return False
-
         self.time_point = time_point
 
         self.spbR.gotoTime(self.time_point)

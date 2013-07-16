@@ -1,5 +1,5 @@
 """
 """
 
-from widgets import InteractiveCellWidget
-from animate import Animator
+from .widgets import InteractiveCellWidget
+from .animate import Animator

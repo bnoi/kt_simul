@@ -1,3 +1,6 @@
+import sys
+sys.path.append('..')
+
 import argparse
 
 from kt_simul.gui.animation import Animator

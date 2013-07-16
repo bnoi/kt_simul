@@ -1,3 +1,8 @@
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import collections
 
 def pretty_dict(indict, indent_level=0):
@@ -18,3 +23,9 @@ def pretty_dict(indict, indent_level=0):
             out += "%s%s : %s\n" % (indentation, key, value)
 
     return out
+
+def isstr(s):
+    try:
+        return isinstance(s, basestring)
+    except NameError:
+        return isinstance(s, str)

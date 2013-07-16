@@ -2,10 +2,15 @@
 Main module for save and read simulation.
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import time
 import os
 import logging
-import StringIO
+import io
 import zipfile
 import xml.etree.ElementTree as ET
 
@@ -164,6 +169,7 @@ class SimuIO():
         if os.path.isfile(simufname):
             os.remove(simufname)
         store = pd.HDFStore(simufname)
+
         for dfname in df_to_save:
             store[dfname] = locals()[dfname]
         store.close()
@@ -206,6 +212,7 @@ class SimuIO():
         KD = KinetoDynamics(params)
 
         spbs = store['spbs']
+
         KD.spbL.traj = spbs.xs('A', level='side').values.T[0]
         KD.spbR.traj = spbs.xs('B', level='side').values.T[0]
 
@@ -236,6 +243,9 @@ class SimuIO():
             ch.cen_A.calc_plug_vector()
             ch.cen_B.calc_plug_vector()
 
+            ch.calc_erroneous_history()
+            ch.calc_correct_history()
+
         meta.KD = KD
         meta.KD.simulation_done = True
 
@@ -260,7 +270,8 @@ def build_tree(df):
     tags = ['unit', 'description']
     for i, p in df.iterrows():
         et = ET.SubElement(root, "param")
-        for key, value in p.iteritems():
+
+        for key, value in list(p.iteritems()):
             if key not in tags:
                 et.set(key, value)
             else:

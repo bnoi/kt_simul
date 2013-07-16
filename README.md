@@ -46,12 +46,13 @@ LICENCE for full details).
 Dependencies
 ------------
 
-- numpy
-- scipy
-- cython
-- pandas
-- matplotlib (optional)
-- PySide (optional)
+- Python 2.7 and Python 3
+- numpy >= 1.7
+- scipy >= 0.12
+- cython >= 0.19
+- pandas >= 0.12
+- matplotlib (optional) >= 1.2
+- PyQt4 (optional)
 
 Installation
 ------------

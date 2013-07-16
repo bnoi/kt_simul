@@ -8,6 +8,11 @@ Civelekoglu-Scholey et al. Biophys. J. 90(11), 2006
 http://dx.doi.org/10.1529/biophysj.105.078691
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 import numpy as np
 import collections
@@ -15,11 +20,11 @@ import collections
 import pyximport
 pyximport.install()
 
-from kt_simul.core.spindle_dynamics import KinetoDynamics
-from kt_simul.io.xml_handler import ParamTree
-from kt_simul.core import parameters
-from kt_simul.utils.progress import pprogress
-from kt_simul.utils.format import pretty_dict
+from ..core.spindle_dynamics import KinetoDynamics
+from ..io.xml_handler import ParamTree
+from ..core import parameters
+from ..utils.progress import pprogress
+from ..utils.format import pretty_dict
 
 log = logging.getLogger(__name__)
 
@@ -45,20 +50,34 @@ class Metaphase(object):
 
     Launch a new simulation::
 
-        from kt_simul.simul_spindle import Metaphase
-        m = Metaphase()
-        m.simul()
-        m.show_trajs()
-        m.write_results('examples/docstring_results.xml',
-                        'examples/docstring_data.npy')
+        from kt_simul.io.xml_handler import ParamTree
+        from kt_simul.core.simul_spindle import Metaphase
+        from kt_simul.io.simuio import SimuIO
+        from kt_simul.core import parameters
 
-    From an already runned simulation::
+        PARAMFILE = parameters.PARAMFILE
+        MEASUREFILE = parameters.MEASUREFILE
 
-        from kt_simul.simul_spindle import Metaphase
-        m1 = get_fromfile('examples/docstring_results.xml')
-        m1.show_one(1) #This shows the trajactory of the chromosome 1
-        m2 = Metaphase(m1.paramtree, m1.measuretree) #A new simulation
-        m2.simul(ablat = 600) #this time with spindle ablation
+        # Change some parameters
+        paramtree = ParamTree(PARAMFILE)
+        paramtree.change_dic('dt', 10)
+        paramtree.change_dic('span', 2000)
+        paramtree.change_dic('t_A', 1750)
+
+        measuretree = ParamTree(MEASUREFILE, adimentionalized=False)
+
+        # Init simu
+        meta = Metaphase(verbose=True, paramtree=paramtree, measuretree=measuretree, initial_plug='random')
+
+        # Launch simu
+        meta.simul()
+
+        # Save results
+        SimuIO(meta).save("simu.h5")
+
+        # Show trajectories (matplotlib needed)
+        meta.show()
+
 
     Parameters
     ----------
@@ -88,11 +107,14 @@ class Metaphase(object):
         is ignored
 
     initial_plug : string or None
-        Defines globally the initial attachment states. This argument can have the following values:
+        Defines globally the initial attachment states. This argument can have
+        the following values:
             - 'null': all kinetochores are detached
             - 'amphitelic': all chromosmes are amphitelic
-            - 'random': all attachement site can be bound to either pole or deteched with equal prob.
-            - 'monotelic': right kinetochores are attached to the same pole, left ones are detached
+            - 'random': all attachement site can be bound to either pole or
+            detected with equal prob.
+            - 'monotelic': right kinetochores are attached to the same pole,
+            left ones are detached
             - 'syntelic' : all kinetochores are attached to the same pole
 
     reduce_p : bool
@@ -452,7 +474,7 @@ class Metaphase(object):
         ax3.set_xlabel('Time (s)')
         ax2.set_ylabel('Distance from center (um)')
 
-        ax1.set_yticks(range(5))
-        ax3.set_yticks(range(5))
+        ax1.set_yticks(list(range(5)))
+        ax3.set_yticks(list(range(5)))
 
         plt.show()

@@ -3,11 +3,19 @@
 Handler for the parameters xml files -- to allow phase space exploration
 """
 
-import StringIO
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
+import logging
+import io
 from xml.etree.ElementTree import parse, tostring
 
 import numpy as np
 import pandas as pd
+
+from ..utils.format import isstr
 
 # Those strings should be respected in the xml file
 SPRING_UNIT = u'pN/µm'
@@ -18,6 +26,8 @@ FORCE_UNIT = u'pN'
 SPEED_UNIT = u'µm/s'
 
 __all__ = ["ParamTree", "indent", "ResultTree"]
+
+log = logging.getLogger(__name__)
 
 
 def indent(elem, level=0):
@@ -53,10 +63,10 @@ class ParamTree(object):
 
         if xmlfile is not None:
 
-            if isinstance(xmlfile, file) or isinstance(xmlfile, StringIO.StringIO):
+            if isinstance(xmlfile, io.IOBase) or isinstance(xmlfile, io.StringIO):
                 self.tree = parse(xmlfile)
-            elif isinstance(xmlfile, str):
-                source = file(xmlfile, "r")
+            elif isstr(xmlfile):
+                source = open(xmlfile, "r")
                 self.tree = parse(source)
                 source.close()
 
@@ -65,7 +75,7 @@ class ParamTree(object):
         elif root is not None:
             self.root = root
         else:
-            print 'A etree root or a xmlfile should be provided'
+            log.error('A etree root or a xmlfile should be provided')
 
         list = []
         a = self.root.findall("param")
@@ -140,7 +150,7 @@ class ParamTree(object):
                 try:
                     self.absolute_dic[key] = new_value
                 except KeyError:
-                    print "Couldn't find the parameter %s" % key
+                    log.error("Couldn't find the parameter %s" % key)
                     return 0
                 break
         try:
@@ -149,7 +159,7 @@ class ParamTree(object):
             if 'metaph_rate' in self.absolute_dic.keys():
                 self.relative_dic = self.absolute_dic
             else:
-                print 'Oooups'
+                log.error('Oooups')
                 raise()
 
     def save(self, path):
@@ -170,20 +180,26 @@ class ParamTree(object):
         :class:`pandas.DataFrame`
         """
 
+        import codecs
+        c = codecs.lookup('utf-8')
+
         attributs = {'name': [], 'value': [], 'min': [], 'max': [], 'step': []}
         tags = {'unit': [], 'description': []}
 
         for el in self.root.findall("param"):
 
             for name in attributs:
-                attributs[name].append(el.get(name))
+                value = el.get(name)
+                attributs[name].append(value)
             for name in tags:
-                tags[name].append(el.find(name).text)
+                value = el.find(name).text
+                tags[name].append(value)
 
         attributs.update(tags)
         df = pd.DataFrame.from_dict(attributs)
         cols_ordered = ['name', 'value', 'unit', 'description', 'min', 'max', 'step']
         df = df.reindex_axis(cols_ordered, axis=1)
+
         return df
 
 

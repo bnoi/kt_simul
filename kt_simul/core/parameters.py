@@ -3,6 +3,11 @@
 Module dealing with simulation parameters
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 import os
 
@@ -52,7 +57,7 @@ def reduce_params(paramtree, measuretree):
     except KeyError:
         log.warning("The measures dictionary should contain"
                        "at least the following keys: ")
-        log.warning(MEASURES.keys())
+        log.warning(list(MEASURES.keys()))
         return False
 
     k_a = params['k_a']  # 'free' attachement event frequency
@@ -101,5 +106,5 @@ def reduce_params(paramtree, measuretree):
     params['muc'] = muc
     muk = (tau_k * kappa_k)
     params['muk'] = muk
-    for key, val in params.items():
+    for key, val in list(params.items()):
         paramtree.change_dic(key, val, verbose=False)

@@ -1,3 +1,8 @@
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import random
 import numpy as np
 cimport numpy as np
@@ -52,7 +57,7 @@ cdef class Chromosome(Organite):
 
 
 cdef class Centromere(Organite):
-    cdef public str tag
+    cdef public unicode tag
     cdef public Chromosome chromosome
     cdef public float toa
     cdef public np.ndarray plug_vector
@@ -66,7 +71,7 @@ cdef class Centromere(Organite):
 
 cdef class PlugSite(Organite):
     cdef public Centromere centromere
-    cdef public str tag
+    cdef public unicode tag
     cdef public int plug_state, plugged
     cdef public np.ndarray state_hist
     cdef public float P_att

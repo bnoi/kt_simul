@@ -3,6 +3,11 @@ Simulated objects declaration. 'Objects' are for example: centromeres,
 kinetochores, spindle pole body, etc.
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import logging
 
 import random
@@ -312,14 +317,14 @@ cdef class Centromere(Organite):
     cdef int left_plugged(self):
         cdef int lp
         cdef np.ndarray[ITYPE_t] left_plugged
-        left_plugged = self.plug_vector * (self.plug_vector - 1) / 2
+        left_plugged = self.plug_vector * (self.plug_vector - 1) // 2
         lp = left_plugged.sum()
         return lp
 
     cdef int right_plugged(self):
         cdef int rp
         cdef np.ndarray[ITYPE_t] right_plugged
-        right_plugged = self.plug_vector * (1 + self.plug_vector) / 2
+        right_plugged = self.plug_vector * (1 + self.plug_vector) // 2
         rp = right_plugged.sum()
         return rp
 

@@ -4,6 +4,11 @@ Makes working with XML feel like you are working with JSON
 Source : https://github.com/martinblech/xmltodict
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 from xml.parsers import expat
 from xml.sax.saxutils import XMLGenerator
 from xml.sax.xmlreader import AttributesImpl

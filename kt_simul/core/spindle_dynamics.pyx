@@ -8,14 +8,19 @@ It uses cython used for the computer intensive bits
   and the system of equations.
 """
 
+from __future__ import unicode_literals
+from __future__ import division
+from __future__ import absolute_import
+from __future__ import print_function
+
 import random
 import numpy as np
 cimport cython
 cimport numpy as np
 from cpython cimport bool
 
-from components cimport Spindle, Spb, Chromosome, Centromere, PlugSite
-from components import Spindle, Spb, Chromosome, Centromere, PlugSite
+from .components cimport Spindle, Spb, Chromosome, Centromere, PlugSite
+from .components import Spindle, Spb, Chromosome, Centromere, PlugSite
 
 __all__ = ["KinetoDynamics"]
 
@@ -33,7 +38,7 @@ cdef class KinetoDynamics(object):
     """
     cdef public Spindle spindle
     cdef public Spb spbR, spbL
-    cdef public str initial_plug
+    cdef public unicode initial_plug
     cdef public bool simulation_done
     cdef public object params
     cdef public int num_steps
@@ -75,7 +80,7 @@ cdef class KinetoDynamics(object):
         self.spindle = Spindle(self)
         self.spbR = Spb(self.spindle, RIGHT, L0)  # right spb (RIGHT = 1)
         self.spbL = Spb(self.spindle, LEFT, L0)  # left one (LEFT = -1)
-        self.initial_plug = initial_plug
+        self.initial_plug = initial_plug#.decode('UTF-8')
         cdef Chromosome ch
         self.chromosomes = []
         for n in range(N):
