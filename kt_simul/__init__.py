@@ -52,3 +52,4 @@ formatter = logging.Formatter(logformat, "%Y-%m-%d %H:%M:%S")
 handler.setFormatter(formatter)
 log.addHandler(handler)
 log.setLevel(logging.DEBUG)
+log.propagate = False

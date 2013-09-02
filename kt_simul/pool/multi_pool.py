@@ -124,6 +124,7 @@ class MultiPool:
         n = self.simus_path.shape[0]
         log.info('Run simulations for %i different set of parameters' % n)
         log.info('Each set of parameters runs %s simulations' % self.n_simu)
+
         sys.stdout.flush()
         for i, (parameters, rows) in enumerate(self.simus_path.iterrows()):
             if self.verbose:
@@ -136,7 +137,7 @@ class MultiPool:
             if not isinstance(parameters, list):
                 parameters = [parameters]
 
-            names = map(lambda x: x[0], self.parameters)
+            names = list(map(lambda x: x[0], self.parameters))
             for i, parameter in enumerate(parameters):
                 if self.trees[i] == 'paramtree':
                     paramtree.change_dic(names[i], parameter)
@@ -181,10 +182,10 @@ class MultiPool:
         return self.pools
 
     def _build_path( self):
-        names_set = itertools.repeat(map(lambda x: x[0], self.parameters))
+        names_set = itertools.repeat(list(map(lambda x: x[0], self.parameters)))
         values_set = list(
             itertools.product(*map(lambda x: x[1], self.parameters)))
-        n_floats_set = itertools.repeat(map(lambda x: x[2], self.parameters))
+        n_floats_set = itertools.repeat(list(map(lambda x: x[2], self.parameters)))
 
         index = []
         pool_path = []
@@ -200,4 +201,4 @@ class MultiPool:
 
         self.simus_path = pd.DataFrame(pool_path, columns=['relpath'])
         self.simus_path.index = pd.MultiIndex.from_tuples(
-            index, names=map(lambda x: x[0], self.parameters))
+            index, names=list(map(lambda x: x[0], self.parameters)))

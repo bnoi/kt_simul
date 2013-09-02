@@ -143,21 +143,21 @@ class Pool:
                            'verbose': False,
                            'reduce_p': True}
 
-        arguments = itertools.izip(itertools.repeat(simu_parameters),
-                                   itertools.repeat(self.simu_path),
-                                   range(self.n_simu),
-                                   itertools.repeat(self.digits))
+        arguments = zip(itertools.repeat(simu_parameters),
+                        itertools.repeat(self.simu_path),
+                        range(self.n_simu),
+                        itertools.repeat(self.digits))
 
         try:
             # Launch simulation
             if self.parallel:
                 results = pool.imap_unordered(_run_one_simulation, arguments)
             else:
-                results = itertools.imap(_run_one_simulation, arguments)
+                results = map(_run_one_simulation, arguments)
 
             # Get unordered results and log progress
             for i in range(self.n_simu):
-                result = results.next()
+                result = next(results)
                 if self.verbose:
                     pprogress((i + 1) / self.n_simu * 100, "(%i / %i)" %
                               (i + 1, self.n_simu))
