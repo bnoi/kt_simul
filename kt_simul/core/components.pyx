@@ -190,6 +190,8 @@ cdef class Chromosome(Organite):
         """
         Returns the number of *erroneously* plugged MTs
         """
+        self.cen_A.calc_plug_vector()
+        self.cen_B.calc_plug_vector()
         if self.is_right_A():
             return self.cen_A.left_plugged(), self.cen_B.right_plugged()
         else:
@@ -441,6 +443,7 @@ cdef class PlugSite(Organite):
 
         pole_pos = self.KD.spbR.pos * self.plug_state
         mt_length = abs(pole_pos - self.pos)
+        spindle_length = abs(self.KD.spbR.pos - self.KD.spbL.pos)
 
         force_term = ldep * mt_length + lbase
 

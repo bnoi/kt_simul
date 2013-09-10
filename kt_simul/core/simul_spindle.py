@@ -422,59 +422,65 @@ class Metaphase(object):
 
         duration = self.KD.duration
         dt = self.KD.dt
-        steps = self.KD.num_steps
+        # steps = self.KD.num_steps
         anaphase = self.KD.params['t_A']
         times = np.arange(0, duration, dt)
         spbA = self.KD.spbL.traj
         spbB = self.KD.spbR.traj
         kts = self.KD.chromosomes
 
-        fig = plt.figure(figsize=(14,8))
+        h = len(kts) * 2 + 10
+        fig = plt.figure(figsize=(14, h))
 
-        tot = 5
-        ax1 = plt.subplot2grid((tot, 1), (0, 0), rowspan=1)
-        ax2 = plt.subplot2grid((tot, 1), (1, 0), rowspan=3, sharex=ax1)
-        ax3 = plt.subplot2grid((tot, 1), (4, 0), rowspan=1, sharex=ax1)
+        mainrowspan = int(len(kts) * 2)
+        tot = len(kts) * 2 + mainrowspan
+
+        main_ax = plt.subplot2grid((tot, 1), (3, 0), rowspan=mainrowspan)
+        axs = []
+        for i in range(len(kts)):
+            ax1 = plt.subplot2grid((tot, 1), (i, 0), rowspan=1, sharex=main_ax)
+            ax2 = plt.subplot2grid((tot, 1), (i + len(kts) + mainrowspan, 0),
+                                   rowspan=1, sharex=main_ax)
+            axs.append((ax1, ax2))
 
         colors = ["red",
                   "green",
                   "blue"]
 
         # Draw kymo
-        ax2.plot(times, spbA, color='black')
-        ax2.plot(times, spbB, color='black')
+        main_ax.plot(times, spbA, color='black')
+        main_ax.plot(times, spbB, color='black')
 
         for color, kt in zip(colors, kts):
-            ax2.plot(times, kt.cen_A.traj, color=color, alpha=0.5)
-            ax2.plot(times, kt.cen_B.traj, color=color, alpha=0.5)
-        ax2.grid()
+            main_ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8)
+            main_ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8)
+        main_ax.grid()
 
-        for lab in ax1.xaxis.get_majorticklabels():
-            lab.set_visible(False)
-        for lab in ax2.xaxis.get_majorticklabels():
+        for lab in main_ax.xaxis.get_majorticklabels():
             lab.set_visible(False)
 
-        ax2.axvline(anaphase, color='black')
+        main_ax.axvline(anaphase, color='black')
 
-        ax1.grid()
-        ax3.grid()
-
-        for color, kt in zip(colors, kts):
+        for (ax1, ax2), color, kt in zip(axs, colors, kts):
             correctA = kt.correct_history.T[1]
             correctB = kt.correct_history.T[0]
             errA = kt.erroneous_history.T[1]
             errB = kt.erroneous_history.T[0]
 
-            ax3.plot(times, correctA, color=color, alpha=0.5)
-            ax3.plot(times, errA, color=color, alpha=0.5)
+            ax1.plot(times, correctA, color=color, alpha=0.8)
+            ax1.plot(times, errA, color=color, alpha=0.8, ls='--')
 
-            ax1.plot(times, correctB, color=color, alpha=0.5)
-            ax1.plot(times, errB, color=color, alpha=0.5)
+            ax2.plot(times, correctB, color=color, alpha=0.8)
+            ax2.plot(times, errB, color=color, alpha=0.8, ls='--')
 
-        ax3.set_xlabel('Time (s)')
-        ax2.set_ylabel('Distance from center (um)')
+            ax1.set_yticks(list(range(5)))
+            ax2.set_yticks(list(range(5)))
 
-        ax1.set_yticks(list(range(5)))
-        ax3.set_yticks(list(range(5)))
+            ax1.grid()
+            ax2.grid()
+
+
+        axs[-1][1].set_xlabel('Time (s)')
+        main_ax.set_ylabel('Distance from center (um)')
 
         plt.show()
