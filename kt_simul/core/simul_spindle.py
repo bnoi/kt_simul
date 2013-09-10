@@ -349,7 +349,7 @@ class Metaphase(object):
             Position of the laser beam within the spindle
 
         """
-        if pos == None:
+        if pos is None:
             pos = self.KD.spbR.pos
         if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
             log.warning('Missed shot, same player play again!')
@@ -429,7 +429,7 @@ class Metaphase(object):
         spbB = self.KD.spbR.traj
         kts = self.KD.chromosomes
 
-        h = len(kts) * 2 + 10
+        h = len(kts) * 2 + 8
         fig = plt.figure(figsize=(14, h))
 
         mainrowspan = int(len(kts) * 2)
@@ -478,7 +478,6 @@ class Metaphase(object):
 
             ax1.grid()
             ax2.grid()
-
 
         axs[-1][1].set_xlabel('Time (s)')
         main_ax.set_ylabel('Distance from center (um)')
