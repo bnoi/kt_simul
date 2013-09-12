@@ -1,5 +1,4 @@
-kt_simul - Python model of chromosome mouvements during mitosis
-===============================================================
+# `kt_simul` - Python model of chromosome mouvements during mitosis
 
 Python model of chromosome mouvements during mitosis in Fission Yeast
 (http://mitotic-machine.org).
