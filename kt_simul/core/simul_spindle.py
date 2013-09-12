@@ -176,6 +176,10 @@ class Metaphase(object):
         log.info('Simulation initialized')
         log.disabled = False
 
+        self.chrom_colors = ["red",
+                             "green",
+                             "blue"]
+
     def __str__(self):
         lines = []
         lines.append('Metaphase class')
@@ -423,10 +427,7 @@ class Metaphase(object):
         duration = self.KD.duration
         dt = self.KD.dt
         # steps = self.KD.num_steps
-        anaphase = self.KD.params['t_A']
         times = np.arange(0, duration, dt)
-        spbA = self.KD.spbL.traj
-        spbB = self.KD.spbR.traj
         kts = self.KD.chromosomes
 
         h = len(kts) * 2 + 8
@@ -443,25 +444,9 @@ class Metaphase(object):
                                    rowspan=1, sharex=main_ax)
             axs.append((ax1, ax2))
 
-        colors = ["red",
-                  "green",
-                  "blue"]
+        main_ax = self.get_kymo_plot(main_ax)
 
-        # Draw kymo
-        main_ax.plot(times, spbA, color='black')
-        main_ax.plot(times, spbB, color='black')
-
-        for color, kt in zip(colors, kts):
-            main_ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8)
-            main_ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8)
-        main_ax.grid()
-
-        for lab in main_ax.xaxis.get_majorticklabels():
-            lab.set_visible(False)
-
-        main_ax.axvline(anaphase, color='black')
-
-        for (ax1, ax2), color, kt in zip(axs, colors, kts):
+        for (ax1, ax2), color, kt in zip(axs, self.chrom_colors, kts):
             correctA = kt.correct_history.T[1]
             correctB = kt.correct_history.T[0]
             errA = kt.erroneous_history.T[1]
@@ -482,4 +467,38 @@ class Metaphase(object):
         axs[-1][1].set_xlabel('Time (s)')
         main_ax.set_ylabel('Distance from center (um)')
 
-        plt.show()
+        fig.suptitle("Kymograph")
+
+        fig.show()
+
+        return fig
+
+    def get_kymo_plot(self, ax):
+        """
+        """
+
+        import matplotlib
+        matplotlib.use('Qt4Agg')
+
+        dt = self.KD.dt
+        duration = self.KD.duration
+        anaphase = self.KD.params['t_A']
+        times = np.arange(0, duration, dt)
+        spbA = self.KD.spbL.traj
+        spbB = self.KD.spbR.traj
+        kts = self.KD.chromosomes
+
+        ax.plot(times, spbA, color='black')
+        ax.plot(times, spbB, color='black')
+
+        for color, kt in zip(self.chrom_colors, kts):
+            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8)
+            ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8)
+        ax.grid()
+
+        for lab in ax.xaxis.get_majorticklabels():
+            lab.set_visible(False)
+
+        ax.axvline(anaphase, color='black')
+
+        return ax
