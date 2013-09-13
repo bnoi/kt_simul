@@ -15,6 +15,7 @@ import itertools
 import gc
 
 import pandas as pd
+import numpy as np
 
 from kt_simul.io.simuio import build_tree
 from kt_simul.utils.progress import pprogress
@@ -134,8 +135,8 @@ class MultiPool:
             paramtree = self.paramtree
             measuretree = self.measuretree
 
-            if not isinstance(parameters, list):
-                parameters = [parameters]
+            if isinstance(parameters, np.ndarray):
+                parameters = parameters.tolist()
 
             names = list(map(lambda x: x[0], self.parameters))
             for i, parameter in enumerate(parameters):
@@ -202,3 +203,8 @@ class MultiPool:
         self.simus_path = pd.DataFrame(pool_path, columns=['relpath'])
         self.simus_path.index = pd.MultiIndex.from_tuples(
             index, names=list(map(lambda x: x[0], self.parameters)))
+
+    def get_parameters(self):
+        """
+        """
+        return self.simus_path.index.values

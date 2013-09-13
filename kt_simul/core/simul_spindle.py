@@ -502,3 +502,48 @@ class Metaphase(object):
         ax.axvline(anaphase, color='black')
 
         return ax
+
+    def get_attachment(self, state):
+        """
+        Get attachment state name according to biological classification:
+            - amphitelic
+            - monotelic
+            - syntelic
+            - merotelic
+            - unattached
+            - error means no attachment were found.
+        """
+
+        def amphitelic(state):
+            return (state[0] > 0 and state[1] > 0 and
+                    state[2] == 0 and state[3] == 0)
+
+        def monotelic(state):
+            return (state[0] > 0 and state[1] == 0 and
+                    state[2] == 0 and state[3] == 0)
+
+        def syntelic(state):
+            return (state[0] > 0 and state[1] == 0 and
+                    state[2] == 0 and state[3] > 0)
+
+        def merotelic(state):
+            return (state[0] > 0 and state[2] > 0)
+
+        def unattached(state):
+            return (state[0] == 0 and state[1] == 0 and
+                    state[2] == 0 and state[3] == 0)
+
+        permuted_state = [state[1], state[0], state[3], state[2]]
+
+        if amphitelic(state) or amphitelic(permuted_state):
+            return amphitelic.__name__
+        elif monotelic(state) or monotelic(permuted_state):
+            return monotelic.__name__
+        elif syntelic(state) or syntelic(permuted_state):
+            return syntelic.__name__
+        elif merotelic(state) or merotelic(permuted_state):
+            return merotelic.__name__
+        elif unattached(state) or unattached(permuted_state):
+            return unattached.__name__
+        else:
+            return 'error'
