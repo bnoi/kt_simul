@@ -223,8 +223,9 @@ cdef class KinetoDynamics(object):
                 pluggedB = plugsite_B.plugged
 
                 # Lenght dependance
-                pi_nmA *= plugsite_A.calc_ldep()
-                pi_nmB *= plugsite_B.calc_ldep()
+                if not self.anaphase:
+                    pi_nmA *= plugsite_A.calc_ldep()
+                    pi_nmB *= plugsite_B.calc_ldep()
 
                 #spbs diag terms:
                 self.At_mat[0, 0] -= pluggedA + pluggedB
@@ -332,9 +333,10 @@ cdef class KinetoDynamics(object):
                 pi_nmB = plugsite_B.plug_state
                 pluggedB = plugsite_B.plugged
 
-                # Lenght dependance
-                pi_nmA *= plugsite_A.calc_ldep()
-                pi_nmB *= plugsite_B.calc_ldep()
+                if not self.anaphase:
+                    # Lenght dependance
+                    pi_nmA *= plugsite_A.calc_ldep()
+                    pi_nmB *= plugsite_B.calc_ldep()
 
                 C[0] -= pluggedA + pluggedB
                 C[anm] = pi_nmA
