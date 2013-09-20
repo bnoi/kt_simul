@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 This module provides the core simulation functionalities.
 
@@ -506,12 +505,12 @@ class Metaphase(object):
     def get_attachment(self, state):
         """
         Get attachment state name according to biological classification:
-            - amphitelic
-            - monotelic
-            - syntelic
-            - merotelic
-            - unattached
-            - error means no attachment were found.
+            - amphitelic returns 0
+            - monotelic returns 1
+            - syntelic returns 2
+            - merotelic returns 3
+            - unattached returns 4
+            - error means no attachment were found (issue with code) returns 5
         """
 
         def amphitelic(state):
@@ -536,14 +535,22 @@ class Metaphase(object):
         permuted_state = [state[1], state[0], state[3], state[2]]
 
         if amphitelic(state) or amphitelic(permuted_state):
-            return amphitelic.__name__
+            return 0
         elif monotelic(state) or monotelic(permuted_state):
-            return monotelic.__name__
+            return 1
         elif syntelic(state) or syntelic(permuted_state):
-            return syntelic.__name__
+            return 2
         elif merotelic(state) or merotelic(permuted_state):
-            return merotelic.__name__
+            return 3
         elif unattached(state) or unattached(permuted_state):
-            return unattached.__name__
+            return 4
         else:
-            return 'error'
+            return 5
+
+    def get_attachment_names(self):
+        """
+        """
+
+        names = ['amphitelic', 'monotelic', 'syntelic',
+                 'merotelic', 'unattached', 'error']
+        return names
