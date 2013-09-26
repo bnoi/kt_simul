@@ -457,17 +457,31 @@ class Metaphase(object):
             ax2.plot(times, correctB, color=color, alpha=0.8)
             ax2.plot(times, errB, color=color, alpha=0.8, ls='--')
 
-            ax1.set_yticks(list(range(5)))
-            ax2.set_yticks(list(range(5)))
+            ax1.set_yticks(list(range(0, 5, 2)))
+            ax2.set_yticks(list(range(0, 5, 2)))
 
             ax1.grid()
             ax2.grid()
 
+            for lab in ax1.xaxis.get_majorticklabels():
+                lab.set_visible(False)
+
+            for lab in ax2.xaxis.get_majorticklabels():
+                lab.set_visible(False)
+
+        for lab in ax1.xaxis.get_majorticklabels():
+            lab.set_visible(True)
+
+        for lab in ax2.xaxis.get_majorticklabels():
+            lab.set_visible(True)
+
+
         axs[-1][1].set_xlabel('Time (s)')
         main_ax.set_ylabel('Distance from center (um)')
 
-        fig.suptitle("Kymograph")
+        # fig.suptitle("Kymograph")
 
+        fig.tight_layout()
         fig.show()
 
         return fig
@@ -499,6 +513,7 @@ class Metaphase(object):
             lab.set_visible(False)
 
         ax.axvline(anaphase, color='black')
+        ax.set_ylim(-3, 3)
 
         return ax
 
