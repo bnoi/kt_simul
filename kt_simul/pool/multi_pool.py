@@ -45,8 +45,8 @@ class MultiPool:
     """
 
     def __init__(self, multi_pool_path,
-                 parameters,
-                 trees,
+                 parameters=None,
+                 trees=None,
                  paramtree=None,
                  measuretree=None,
                  load=False,
