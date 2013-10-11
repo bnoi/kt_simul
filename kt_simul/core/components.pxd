@@ -80,3 +80,4 @@ cdef class PlugSite(Organite):
     cdef public void plug_unplug(PlugSite, int)
     cdef public float P_det(PlugSite)
     cdef public int site_id
+    cdef public double calc_attach_trans(PlugSite)

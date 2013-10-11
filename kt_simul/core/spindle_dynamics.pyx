@@ -48,6 +48,7 @@ cdef class KinetoDynamics(object):
     cdef public np.ndarray B_mat, At_mat, A0_mat
     cdef public bool anaphase
     cdef public list all_plugsites
+    cdef public int time_point
     cdef public np.ndarray speeds
 
     def __init__(self, parameters, initial_plug='null'):
@@ -116,6 +117,7 @@ cdef class KinetoDynamics(object):
             1. Solving the equation for this time point (solve()).
             2. Updating position according to new speeds (position_update())
         """
+        self.time_point = time_point
         self._one_step(time_point)
         if time_point == (self.num_steps - 1):
             self.simulation_done = True
@@ -227,6 +229,9 @@ cdef class KinetoDynamics(object):
                     pi_nmA *= plugsite_A.calc_ldep()
                     pi_nmB *= plugsite_B.calc_ldep()
 
+                    # pi_nmA *= plugsite_A.calc_attach_trans()
+                    # pi_nmB *= plugsite_B.calc_attach_trans()
+
                 #spbs diag terms:
                 self.At_mat[0, 0] -= pluggedA + pluggedB
                 anm = self._idx(0, n, m)
@@ -337,6 +342,9 @@ cdef class KinetoDynamics(object):
                     # Lenght dependance
                     pi_nmA *= plugsite_A.calc_ldep()
                     pi_nmB *= plugsite_B.calc_ldep()
+
+                    # pi_nmA *= plugsite_A.calc_attach_trans()
+                    # pi_nmB *= plugsite_B.calc_attach_trans()
 
                 C[0] -= pluggedA + pluggedB
                 C[anm] = pi_nmA

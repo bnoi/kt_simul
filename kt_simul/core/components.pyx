@@ -501,3 +501,26 @@ cdef class PlugSite(Organite):
         k_dc = k_d0  *  d_alpha / dist
         if k_dc > 1e4: return 1.
         return 1 - np.exp(-k_dc)
+
+    cdef double calc_attach_trans(self):
+        """
+        """
+        cdef double tau_trans
+        cdef double dt
+        cdef double trans_modulation
+        cdef int index_t0
+        cdef int current_t_index
+
+        tau_trans = 10
+
+        current_t_index = self.KD.time_point
+        state = self.state_hist
+        try:
+            index_t0 = np.where(state[:current_t_index] != self.plug_state)[0][-1]
+        except IndexError:
+            index_t0 = 0
+        dt = (current_t_index - index_t0) * self.KD.dt
+
+        trans_modulation = 1 - np.exp(-dt * (1 / tau_trans))
+
+        return trans_modulation

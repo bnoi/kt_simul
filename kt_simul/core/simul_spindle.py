@@ -326,18 +326,17 @@ class Metaphase(object):
         if self.KD.anaphase:
             return True
         if t >= t_A and self._plug_checkpoint():
-            if self.delay == -1:
-                self.delay = t - t_A
-                # Then we just get rid of cohesin
-                self.KD.params['kappa_c'] = 0.
-                self.KD.calc_B()
-                nb_mero = self._mero_checkpoint()
-                if nb_mero:
-                    s = ("There were %d merotelic MT at anaphase onset"
-                         % nb_mero)
-                    self.report.append(s)
-                self.KD.anaphase = True
-                return True
+            self.delay = t - t_A
+            # Then we just get rid of cohesin
+            self.KD.params['kappa_c'] = 0.
+            self.KD.calc_B()
+            nb_mero = self._mero_checkpoint()
+            if nb_mero:
+                s = ("There were %d merotelic MT at anaphase onset"
+                     % nb_mero)
+                self.report.append(s)
+            self.KD.anaphase = True
+            return True
         return False
 
     def _ablation(self, time_point, pos=None):
