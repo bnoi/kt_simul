@@ -419,7 +419,7 @@ class Metaphase(object):
         """
 
         import matplotlib
-        matplotlib.use('Qt4Agg')
+        matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
         duration = self.KD.duration
