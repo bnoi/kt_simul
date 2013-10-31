@@ -17,7 +17,7 @@ import numpy as np
 import collections
 
 import pyximport
-pyximport.install()
+pyximport.install(setup_args={'include_dirs': np.get_include()})
 
 from ..core.spindle_dynamics import KinetoDynamics
 from ..io.xml_handler import ParamTree
