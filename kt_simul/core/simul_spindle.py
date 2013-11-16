@@ -418,8 +418,6 @@ class Metaphase(object):
         Matplotlib is required.
         """
 
-        import matplotlib
-        matplotlib.use('TkAgg')
         import matplotlib.pyplot as plt
 
         duration = self.KD.duration
@@ -428,7 +426,7 @@ class Metaphase(object):
         times = np.arange(0, duration, dt)
         kts = self.KD.chromosomes
 
-        h = len(kts) * 2 + 8
+        h = len(kts) * 2 + 6
         fig = plt.figure(figsize=(14, h))
 
         mainrowspan = int(len(kts) * 2)
@@ -474,14 +472,13 @@ class Metaphase(object):
         for lab in ax2.xaxis.get_majorticklabels():
             lab.set_visible(True)
 
-
         axs[-1][1].set_xlabel('Time (s)')
         main_ax.set_ylabel('Distance from center (um)')
 
         # fig.suptitle("Kymograph")
 
         fig.tight_layout()
-        fig.show()
+        plt.show()
 
         return fig
 
