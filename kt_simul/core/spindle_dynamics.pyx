@@ -50,8 +50,9 @@ cdef class KinetoDynamics(object):
     cdef public list all_plugsites
     cdef public int time_point
     cdef public np.ndarray speeds
+    cdef public object prng
 
-    def __init__(self, parameters, initial_plug='null'):
+    def __init__(self, parameters, initial_plug='null', prng=None):
         """
         KinetoDynamics instenciation method
 
@@ -70,6 +71,11 @@ cdef class KinetoDynamics(object):
                 * 'syntelic' : all kinetochores are attached to the same pole
         :type initial_plug: string or None
         """
+
+        if not prng:
+            self.prng = np.random.RandomState()
+        else:
+            self.prng = prng
 
         self.params = parameters
         L0 = self.params['L0']

@@ -10,7 +10,6 @@ from __future__ import print_function
 
 import logging
 
-import random
 import numpy as np
 cimport numpy as np
 cimport cython
@@ -123,13 +122,19 @@ cdef class Chromosome(Organite):
 
     """
     def __init__(self, spindle, ch_id):
-
+        """
+        """
         self.ch_id = ch_id
         self.id = self.ch_id
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
-        center_pos = random.gauss(0, 0.2 * (L0 - d0))
-        Organite.__init__(self, spindle, center_pos)
+
+        Organite.__init__(self, spindle, 0)
+        center_pos = self.KD.prng.normal(0, 0.2 * (L0 - d0))
+
+        self.pos = center_pos
+        self.traj[0] = center_pos
+
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
         self.correct_history = np.zeros((self.KD.num_steps, 2))
@@ -384,19 +389,19 @@ cdef class PlugSite(Organite):
         self.site_id = site_id
 
         if initial_plug == None:
-            self.plug_state = random.randint(-1, 1)
+            self.plug_state = self.KD.prng.randint(-1, 1)
         elif initial_plug == 'null':
             self.plug_state = 0
         elif initial_plug == 'amphitelic':
             self.plug_state = - 1 if self.tag == 'A' else 1
         elif initial_plug == 'random':
-            self.plug_state = random.randint(-1, 1)
+            self.plug_state = self.KD.prng.randint(-1, 1)
         elif initial_plug == 'monotelic':
             self.plug_state = - 1 if self.tag == 'A' else 0
         elif initial_plug == 'syntelic':
             self.plug_state = 1
         elif initial_plug == 'merotelic':
-            self.plug_state = random.choice([-1,1])
+            self.plug_state = self.KD.prng.choice([-1,1])
         else:
             self.plug_state = initial_plug
 
@@ -450,10 +455,10 @@ cdef class PlugSite(Organite):
 
     cdef void plug_unplug(self, int time_point):
         cdef float dice, side_dice
-        dice = random.random()
+        dice = self.KD.prng.rand()
         # Attachment
         if self.plug_state == 0 and dice < self.P_att:
-            side_dice = random.random()
+            side_dice = self.KD.prng.rand()
             P_left = self.centromere.P_attachleft()
             if side_dice < P_left:
                 self.set_plug_state(-1, time_point)

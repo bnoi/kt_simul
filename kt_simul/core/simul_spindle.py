@@ -121,12 +121,17 @@ class Metaphase(object):
         so that the simulation average behaviour complies with
         the data in the measures dictionary
 
+    keep_same_random_seed : bool
+        To launch simulations with same random state
+
     """
+
+    RANDOM_STATE = None
 
     def __init__(self,  paramtree=None, measuretree=None,
                  paramfile=None, measurefile=None,
                  initial_plug='random', reduce_p=True,
-                 verbose=False):
+                 verbose=False, keep_same_random_seed=False):
 
         # Enable or disable log console
         self.verbose = verbose
@@ -155,6 +160,11 @@ class Metaphase(object):
 
         log.info('Parameters loaded')
 
+        if keep_same_random_seed:
+            self.prng = self.__class__.get_random_state()
+        else:
+            self.prng = np.random.RandomState()
+
         params = self.paramtree.relative_dic
         # Reset explicitely the unit parameters to their
         # dimentionalized value
@@ -162,7 +172,7 @@ class Metaphase(object):
         params['Fk'] = self.paramtree.absolute_dic['Fk']
         params['dt'] = self.paramtree.absolute_dic['dt']
 
-        self.KD = KinetoDynamics(params, initial_plug=initial_plug)
+        self.KD = KinetoDynamics(params, initial_plug=initial_plug, prng=self.prng)
         dt = self.paramtree.absolute_dic['dt']
         duration = self.paramtree.absolute_dic['span']
         self.num_steps = int(duration / dt)
@@ -178,6 +188,17 @@ class Metaphase(object):
         self.chrom_colors = ["red",
                              "green",
                              "blue"]
+
+    @classmethod
+    def get_random_state(cls):
+        """
+        """
+        prng = np.random.RandomState()
+        if not cls.RANDOM_STATE:
+            cls.RANDOM_STATE = prng.get_state()
+        else:
+            prng.set_state(cls.RANDOM_STATE)
+        return prng
 
     def __str__(self):
         lines = []
