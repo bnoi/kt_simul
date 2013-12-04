@@ -115,6 +115,8 @@ class MultiPool:
 
             self.load_pools()
 
+        self.parameter_labels = self.simus_path.index.values
+
     def run(self,):
         """
         """
@@ -182,7 +184,7 @@ class MultiPool:
             self.pools.append(Pool(**pool_params))
         return self.pools
 
-    def _build_path( self):
+    def _build_path(self):
         names_set = itertools.repeat(list(map(lambda x: x[0], self.parameters)))
         values_set = list(
             itertools.product(*map(lambda x: x[1], self.parameters)))
@@ -196,7 +198,7 @@ class MultiPool:
             for name, value, nfloat in zip(names, values, nfloats):
                 relpath = os.path.join(
                     relpath, "%s_%.*f" % (name, nfloat, value))
-            abspath = os.path.join(self.multi_pool_path, relpath)
+            # abspath = os.path.join(self.multi_pool_path, relpath)
             index.append(values)
             pool_path.append(relpath)
 
@@ -204,7 +206,15 @@ class MultiPool:
         self.simus_path.index = pd.MultiIndex.from_tuples(
             index, names=list(map(lambda x: x[0], self.parameters)))
 
-    def get_parameters(self):
+    def set_labels(self, labels):
         """
         """
-        return self.simus_path.index.values
+
+        self.parameter_labels = labels
+
+    def reorder(self, new_order):
+        """
+        """
+
+        self.parameter_labels = [self.parameter_labels[i] for i in new_order]
+        self.pools = [self.pools[i] for i in new_order]
