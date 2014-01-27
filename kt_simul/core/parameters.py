@@ -76,7 +76,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     Vk = poleward_speed
     if 'Vk' not in force_parameters:
         params['Vk'] = poleward_speed
-        print(params['Vk'])
 
     Vmz = anaph_rate
     if 'Vmz' not in force_parameters:
