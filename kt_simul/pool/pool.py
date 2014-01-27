@@ -171,6 +171,11 @@ class Pool:
             raise CanceledByUserException(
                 'Simulation has been canceled by user')
 
+        for i in range(self.n_simu):
+            fname = "simu_%s.h5" % (str(i).zfill(self.digits))
+            self.metaphases_path.append(
+                os.path.join(self.simu_path, fname))
+
         log.info("Pool simulations are done")
         self.simus_run = True
 
