@@ -23,7 +23,7 @@ MEASURES = MEASURETREE.absolute_dic
 log = logging.getLogger(__name__)
 
 
-def reduce_params(paramtree, measuretree):
+def reduce_params(paramtree, measuretree, force_parameters=[]):
     """
     This functions changes the parameters so that
     the dynamical characteristics complies with the measures [1]_.
@@ -69,11 +69,21 @@ def reduce_params(paramtree, measuretree):
     Fk = params['Fk']
 
     #Let's go for the direct relations
-    d0 = params['d0'] = obs_d0
-    Vk = params['Vk'] = poleward_speed
-    Vmz = params['Vmz'] = anaph_rate
+    d0 = obs_d0
+    if 'd0' not in force_parameters:
+        params['d0'] = obs_d0
 
-    params['ldep_balance'] = mean_kt_spb_dist
+    Vk = poleward_speed
+    if 'Vk' not in force_parameters:
+        params['Vk'] = poleward_speed
+        print(params['Vk'])
+
+    Vmz = anaph_rate
+    if 'Vmz' not in force_parameters:
+        params['Vmz'] = anaph_rate
+
+    if 'ldep_balance' not in force_parameters:
+        params['ldep_balance'] = mean_kt_spb_dist
 
     #Aurora modifies fd
     if d_alpha != 0:
@@ -87,11 +97,13 @@ def reduce_params(paramtree, measuretree):
     # Take metaphase kt pair distance as the maximum one
     # TODO : kc = Fk * Mt * alpha_mean / (max_metaph_k_dist - d0)
     kappa_c = Fk * Mk * 2 / (max_metaph_k_dist - d0)
-    params['kappa_c'] = kappa_c
+    if 'kappa_c' not in force_parameters:
+        params['kappa_c'] = kappa_c
 
     #kop = alpha_mean * ( 1 + metaph_rate/2 ) / ( outer_inner_dist )
     kappa_k = Fk * Mk * 2 / (2 * outer_inner_dist)
-    params['kappa_k'] = kappa_k
+    if 'kappa_k' not in force_parameters:
+        params['kappa_k'] = kappa_k
     #Ensure we have sufficientely small time steps
     dt = params['dt']
     # params['dt'] = min(tau_c / 4., tau_k / 4., params['dt'])
@@ -101,10 +113,15 @@ def reduce_params(paramtree, measuretree):
     mus = params['mus']
     Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk))
            + mus * metaph_rate / 2.) / (1 - metaph_rate / Vmz)
-    params['Fmz'] = Fmz
+    if 'Fmz' not in force_parameters:
+        params['Fmz'] = Fmz
     muc = (tau_c * kappa_c)
-    params['muc'] = muc
+    if 'muc' not in force_parameters:
+        params['muc'] = muc
     muk = (tau_k * kappa_k)
-    params['muk'] = muk
+    if 'muk' not in force_parameters:
+        params['muk'] = muk
+
     for key, val in list(params.items()):
-        paramtree.change_dic(key, val, verbose=False)
+        if key not in force_parameters:
+            paramtree.change_dic(key, val, verbose=False)

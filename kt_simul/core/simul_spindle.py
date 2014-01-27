@@ -131,7 +131,8 @@ class Metaphase(object):
     def __init__(self,  paramtree=None, measuretree=None,
                  paramfile=None, measurefile=None,
                  initial_plug='random', reduce_p=True,
-                 verbose=False, keep_same_random_seed=False):
+                 verbose=False, keep_same_random_seed=False,
+                 force_parameters=[]):
 
         # Enable or disable log console
         self.verbose = verbose
@@ -156,7 +157,7 @@ class Metaphase(object):
             self.measuretree = measuretree
 
         if reduce_p:
-            parameters.reduce_params(self.paramtree, self.measuretree)
+            parameters.reduce_params(self.paramtree, self.measuretree, force_parameters=force_parameters)
 
         log.info('Parameters loaded')
 
