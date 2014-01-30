@@ -389,13 +389,13 @@ cdef class PlugSite(Organite):
         self.site_id = site_id
 
         if initial_plug == None:
-            self.plug_state = self.KD.prng.randint(-1, 1)
+            self.plug_state = self.KD.prng.choice([-1,0,1])
         elif initial_plug == 'null':
             self.plug_state = 0
         elif initial_plug == 'amphitelic':
             self.plug_state = - 1 if self.tag == 'A' else 1
         elif initial_plug == 'random':
-            self.plug_state = self.KD.prng.randint(-1, 1)
+            self.plug_state = self.KD.prng.choice([-1,0,1])
         elif initial_plug == 'monotelic':
             self.plug_state = - 1 if self.tag == 'A' else 0
         elif initial_plug == 'syntelic':
