@@ -504,7 +504,28 @@ class Metaphase(object):
 
         return fig
 
-    def get_kymo_plot(self, ax):
+    def show_kymo(self, lims=[-3, 3]):
+        """
+        """
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure(figsize=(12, 7))
+        main_ax = plt.subplot(111)
+
+        main_ax = self.get_kymo_plot(main_ax, lims=lims)
+
+        main_ax.set_xlabel('Time (s)')
+        main_ax.set_ylabel('Distance from center (um)')
+
+        # fig.suptitle("Kymograph")
+
+        fig.tight_layout()
+        plt.show()
+
+        return fig
+
+
+    def get_kymo_plot(self, ax, lims=[-3, 3]):
         """
         """
 
@@ -531,7 +552,8 @@ class Metaphase(object):
             lab.set_visible(False)
 
         ax.axvline(anaphase, color='black')
-        ax.set_ylim(-3, 3)
+        if lims:
+            ax.set_ylim(*lims)
 
         return ax
 
