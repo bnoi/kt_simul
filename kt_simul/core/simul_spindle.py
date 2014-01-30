@@ -532,6 +532,10 @@ class Metaphase(object):
         import matplotlib
         matplotlib.use('Qt4Agg')
 
+        import matplotlib.pyplot as plt
+        import matplotlib.colors as colors
+        import matplotlib.cm as cmx
+
         dt = self.KD.dt
         duration = self.KD.duration
         anaphase = self.KD.params['t_A']
@@ -543,9 +547,17 @@ class Metaphase(object):
         ax.plot(times, spbA, color='black')
         ax.plot(times, spbB, color='black')
 
-        for color, kt in zip(self.chrom_colors, kts):
-            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8)
-            ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8)
+        if len(self.chrom_colors) == len(kts):
+            colors = lambda x: self.chrom_colors[x]
+        else:
+            cm = plt.get_cmap('gist_rainbow')
+            norm  = colors.Normalize(vmin=0, vmax=len(kts))
+            sm = cmx.ScalarMappable(norm=norm, cmap=cm)
+            colors = sm.to_rgba
+
+        for i, kt in enumerate(kts):
+            ax.plot(times, kt.cen_A.traj, color=colors(i), alpha=0.8)
+            ax.plot(times, kt.cen_B.traj, color=colors(i), alpha=0.8)
         ax.grid()
 
         for lab in ax.xaxis.get_majorticklabels():
