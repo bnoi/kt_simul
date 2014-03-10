@@ -114,7 +114,10 @@ class MultiPool:
             self.n_simu = store['metadata']['n_simu']
             self.parallel = store['metadata']['parallel']
             self.initial_plug = store['metadata']['initial_plug']
-            self.force_parameters = store['metadata']['force_parameters']
+            try:
+                self.force_parameters = store['metadata']['force_parameters']
+            except KeyError:
+                self.force_parameters = []
             store.close()
 
             self.load_pools()
