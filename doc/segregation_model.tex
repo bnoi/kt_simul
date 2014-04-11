@@ -60,11 +60,11 @@ work.
 
 \subsection{State vector}
 
-The mitotic spindle is described by the speeds and position along the
+The mitotic spindle is described by the speeds and positions along the
 $x$ axis of two spindle pole bodies, $N$ chromosomes with two
 centromeres and $M_k$ attachment sites per centromere.
 
-Positions are noted as follow:
+Positions are noted as follows:
 \begin{itemize}
 \item The left and right spindle pole bodies ( SPBs ), $x_s^L$ and $x_s^R$
 \item The $N$ centromeres, $x_n^A, \, x_n^B, n \in \{1,\cdots, N\}$
@@ -80,7 +80,7 @@ $x_s^L(t) = - x_s^R(t)\, \forall t$.
 
 \subsection{Random variables for the attachment}
 
-We define $\rho_{nm}^A$ and $\lambda_{nm}^A$, two random variables that govern
+We define $\rho_{nm}^A$ and $\lambda_{nm}^A$, two random variables that define
 the attachment state of the site $x_{nm}^A$, such that:
 \begin{align}
   \label{eq:rholambda}
@@ -130,6 +130,26 @@ The same definitions apply for the centromere B and left SPB.
 
 The following force balances are considered:
 
+
+\subsubsection{Forces at the right SPB :}
+
+
+\begin{itemize}
+\item Friction forces (viscous drag):  $F_f^R = -\mu_s \dot{x_s}^R$
+\item Midzone force generators: 
+  $$F_{mid} = F_z\left(1 - (\dot{x}^R_s - \dot{x}_s^L)/V_z\right) =
+  F_z\left(1 - 2\dot{x}^R_s / V_z\right) $$
+\item Total kinetochore microtubules force generators:
+
+ $$ \begin{aligned}
+    F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} & - \rho_{nm}^A\,F_k\left( 1 -
+      (\dot{x}^A_{nm} - \dot{x}^R_s)/V_k\right)\\
+    & - \rho_{nm}^B\,F_k\left( 1 -
+      (\dot{x}^B_{nm} - \dot{x}^R_s)/V_k\right)\\
+ \end{aligned} $$
+\end{itemize}
+
+
 \subsubsection{Forces at the left SPB :}
 
 Because of the reference frame definition, $\dot{x_s}^R =
@@ -140,28 +160,14 @@ Because of the reference frame definition, $\dot{x_s}^R =
   $$F_{mid}^L = - F_z\left(1 - 2\dot{x}^R_s / V_z\right) $$
 \item Total kinetochore microtubules force generators:
 $$  \begin{aligned}
-    F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} & - \lambda_{nm}^A\,F_k\left(1 +
+    F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} &  \lambda_{nm}^A\,F_k\left(1 +
       (\dot{x}^A_{nm} + \dot{x}^R_s)/V_k\right)\\
-    & - \lambda_{nm}^B\,F_k\left(1 +
+    & \lambda_{nm}^B\,F_k\left(1 +
       (\dot{x}^B_{nm} + \dot{x}^R_s)/V_k\right)
   \end{aligned}
 $$
 \end{itemize}
-\subsubsection{Forces at the right SPB :}
 
-\begin{itemize}
-\item Friction forces (viscous drag):  $F_f^R = -\mu_s \dot{x_s}^R$
-\item Midzone force generators: 
-  $$F_{mid} = F_z\left(1 - (\dot{x}^R_s - \dot{x}_s^L)/V_z\right) =
-  F_z\left(1 - 2\dot{x}^R_s / V_z\right) $$
-\item Total kinetochore microtubules force generators:
- $$ \begin{aligned}
-    F_{kMT}^T = \sum_{n = 1}^{N}\sum_{m = 1}^{M_k} & - \rho_{nm}^A\,F_k\left( 1 -
-      (\dot{x}^A_{nm} - \dot{x}^R_s)/V_k\right)\\
-    & - \rho_{nm}^B\,F_k\left( 1 -
-      (\dot{x}^B_{nm} - \dot{x}^R_s)/V_k\right)\\
- \end{aligned} $$
-\end{itemize}
 
 \subsubsection{Forces at centromere $An$}
 
@@ -169,7 +175,7 @@ $$
 \item Drag: $F_c^f = -\mu_c \dot{x_n}^A$
 \item Cohesin bond (Hook spring) restoring force exerted by
   centromere\footnote{We want the centromeres to be able to cross each
-    over. In one dimension, this introduces a discontinuity. In the
+    other. In one dimension, this introduces a discontinuity. In the
     previous version, the 'swap' mechanism was solving this directly
     (as $x_A$ and $x_B$ are exchanged). This is not possible any more,
     as the 'swap' mechanism is now irrelevant, as there is no prefered
@@ -184,7 +190,7 @@ $$
   \end{equation}
   With $F_{AB} = - F_{BA}$. 
 \item Total visco-elastic bond between the centromere A and the attachment
-  sites:
+  sites (Note that the rest length of the spring is put to 0) :
   $$ F_v^T = \sum_{m = 1}^{M_k} -\kappa_k(x_n^A - x_{nm}^A) 
   - \mu_k(\dot{x}_n^A - \dot{x}_{nm}^A) $$
 \end{itemize}
@@ -207,23 +213,30 @@ $$
           \dot{x}^L_s}{V_k}\right)\\
     \end{aligned}
   \end{equation}
-With $F_k = 1$ and $ V_k = 1$ (for now on, we are taking $F_k$ as
-unit force and $V_k$ as unit speed), this gives:
+For now on, we are taking $F_k$ as unit force and $V_k$ as unit speed (i.e $F_k = 1$ and $ V_k = 1$), this gives:
 \begin{equation}
  F_{kMT}^A = \rho_{nm}^A\,\left(\dot{x}^R_s - \dot{x}^A_{nm} + 1\right)%
  - \lambda_{nm}^A\,\left(\dot{x}^R_s + \dot{x}^A_{nm} + 1\right)
 \end{equation}
-Eventually, substituting $\lambda^A_{nm} - \rho^A_{nm}$ with $\pi_{nm}^A$ and $\lambda^A_{nm} + \rho^A_{nm}$ with $|\pi_{nm}^A|$:
+Eventually, substituting $\rho^A_{nm} - \lambda^A_{nm}$ with $\pi_{nm}^A$ and $\lambda^A_{nm} + \rho^A_{nm}$ with $|\pi_{nm}^A|$:
 \begin{equation}
     F_{kMT}^A =  \pi_{nm}^A(\dot{x}^R_s + 1) - |\pi_{nm}^A|\dot{x}^A_{nm}
 \end{equation}
 \end{itemize}
 
+\newpage
+
 \subsection{Set of coupled first order differential equations}
 
 In the viscous nucleoplasm, inertia is negligible. Newton first
-principle thus reduces to: $ \sum F = 0 $. This force balance equation
-can be written for each elements of the spindle. 
+principle thus reduces to: $ \sum F = 0 $ on each object of the spindle. This equation of motion
+can be written for each element of the spindle of coordinates $x_s^R, x_s^L, x_n^A, x_{nm}^A,  x_n^B  \mbox{ and } 
+  x_{nm}^B $.
+
+\begin{itemize}
+
+\item Equation of motion at left/right SPBs
+
 To simplify further, the equations for the right and left SPBs can be
 combined:
  
@@ -231,9 +244,11 @@ combined:
   \begin{aligned}
     - \mu_s\dot{x}^R_s + F_{z}\left(1 - 2\dot{x}^R_s/V_z\right)%
     + \sum_{n,m} - \rho_{nm}^A\,\left(\dot{x}^R_s - \dot{x}^A_{nm} +%
-      1\right) &= 0 \, \mbox{for the right SPB}\\
+      1\right) - \rho_{nm}^B\,\left(\dot{x}^R_s - \dot{x}^B_{nm} +%
+      1\right)&= 0 \, \mbox{for the right SPB}\\
     \mu_s\dot{x}^R_s - F_{z}\left(1 - 2\dot{x}^R_s/V_z\right)%
-    + \sum_{n,m} \lambda_{nm}^A\,\left(\dot{x}^R_s + \dot{x}^A_{nm} +%
+    + \sum_{n,m} -\lambda_{nm}^A\,\left(\dot{x}^R_s + \dot{x}^A_{nm} +%
+      1\right) - \lambda_{nm}^B\,\left(\dot{x}^R_s + \dot{x}^B_{nm} +%
       1\right) &= 0 \, \mbox{for the left SPB}\\
   \end{aligned}
 \end{equation}
@@ -246,7 +261,29 @@ The difference of those two expressions gives, with the same substitutions as be
   + \pi_{nm}^A \dot{x}_{nm}^A + \pi_{nm}^B \dot{x}_{nm}^B= 0%
 \end{equation}
 
-All the equations are gathered together in the system of equations:
+
+\item Equation of motion at each centromere $A_n$
+
+\begin{equation}
+-\mu_c \dot{x_n}^A+\kappa_c (x_n^B - x_n^A - \delta_n d_0) + \sum_{m = 1}^{M_k} -\kappa_k(x_n^A - x_{nm}^A) 
+  - \mu_k(\dot{x}_n^A - \dot{x}_{nm}^A) = 0  %
+    \mbox{ with }\, \delta_n =%      
+    \begin{cases}
+      1  &\mathrm{if}\quad  x_n^A < x_n^B\\
+      -1 &\mathrm{if}\quad  x_n^A > x_n^B\\
+    \end{cases}
+\end{equation}
+
+\item Equation of motion at each attachment site $A_nm$
+
+\begin{equation}
+\kappa_k(x_n^A - x_{nm}^A) + \mu_k(\dot{x}_n^A - \dot{x}_{nm}^A) + \pi_{nm}^A(\dot{x}^R_s + 1) - |\pi_{nm}^A|\dot{x}^A_{nm} = 0
+\end{equation}
+
+
+
+
+\item These 3 equations are gathered together in the system of equations:
 $$
 \mathbf{A}\dot{X} + \mathbf{B}X + C = 0
 $$
@@ -279,27 +316,29 @@ In matrix form, we have:\\
     A = &% 
     \begin{pmatrix}
       %%%%% SPB %%%%
-      - 2 \mu_s - 4 F_z/V_z - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)& \hdots & \pi_{nm}^A &%
-      \hdots &  \pi_{nm}^B\\
+      - 2 \mu_s - 4 F_z/V_z - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)& 0 & \pi_{nm}^A &%
+      0 &  \pi_{nm}^B\\
+
+      
       %%%%% Centromere A %%%%
-      \hdots &  -\mu_c - M_k \mu_k& \mu_k & \hdotsfor{2}\\
+      0 &  -\mu_c - M_k \mu_k& \mu_k & 0 & 0\\
       %%%%% Att. Site A %%%%
-      \pi_{nm}^A & \mu_k & - \mu_k - |\pi_{nm}^A| & \hdotsfor{2}\\
+      \pi_{nm}^A & \mu_k & - \mu_k - |\pi_{nm}^A| & 0& 0\\
       %%%%% Centromere B %%%%
-      \hdotsfor{3} & -\mu_c - M_k \mu_k & \mu_k\\
+      0&0&0 & -\mu_c - M_k \mu_k & \mu_k\\
       %%%%% Att. Site B %%%%
-      \pi_{nm}^B & \hdotsfor{2} & \mu_k & - \mu_k - |\pi_{nm}^B| \\
+      \pi_{nm}^B & 0&0 & \mu_k & - \mu_k - |\pi_{nm}^B| \\
     \end{pmatrix}, \\
      % = &%
     B = &%
     \begin{pmatrix}
-      \,0\, & \hdotsfor{4}\\
-      \hdots & - \kappa_c - M_k \kappa_k & \kappa_k &%
-      \kappa_c & \hdots \\
-      \hdots & \kappa_k & -\kappa_k &  \hdotsfor{2}\\
-      \hdots & \kappa_c & \hdots &%
+      0 & 0&0&0&0\\
+      0 & - \kappa_c - M_k \kappa_k & \kappa_k &%
+      \kappa_c & 0 \\
+      0 & \kappa_k & -\kappa_k & 0&0\\
+      0 & \kappa_c & 0 &%
       -\kappa_c - M_k \kappa_k & \kappa_k \\
-      \hdotsfor{3}  & \kappa_k & - \kappa_k\\
+      0&0&0 & \kappa_k & - \kappa_k\\
     \end{pmatrix}\\
     C = &%
     \begin{pmatrix}
@@ -309,11 +348,6 @@ In matrix form, we have:\\
       \delta_n \kappa_c d_0\\
       \pi_{nm}^B\\
     \end{pmatrix}
-    \mathrm{with}\, \delta_n =%      
-    \begin{cases}
-      1  &\mathrm{if}\quad  x_n^A < x_n^B\\
-      -1 &\mathrm{if}\quad  x_n^A > x_n^B\\
-    \end{cases}
     % \begin{cases}
     %   1  &\mathrm{if}\quad d_0 < x_n^A - x_n^B\\
     %   0  &\mathrm{if}\quad - d_0 < x_n^A - x_n^B < d_0\\
@@ -329,25 +363,25 @@ variable part $A_t$ with:\\
   \begin{aligned}
     A_0 &=%
     \begin{pmatrix}
-      - 2 \mu_s - 4 F_z/V_z & \hdotsfor{4}\\
-      \hdots &  -\mu_c - M_k \mu_k& \mu_k & \hdotsfor{2}\\
-      \hdots & \mu_k & - \mu_k & \hdotsfor{2}\\
-      \hdotsfor{3} & -\mu_c - M_k \mu_k & \mu_k\\
-      \hdotsfor{3} & \mu_k & - \mu_k\\
+      - 2 \mu_s - 4 F_z/V_z & 0&0&0&0\\
+      0 &  -\mu_c - M_k \mu_k& \mu_k & 0&0\\
+      0 & \mu_k & - \mu_k & 0&0\\
+      0&0&0 & -\mu_c - M_k \mu_k & \mu_k\\
+      0&0&0 & \mu_k & - \mu_k\\
     \end{pmatrix}\\
     A_t &=%
     \begin{pmatrix}
       %%%%% SPB %%%%
-      - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)& \hdots & \pi_{nm}^A &%
-      \hdots &  \pi_{nm}^B\\
+      - \sum (|\pi_{nm}^A| + |\pi_{nm}^B|)& 0 & \pi_{nm}^A &%
+      0 &  \pi_{nm}^B\\
       %%%%% Centromere A %%%%
-      \hdotsfor{5}\\
+      0&0&0&0&0\\
       %%%%% Att. Site A %%%%
-      \pi_{nm}^A & \hdots & - |\pi_{nm}^A| & \hdotsfor{2}\\
+      \pi_{nm}^A & 0 & - |\pi_{nm}^A| & 0&0\\
       %%%%% Centromere B %%%%
-      \hdotsfor{5}\\
+      0&0&0&0&0\\
       %%%%% Att. Site B %%%%
-      \pi_{nm}^B & \hdotsfor{3} & - |\pi_{nm}^B| \\
+      \pi_{nm}^B & 0&0&0 & - |\pi_{nm}^B| \\
     \end{pmatrix}\\
   \end{aligned}
 \end{equation}
@@ -357,23 +391,24 @@ cohesin part, $B = B_c + B_k$:
 \begin{equation}
   B = \kappa_k% 
   \begin{pmatrix}
-    \,0\, & \hdotsfor{4}\\
-    \hdots &  - M_k  & 1 & \hdotsfor{2} \\
-    \hdots & 1 & -1 &  \hdotsfor{2}\\
-    \hdots &  \hdotsfor{2} & - M_k  & 1 \\
-    \hdotsfor{3}  & 1 & - 1\\
+    0 & 0&0&0&0\\
+    0 &  - M_k  & 1 & 0&0 \\
+    0 & 1 & -1 &  0&0\\
+    0 &  0&0 & - M_k  & 1 \\
+    0&0&0  & 1 & - 1\\
   \end{pmatrix}
   + \kappa_c%
   \begin{pmatrix}
-    \,0\, & \hdotsfor{4}\\
-    \hdots & - 1 & \hdots & 1  & \hdots \\
-    \hdotsfor{5}\\
-    \hdots & 1 & \hdots & -1 & \hdots \\
-    \hdotsfor{5}\\
+    0 & 0&0&0&0\\
+    0 & - 1 & 0 & 1  & 0 \\
+    0&0&0&0&0\\
+    0 & 1 & 0 & -1 & 0 \\
+    0&0&0&0&0\\
   \end{pmatrix}
 \end{equation}
+\end{itemize}
 
-
+\newpage
 \section{Attachment instability}
 
 \subsection{Attachment rate}
@@ -407,7 +442,27 @@ site with respect to the centromere\footnote{The following expression
 % i_{nm}^B &= 2n(M_k+1) + M_k + 4 + m \\
 % \end{aligned}$$
 
+\section{Length-dependent pulling force}
 
+To model the centering of chromosomes during metaphase, a length-dependent parameter has been added to the pulling force at each attachment site. Then the typical force-velocity relationship : 
+ 
+\begin{equation}
+F_{kMT}= \pi F_k (1 - \frac{v}{V_k})\\
+\end{equation}
+
+becomes :
+
+\begin{equation}
+F_{kMT}= L_{dep} \pi F_k (1 - \frac{v}{V_k})\\
+\end{equation}
+
+The prefactor $L_{dep}$ adapts the force applied on the attachment site according to the distance $d_{site-pole}$ between this attachment site and the pole it is attached, such that :
+ 
+\begin{equation}
+L_{dep} = 1 + \alpha(d_{site-pole} - d_{mean})\\
+\end{equation}
+
+where $\alpha$ is a free parameter and $d_{mean}$ is the mean in vivo distance between kinetochores and the poles (i.e, approximately half the size of the spindle). Therefore, the stall force is unchanged when the attachment site is near the spindle center, while it is incresed (resp. decreased) when the attachment site is far from (resp. close to) the pole it is attached.     
 
 
 \end{document}
