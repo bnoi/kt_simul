@@ -508,21 +508,28 @@ cdef class PlugSite(Organite):
         cdef float d_alpha, k_d0
         cdef double k_shrink
 
-        k_shrink = 0.2
+        k_shrink = 1
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
-        if d_alpha == 0: return k_d0
+        if d_alpha == 0:
+            return k_d0
         cdef float dist
         dist = abs(self.pos -
                    (self.centromere.chromosome.cen_A.pos +
                     self.centromere.chromosome.cen_B.pos) / 2.)
-        if dist == 0: return 1.
-        k_dc = k_d0  *  d_alpha / dist
-        if k_dc > 1e4: return 1.
+
+        if dist == 0:
+            return 1.
+        k_dc = k_d0 * d_alpha / dist
+
+        if k_dc > 1e4:
+            return 1.
 
         if self.KD.time_point > 1:
-            if (np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0] * self.plug_state) > 0:
+            cum_di = np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0]
+            cum_di *= self.plug_state
+            if cum_di > 0:
                 k_dc *= k_shrink
 
         return 1 - np.exp(-k_dc)

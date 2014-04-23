@@ -46,6 +46,7 @@ class Pool:
                  load=False,
                  n_simu=100,
                  initial_plug='random',
+                 force_parameters=[],
                  parallel=True,
                  verbose=True):
 
@@ -61,6 +62,7 @@ class Pool:
             self.paramtree = paramtree
             self.measuretree = measuretree
             self.initial_plug = initial_plug
+            self.force_parameters = force_parameters
             self.parallel = parallel
             self.n_simu = n_simu
 
@@ -85,6 +87,7 @@ class Pool:
             metadata = pd.Series({'n_simu': self.n_simu,
                                   'parallel': self.parallel,
                                   'initial_plug': initial_plug,
+                                  'force_parameters': str(force_parameters),
                                   'datetime': str(datetime.datetime.now())})
             store['metadata'] = metadata
             store.close()
@@ -102,6 +105,10 @@ class Pool:
             self.n_simu = store['metadata']['n_simu']
             self.parallel = store['metadata']['parallel']
             self.initial_plug = store['metadata']['initial_plug']
+            try:
+                self.force_parameters = store['metadata']['force_parameters']
+            except KeyError:
+                self.force_parameters = []
             store.close()
 
             self.metaphases_path = []
@@ -140,6 +147,7 @@ class Pool:
         simu_parameters = {'paramtree': self.paramtree,
                            'measuretree': self.measuretree,
                            'initial_plug': self.initial_plug,
+                           'force_parameters': self.force_parameters,
                            'verbose': False,
                            'reduce_p': True}
 

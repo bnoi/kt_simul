@@ -52,6 +52,7 @@ class MultiPool:
                  load=False,
                  n_simu=10,
                  initial_plug='random',
+                 force_parameters=[],
                  parallel=True,
                  verbose=True):
 
@@ -76,6 +77,7 @@ class MultiPool:
             self.n_simu = n_simu
             self.parallel = parallel
             self.initial_plug = initial_plug
+            self.force_parameters = force_parameters
             self.trees = trees
 
             self.simus_run = False
@@ -91,6 +93,7 @@ class MultiPool:
             metadata = pd.Series({'n_simu': self.n_simu,
                                   'parallel': self.parallel,
                                   'initial_plug': initial_plug,
+                                  'force_parameters': str(force_parameters),
                                   'datetime': str(datetime.datetime.now())})
             store['metadata'] = metadata
             store.close()
@@ -111,6 +114,10 @@ class MultiPool:
             self.n_simu = store['metadata']['n_simu']
             self.parallel = store['metadata']['parallel']
             self.initial_plug = store['metadata']['initial_plug']
+            try:
+                self.force_parameters = store['metadata']['force_parameters']
+            except KeyError:
+                self.force_parameters = []
             store.close()
 
             self.load_pools()
@@ -153,6 +160,8 @@ class MultiPool:
                            'paramtree': paramtree,
                            'measuretree': measuretree,
                            'n_simu': self.n_simu,
+                           'initial_plug': self.initial_plug,
+                           'force_parameters': self.force_parameters,
                            'simu_path': simu_path,
                            'parallel': self.parallel,
                            'verbose': False
@@ -175,7 +184,8 @@ class MultiPool:
         """
         """
         self.pools = []
-        for dalpha, pool_path in self.simus_path.iterrows():
+        self.parameters = []
+        for parameters, pool_path in self.simus_path.iterrows():
             simu_path = os.path.join(self.multi_pool_path, pool_path['relpath'])
             pool_params = {'load': True,
                            'simu_path': simu_path,
