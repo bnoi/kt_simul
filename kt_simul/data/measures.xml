@@ -34,10 +34,11 @@
   </param>
   <param max="60." min="5." name="tau_k" step="0.1" value="12.">
     <unit>s</unit>
-    <description>Kt pair relaxation rate</description>
+    <description>Kt pair relaxation time</description>
   </param>
   <param max="60." min="5." name="tau_c" step="0.1" value="10.">
     <unit>s</unit>
-    <description>Merotelic kt relaxation rate</description>
+    <description>Merotelic kt relaxation time</description>
   </param>
+  
 </measures>

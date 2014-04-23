@@ -101,6 +101,10 @@
 </param>
 <param max="2." min="0." name="ldep_balance" step="0" value="1">
   <unit> </unit>
-  <description>Length dependance balance</description>
+  <description>Length dependence balance</description>
+</param>
+<param max="10000." min="1.0" name="muco" step="1" value="10.">
+    <unit>pN.s/&#181;m</unit>
+    <description>Cohesin structural friction coefficient</description>
 </param>
 </parameters>

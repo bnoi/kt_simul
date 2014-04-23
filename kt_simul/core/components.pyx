@@ -126,6 +126,8 @@ cdef class Chromosome(Organite):
         """
         self.ch_id = ch_id
         self.id = self.ch_id
+        #self.dt = .absolute_dic['dt']
+        #self.dt = spindle.KD.params['dt']
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
 
@@ -134,7 +136,6 @@ cdef class Chromosome(Organite):
 
         self.pos = center_pos
         self.traj[0] = center_pos
-
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
         self.correct_history = np.zeros((self.KD.num_steps, 2))
@@ -156,12 +157,22 @@ cdef class Chromosome(Organite):
             return True
         return False
 
-    cdef int delta(self):
+    cdef int delta1(self):
         """
         In case the centromeres swap (exchange side), the direction
         of the cohesin restoring force needs to be changed
         """
         return 1 if self.cen_A.pos < self.cen_B.pos else -1
+    
+    cdef int delta2(self):
+        
+        """
+        Change the sense of viscous force depending on relative speeds of centromeres A and B
+        """
+        speedA = (self.cen_A.traj[-2]-self.cen_A.traj[-1])/self.KD.params.dt
+        speedB = (self.cen_B.traj[-2]-self.cen_B.traj[-1])/self.KD.params.dt
+        
+        return 1 if speedA > speedB else -1
 
     def correct(self):
         """

@@ -558,6 +558,7 @@ class Metaphase(object):
         for i, kt in enumerate(kts):
             ax.plot(times, kt.cen_A.traj, color=colors(i), alpha=0.8)
             ax.plot(times, kt.cen_B.traj, color=colors(i), alpha=0.8)
+            #ax.plot(times, (kt.cen_A.traj + kt.cen_B.traj)/2, color=colors(i), alpha=0.8)
         ax.grid()
 
         for lab in ax.xaxis.get_majorticklabels():

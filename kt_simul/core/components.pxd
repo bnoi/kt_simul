@@ -44,7 +44,8 @@ cdef class Chromosome(Organite):
     cdef public Centromere cen_A, cen_B
     cdef public np.ndarray correct_history, erroneous_history
     cdef bool is_right_A(Chromosome)
-    cdef int delta(Chromosome)
+    cdef int delta1(Chromosome)
+    cdef int delta2(Chromosome)
     cdef float pair_dist(Chromosome)
     cdef float plug_dist(Chromosome, float)
     cdef float center(Chromosome)

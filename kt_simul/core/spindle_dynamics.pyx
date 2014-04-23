@@ -190,16 +190,21 @@ cdef class KinetoDynamics(object):
         cdef float mus = self.params['mus']
         cdef float Vmz = self.params['Vmz']
         cdef float Fmz = self.params['Fmz']
+        cdef float muco = self.params['muco']
         cdef int dims = 1 + 2 * N * ( Mk + 1 )
         cdef np.ndarray[DTYPE_t, ndim=2] A0
+        cdef int delta2
         A0 = np.zeros((dims, dims))
         A0[0, 0] = - 2 * mus - 4 * Fmz / Vmz
         cdef int n, m
+        cdef Chromosome ch
         for n in range(N):
+            ch = self.chromosomes[n]
+            delta2 = ch.delta2()
             an = self._idx(0, n)
             bn = self._idx(1, n)
-            A0[an, an] = - Mk * muk - muc
-            A0[bn, bn] = - Mk * muk - muc
+            A0[an, an] = - Mk * muk - muc + muco 
+            A0[bn, bn] = - Mk * muk - muc - muco 
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
@@ -324,16 +329,16 @@ cdef class KinetoDynamics(object):
 
         C = np.zeros(1 + N * (1 + Mk) * 2, dtype="float")
         C[0] = 2 * Fmz
-        cdef int n, m, delta, an, bn
+        cdef int n, m, delta1, an, bn
         cdef int pluggedA, pluggedB
         cdef Chromosome ch
         for n in range(N):
             ch = self.chromosomes[n]
-            delta = ch.delta()
+            delta1 = ch.delta1()
             an = self._idx(0, n)
             bn = self._idx(1, n)
-            C[an] = - delta * kappa_c * d0
-            C[bn] = delta * kappa_c * d0
+            C[an] = - delta1 * kappa_c * d0
+            C[bn] = delta1 * kappa_c * d0
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
