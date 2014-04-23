@@ -54,10 +54,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         tau_c = measures['tau_c']
         obs_d0 = measures['obs_d0']
         mean_kt_spb_dist = measures["mean_kt_spb_dist"]
-        muco = measures['muco']
     except KeyError:
         log.warning("The measures dictionary should contain"
-                       "at least the following keys: ")
+                    "at least the following keys: ")
         log.warning(list(MEASURES.keys()))
         return False
 
@@ -69,7 +68,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
 
     kappa_k = params['kappa_k']
     Fk = params['Fk']
-
 
     #Let's go for the direct relations
     if 'd0' not in force_parameters:
@@ -120,23 +118,22 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     mus = params['mus']
     Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk))
            + mus * metaph_rate / 2.) / (1 - metaph_rate / Vmz)
-    
+
     if 'Fmz' not in force_parameters:
         params['Fmz'] = Fmz
 
     muc = (tau_c * kappa_c)
     if 'muc' not in force_parameters:
         params['muc'] = muc
-        print(muc)
 
     muk = (tau_k * kappa_k)
     if 'muk' not in force_parameters:
         params['muk'] = muk
-    
+
     muco = (tau_k * kappa_c)
     if 'muco' not in force_parameters:
         params['muco'] = muco
-        
+
     for key, val in list(params.items()):
         if key not in force_parameters:
             paramtree.change_dic(key, val, verbose=False)

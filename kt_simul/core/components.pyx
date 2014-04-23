@@ -163,15 +163,15 @@ cdef class Chromosome(Organite):
         of the cohesin restoring force needs to be changed
         """
         return 1 if self.cen_A.pos < self.cen_B.pos else -1
-    
+
     cdef int delta2(self):
-        
+
         """
         Change the sense of viscous force depending on relative speeds of centromeres A and B
         """
-        speedA = (self.cen_A.traj[-2]-self.cen_A.traj[-1])/self.KD.params.dt
-        speedB = (self.cen_B.traj[-2]-self.cen_B.traj[-1])/self.KD.params.dt
-        
+        speedA = (self.cen_A.traj[-2] - self.cen_A.traj[-1]) / self.KD.params['dt']
+        speedB = (self.cen_B.traj[-2] - self.cen_B.traj[-1]) / self.KD.params['dt']
+
         return 1 if speedA > speedB else -1
 
     def correct(self):
