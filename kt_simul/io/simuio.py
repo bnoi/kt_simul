@@ -7,19 +7,15 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-import time
 import os
 import logging
-import io
-import zipfile
 import xml.etree.ElementTree as ET
 
-import numpy as np
 import pandas as pd
 
-from kt_simul.core.simul_spindle import Metaphase
-from kt_simul.core.spindle_dynamics import KinetoDynamics
-from kt_simul.io.xml_handler import ParamTree, indent, ResultTree
+from ..core.simul_spindle import Metaphase
+from ..core.spindle_dynamics import KinetoDynamics
+from .xml_handler import ParamTree
 
 log = logging.getLogger(__name__)
 
@@ -83,9 +79,10 @@ class SimuIO():
             spbL  B    -0.166934
         """
         spbR = pd.DataFrame(KD.spbR.traj, columns=['x'], index=time_index)
-        spbL = pd.DataFrame(KD.spbL.traj, columns=['x'],index=time_index)
+        spbL = pd.DataFrame(KD.spbL.traj, columns=['x'], index=time_index)
 
-        spbs = pd.concat({('spb', 'A'): spbL, ('spb', 'B'): spbR}, names=['label', 'side'])
+        spbs = pd.concat({('spb', 'A'): spbL, ('spb', 'B'): spbR},
+                         names=['label', 'side'])
         spbs = spbs.reorder_levels([2, 0, 1]).sort()
 
         """
@@ -140,22 +137,29 @@ class SimuIO():
             ktA = chromosome.cen_A
             ktB = chromosome.cen_B
 
-            chromosomes_dic[(i, 'kt', 'A')] = pd.DataFrame(ktA.traj, columns=['x'], index=time_index)
-            chromosomes_dic[(i, 'kt', 'B')] = pd.DataFrame(ktB.traj, columns=['x'], index=time_index)
+            chromosomes_dic[(i, 'kt', 'A')] = pd.DataFrame(ktA.traj,
+                                                           columns=['x'],
+                                                           index=time_index)
+            chromosomes_dic[(i, 'kt', 'B')] = pd.DataFrame(ktB.traj,
+                                                           columns=['x'],
+                                                           index=time_index)
 
             for j, (psA, psB) in enumerate(zip(ktA.plugsites, ktB.plugsites)):
-                psA_df = pd.DataFrame.from_dict({'x': psA.traj, 'state_hist': psA.state_hist})
+                psA_df = pd.DataFrame.from_dict({'x': psA.traj,
+                                                'state_hist': psA.state_hist})
                 psA_df.index = time_index
                 plugsites_dic[(i, 'kt', 'A', j)] = psA_df
 
-                psB_df = pd.DataFrame.from_dict({'x': psB.traj, 'state_hist': psB.state_hist})
+                psB_df = pd.DataFrame.from_dict({'x': psB.traj,
+                                                'state_hist': psB.state_hist})
                 psB_df.index = time_index
                 plugsites_dic[(i, 'kt', 'B', j)] = psB_df
 
         kts = pd.concat(chromosomes_dic, names=['id', 'label', 'side'])
         kts = kts.reorder_levels([3, 0, 1, 2]).sort()
 
-        plug_sites = pd.concat(plugsites_dic, names=['id', 'label', 'side', 'plug_id'])
+        plug_sites = pd.concat(plugsites_dic,
+                               names=['id', 'label', 'side', 'plug_id'])
         plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
         plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
 
@@ -250,6 +254,7 @@ class SimuIO():
         meta.KD.simulation_done = True
 
         return meta
+
 
 def build_tree(df):
     """

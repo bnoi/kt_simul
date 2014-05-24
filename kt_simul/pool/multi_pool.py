@@ -17,11 +17,13 @@ import gc
 import pandas as pd
 import numpy as np
 
-from kt_simul.io.simuio import build_tree
-from kt_simul.utils.progress import pprogress
-from kt_simul.io.xml_handler import ParamTree
-from kt_simul.core import parameters
-from kt_simul.pool import Pool
+from ..io.simuio import build_tree
+from ..utils.progress import pprogress
+from ..io.xml_handler import ParamTree
+from ..core import parameters
+from ..pool import Pool
+from ..utils.dict import sanitize_dict
+from ..utils.dict import guess_number_dict
 
 PARAMFILE = parameters.PARAMFILE
 MEASUREFILE = parameters.MEASUREFILE
@@ -90,12 +92,13 @@ class MultiPool:
             store['params'] = paramtree.to_df()
             store['measures'] = measuretree.to_df()
 
-            metadata = pd.Series({'n_simu': self.n_simu,
-                                  'parallel': self.parallel,
-                                  'initial_plug': initial_plug,
-                                  'force_parameters': str(force_parameters),
-                                  'datetime': str(datetime.datetime.now())})
-            store['metadata'] = metadata
+            metadata = {'n_simu': self.n_simu,
+                        'parallel': self.parallel,
+                        'initial_plug': initial_plug,
+                        'force_parameters': str(force_parameters),
+                        'datetime': str(datetime.datetime.now())}
+            metadata = sanitize_dict(metadata)
+            store['metadata'] = pd.Series(metadata)
             store.close()
         else:
             if not os.path.isdir(self.multi_pool_path):
@@ -111,11 +114,12 @@ class MultiPool:
             self.measuretree = ParamTree(root=build_tree(store['measures']),
                                          adimentionalized=False)
 
-            self.n_simu = store['metadata']['n_simu']
-            self.parallel = store['metadata']['parallel']
-            self.initial_plug = store['metadata']['initial_plug']
+            metadata = guess_number_dict(store['metadata'].to_dict())
+            self.n_simu = metadata['n_simu']
+            self.parallel = metadata['parallel']
+            self.initial_plug = metadata['initial_plug']
             try:
-                self.force_parameters = store['metadata']['force_parameters']
+                self.force_parameters = metadata['force_parameters']
             except KeyError:
                 self.force_parameters = []
             store.close()

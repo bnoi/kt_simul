@@ -180,9 +180,6 @@ class ParamTree(object):
         :class:`pandas.DataFrame`
         """
 
-        import codecs
-        c = codecs.lookup('utf-8')
-
         attributs = {'name': [], 'value': [], 'min': [], 'max': [], 'step': []}
         tags = {'unit': [], 'description': []}
 
@@ -190,10 +187,10 @@ class ParamTree(object):
 
             for name in attributs:
                 value = el.get(name)
-                attributs[name].append(value)
+                attributs[name].append(str(value))
             for name in tags:
                 value = el.find(name).text
-                tags[name].append(value)
+                tags[name].append(str(value))
 
         attributs.update(tags)
         df = pd.DataFrame.from_dict(attributs)
