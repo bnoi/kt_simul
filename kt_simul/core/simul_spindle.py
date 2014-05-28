@@ -524,13 +524,11 @@ class Metaphase(object):
 
         return fig
 
-
     def get_kymo_plot(self, ax, lims=[-3, 3]):
         """
         """
 
         import matplotlib
-        matplotlib.use('Qt4Agg')
 
         import matplotlib.pyplot as plt
         import matplotlib.colors as colors
@@ -558,7 +556,6 @@ class Metaphase(object):
         for i, kt in enumerate(kts):
             ax.plot(times, kt.cen_A.traj, color=colors(i), alpha=0.8)
             ax.plot(times, kt.cen_B.traj, color=colors(i), alpha=0.8)
-            #ax.plot(times, (kt.cen_A.traj + kt.cen_B.traj)/2, color=colors(i), alpha=0.8)
         ax.grid()
 
         for lab in ax.xaxis.get_majorticklabels():
@@ -569,6 +566,63 @@ class Metaphase(object):
             ax.set_ylim(*lims)
 
         return ax
+
+    def kymo_figure(self):
+        """
+        """
+
+        colors = ["black",  # SPB
+                  "#004bff",  # Kt 1
+                  "#009d1c",  # Kt 2
+                  "#ff2f00",] # Kt 3
+
+        import matplotlib.pyplot as plt
+
+        fig = plt.figure(figsize=(3.6*5, 5))
+        ax = plt.subplot(111)
+
+        drawer = ax.plot
+
+        dt = self.KD.dt
+        duration = self.KD.duration
+        anaphase = self.KD.params['t_A']
+        times = np.arange(0, duration, dt)
+        spbA = self.KD.spbL.traj
+        spbB = self.KD.spbR.traj
+        kts = self.KD.chromosomes
+
+        # Draw SPB
+        drawer(times, spbA, label="SPB A", color=colors[0], lw=3)
+        drawer(times, spbB, label="SPB B", color=colors[0], lw=3)
+
+        for i, kt in enumerate(kts):
+            ax.plot(times, kt.cen_A.traj, color=colors[i+1], lw=3)
+            ax.plot(times, kt.cen_B.traj, color=colors[i+1], lw=3)
+
+        # Set axis limit
+        ax.set_xlim(min(times), max(times))
+        ax.set_ylim(-6, 6)
+
+        import matplotlib
+
+        ax.xaxis.set_ticks([])
+        ax.yaxis.set_ticks([])
+
+        majorLocator = matplotlib.ticker.MultipleLocator(60*10)
+        ax.xaxis.set_major_locator(majorLocator)
+        ax.minorticks_off()
+
+        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        #ax.xaxis.set_major_formatter(majorFormatter)
+        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        #ax.yaxis.set_major_formatter(majorFormatter)
+
+        majorLocator = matplotlib.ticker.MultipleLocator(2)
+        ax.yaxis.set_major_locator(majorLocator)
+
+        plt.tight_layout()
+
+        return fig
 
     def get_attachment(self, state):
         """
