@@ -574,11 +574,11 @@ class Metaphase(object):
         colors = ["black",  # SPB
                   "#004bff",  # Kt 1
                   "#009d1c",  # Kt 2
-                  "#ff2f00",] # Kt 3
+                  "#ff2f00"]  # Kt 3
 
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(3.6*5, 5))
+        fig = plt.figure(figsize=(2*5, 5))
         ax = plt.subplot(111)
 
         drawer = ax.plot
@@ -591,31 +591,33 @@ class Metaphase(object):
         spbB = self.KD.spbR.traj
         kts = self.KD.chromosomes
 
-        # Draw SPB
-        drawer(times, spbA, label="SPB A", color=colors[0], lw=3)
-        drawer(times, spbB, label="SPB B", color=colors[0], lw=3)
+        times = times / 60
 
         for i, kt in enumerate(kts):
             ax.plot(times, kt.cen_A.traj, color=colors[i+1], lw=3)
             ax.plot(times, kt.cen_B.traj, color=colors[i+1], lw=3)
 
+        # Draw SPB
+        drawer(times, spbA, label="SPB A", color=colors[0], lw=3)
+        drawer(times, spbB, label="SPB B", color=colors[0], lw=3)
+
         # Set axis limit
         ax.set_xlim(min(times), max(times))
-        ax.set_ylim(-6, 6)
+        ax.set_ylim(-4, 4)
 
         import matplotlib
 
         ax.xaxis.set_ticks([])
         ax.yaxis.set_ticks([])
 
-        majorLocator = matplotlib.ticker.MultipleLocator(60*10)
+        majorLocator = matplotlib.ticker.MultipleLocator(5)
         ax.xaxis.set_major_locator(majorLocator)
         ax.minorticks_off()
 
         majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        #ax.xaxis.set_major_formatter(majorFormatter)
+        ax.xaxis.set_major_formatter(majorFormatter)
         majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        #ax.yaxis.set_major_formatter(majorFormatter)
+        ax.yaxis.set_major_formatter(majorFormatter)
 
         majorLocator = matplotlib.ticker.MultipleLocator(2)
         ax.yaxis.set_major_locator(majorLocator)
