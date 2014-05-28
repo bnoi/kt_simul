@@ -103,7 +103,7 @@
   <unit> </unit>
   <description>Length dependence balance</description>
 </param>
-<param max="10000." min="1.0" name="muco" step="1" value="10.">
+<param max="10000." min="1.0" name="muco" step="1" value="0">
     <unit>pN.s/&#181;m</unit>
     <description>Cohesin structural friction coefficient</description>
 </param>

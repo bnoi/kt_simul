@@ -130,9 +130,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     if 'muk' not in force_parameters:
         params['muk'] = muk
 
-    muco = (tau_k * kappa_c)
-    if 'muco' not in force_parameters:
-        params['muco'] = muco
+    # muco = (tau_k * kappa_c)
+    # if 'muco' not in force_parameters:
+    #     params['muco'] = muco
 
     for key, val in list(params.items()):
         if key not in force_parameters:
