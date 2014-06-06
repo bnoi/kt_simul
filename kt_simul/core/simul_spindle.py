@@ -567,7 +567,7 @@ class Metaphase(object):
 
         return ax
 
-    def kymo_figure(self):
+    def kymo_figure(self, size=(2*5, 5)):
         """
         """
 
@@ -578,7 +578,7 @@ class Metaphase(object):
 
         import matplotlib.pyplot as plt
 
-        fig = plt.figure(figsize=(2*5, 5))
+        fig = plt.figure(figsize=size)
         ax = plt.subplot(111)
 
         drawer = ax.plot
