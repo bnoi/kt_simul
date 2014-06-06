@@ -567,7 +567,7 @@ class Metaphase(object):
 
         return ax
 
-    def kymo_figure(self, size=(2*5, 5)):
+    def kymo_figure(self, axis_min=5, size=(2*5, 5)):
         """
         """
 
@@ -610,7 +610,7 @@ class Metaphase(object):
         ax.xaxis.set_ticks([])
         ax.yaxis.set_ticks([])
 
-        majorLocator = matplotlib.ticker.MultipleLocator(5)
+        majorLocator = matplotlib.ticker.MultipleLocator(axis_min)
         ax.xaxis.set_major_locator(majorLocator)
         ax.minorticks_off()
 
