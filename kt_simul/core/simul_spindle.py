@@ -622,7 +622,11 @@ class Metaphase(object):
         majorLocator = matplotlib.ticker.MultipleLocator(2)
         ax.yaxis.set_major_locator(majorLocator)
 
-        plt.tight_layout()
+        for i in ax.spines.values():
+            i.set_linewidth(2)
+            i.set_color('black')
+
+        ax.grid(b=True, which='major', color='#bbbbbb', linestyle='-', alpha=1)
 
         return fig
 
