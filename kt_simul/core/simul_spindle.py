@@ -220,6 +220,21 @@ class Metaphase(object):
 
         return '\n'.join(lines)
 
+    @property
+    def time(self):
+        return np.arange(0, self.KD.duration, self.KD.dt)
+
+    @property
+    def time_anaphase(self):
+        return self.analysis['real_t_A']
+
+    @property
+    def index_anaphase(self):
+        return np.argwhere(time == self.time_anaphase)[0][0]
+
+    def index_anaphase_before(self, t_shift):
+        return np.argwhere(time == (self.time_anaphase - t_shift))[0][0]
+
     def simul(self, ablat=None, ablat_pos=0.):
         """
         The simulation main loop.
