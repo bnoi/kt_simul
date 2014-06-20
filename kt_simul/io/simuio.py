@@ -59,6 +59,7 @@ class SimuIO():
         measuretree = self.meta.measuretree
         timelapse = self.meta.timelapse
         chromosomes = self.KD.chromosomes
+        analysis = pd.Series(self.meta.analysis)
 
         time_index = pd.MultiIndex.from_arrays([timelapse], names=['t'])
 
@@ -163,12 +164,12 @@ class SimuIO():
         plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
         plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
 
-        df_to_save = ['spbs', 'kts', 'plug_sites']
+        df_to_save = ['spbs', 'kts', 'plug_sites', 'analysis']
         if save_tree:
             # Get ParamTree as Dataframe
             params = self.paramtree.to_df()
             measures = self.measuretree.to_df()
-            df_to_save = ['params', 'measures', 'spbs', 'kts', 'plug_sites']
+            df_to_save.extend(['params', 'measures'])
 
         if os.path.isfile(simufname):
             os.remove(simufname)
@@ -214,6 +215,8 @@ class SimuIO():
 
         meta = Metaphase(paramtree=paramtree, measuretree=measuretree, verbose=False)
         KD = KinetoDynamics(params)
+
+        meta.analysis = store['analysis']
 
         spbs = store['spbs']
 

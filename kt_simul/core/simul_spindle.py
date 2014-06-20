@@ -182,6 +182,7 @@ class Metaphase(object):
         self.report = []
         self.delay = -1
         self.observations = {}
+        self.analysis = {}
 
         log.info('Simulation initialized')
         log.disabled = False
@@ -244,6 +245,8 @@ class Metaphase(object):
             log.info('Running simulation')
         bef = 0
         log_anaphase_onset = False
+
+        self.analysis['real_t_A'] = self.KD.params['t_A']
 
         for time_point in range(1, self.num_steps):
 
@@ -349,6 +352,7 @@ class Metaphase(object):
             return True
         if t >= t_A and self._plug_checkpoint():
             self.delay = t - t_A
+            self.analysis['real_t_A'] = t
             # Then we just get rid of cohesin
             self.KD.params['kappa_c'] = 0.
             self.KD.calc_B()
