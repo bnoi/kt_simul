@@ -230,10 +230,10 @@ class Metaphase(object):
 
     @property
     def index_anaphase(self):
-        return np.argwhere(time == self.time_anaphase)[0][0]
+        return np.argwhere(self.time == self.time_anaphase)[0][0]
 
     def index_anaphase_before(self, t_shift):
-        return np.argwhere(time == (self.time_anaphase - t_shift))[0][0]
+        return np.argwhere(self.time == (self.time_anaphase - t_shift))[0][0]
 
     def simul(self, ablat=None, ablat_pos=0.):
         """
