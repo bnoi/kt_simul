@@ -199,6 +199,29 @@ class Pool:
                 paramtree=self.paramtree,
                 measuretree=self.measuretree)
 
+    def load_metaphase_parallel(self, pre_processing_func=None , verbose=True):
+        """
+        """
+        all_fpath = [os.path.join(self.simu_path, fname) for i, fname in enumerate(self.metaphases_path)]
+        args = zip(all_fpath, itertools.repeat(self.paramtree), itertools.repeat(self.measuretree))
+
+        proc_pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+
+        results = []
+        for i, meta in enumerate(proc_pool.imap_unordered(_load_metaphase_single, args)):
+            if verbose:
+                pprogress(int(i * 100 / self.n_simu))
+            print(meta.KD.chromosomes)
+            if pre_processing_func:
+                results.append(pre_processing_func(meta))
+            else:
+                results.append(meta)
+
+        if verbose:
+            pprogress(-1)
+
+        return results
+
 def _run_one_simulation(args):
     """
     """
@@ -210,3 +233,10 @@ def _run_one_simulation(args):
     meta.simul()
     SimuIO(meta).save(fpath, save_tree=False)
     return (i, fname)
+
+def _load_metaphase_single(args):
+    fpath, paramtree, measuretree = args
+    meta = SimuIO().read(fpath,
+                         paramtree=paramtree,
+                         measuretree=measuretree)
+    return meta
