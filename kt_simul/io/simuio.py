@@ -216,7 +216,10 @@ class SimuIO():
         meta = Metaphase(paramtree=paramtree, measuretree=measuretree, verbose=False)
         KD = KinetoDynamics(params)
 
-        meta.analysis = store['analysis']
+        if 'analysis' in store:
+            meta.analysis = store['analysis']
+        else:
+            meta.analysis = {}
 
         spbs = store['spbs']
 

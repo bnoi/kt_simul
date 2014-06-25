@@ -645,7 +645,7 @@ class Metaphase(object):
             i.set_linewidth(2)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#bbbbbb', linestyle='-', alpha=1)
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=1)
 
         return fig
 
