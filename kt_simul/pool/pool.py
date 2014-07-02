@@ -14,6 +14,8 @@ import math
 import multiprocessing
 import itertools
 import tempfile
+import uuid
+import gc
 
 import pandas as pd
 
@@ -154,7 +156,11 @@ class Pool:
                            'reduce_p': True}
 
         if self.parallel:
-            simus_path = [tempfile.mkstemp(prefix="ktsimu_")[1] for _ in range(self.n_simu)]
+            simus_path = []
+            unique_id = uuid.uuid4()
+            for i in range(self.n_simu):
+                name = os.path.join(tempfile.gettempdir(), "simu_{}_{}.h5")
+                simus_path.append(name.format(unique_id, i))
         else:
             simus_path = itertools.repeat(self.simu_full_path)
 
@@ -172,13 +178,16 @@ class Pool:
 
             # Get unordered results and log progress
             for i in range(self.n_simu):
-                result = next(results)
+                next(results)
                 if self.verbose:
                     pprogress((i + 1) / self.n_simu * 100, "(%i / %i)" %
                               (i + 1, self.n_simu))
 
             if self.verbose:
                 pprogress(-1)
+
+            pool.terminate()
+            pool.join()
 
         except KeyboardInterrupt:
             pool.terminate()
@@ -195,6 +204,8 @@ class Pool:
                 st.close()
                 os.remove(simu_tmp)
             store.close()
+
+            del pool
 
         log.info("Pool simulations are done")
         self.simus_run = True
@@ -233,6 +244,7 @@ class Pool:
 
         return results
 
+
 def _run_one_simulation(args):
     """
     """
@@ -241,6 +253,9 @@ def _run_one_simulation(args):
     meta = Metaphase(**simu_parameters)
     meta.simul()
     SimuIO(meta).save(simu_path, simu_id, save_tree=True)
+    del meta.KD
+    del meta
+    gc.collect()
     return (i, simu_id)
 
 def _load_metaphase_single(args):
@@ -249,6 +264,7 @@ def _load_metaphase_single(args):
                          paramtree=paramtree,
                          measuretree=measuretree)
     return meta
+
 
 def get_simu_id(i, digits):
     return "simu_%s" % (str(i).zfill(digits))

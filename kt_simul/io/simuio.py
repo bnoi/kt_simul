@@ -172,6 +172,8 @@ class SimuIO():
             else:
                 store[dfname] = locals()[dfname]
 
+            del locals()[dfname]
+
         if save_tree and ('params' not in store and 'measures' not in store):
             # Get ParamTree as Dataframe
             params = self.paramtree.to_df()
