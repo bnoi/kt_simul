@@ -37,7 +37,7 @@ class SimuIO():
             self.paramtree = self.meta.paramtree
             self.measuretree = self.meta.measuretree
 
-    def save(self, simufname, metadata=None, save_tree=True, verbose=False):
+    def save(self, simufname, simu_id=None, metadata=None, save_tree=True, verbose=False):
         """
         Save :class:`~kt_simul.core.simul_spindle.Metaphase` instance to
         HDF5 file. Each of the following element will be stored via
@@ -164,25 +164,26 @@ class SimuIO():
         plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
         plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
 
+        store = pd.HDFStore(simufname)
         df_to_save = ['spbs', 'kts', 'plug_sites', 'analysis']
-        if save_tree:
+        for dfname in df_to_save:
+            if simu_id:
+                store["/{}/{}".format(simu_id, dfname)] = locals()[dfname]
+            else:
+                store[dfname] = locals()[dfname]
+
+        if save_tree and ('params' not in store and 'measures' not in store):
             # Get ParamTree as Dataframe
             params = self.paramtree.to_df()
             measures = self.measuretree.to_df()
             df_to_save.extend(['params', 'measures'])
 
-        if os.path.isfile(simufname):
-            os.remove(simufname)
-        store = pd.HDFStore(simufname)
-
-        for dfname in df_to_save:
-            store[dfname] = locals()[dfname]
         store.close()
 
         if verbose:
             log.info("Simulation saved to file %s " % simufname)
 
-    def read(self, simufname, paramtree=None, measuretree=None, verbose=False):
+    def read(self, simufname, simu_id=None, paramtree=None, measuretree=None, verbose=False):
         """
         Creates a simul_spindle.Metaphase from a results.zip file.
 
@@ -203,6 +204,11 @@ class SimuIO():
 
         store = pd.HDFStore(simufname)
 
+        if simu_id:
+            store_prefix = "/{}/".format(simu_id)
+        else:
+            store_prefix = ""
+
         if not paramtree:
             param_root = build_tree(store['params'])
             paramtree = ParamTree(root=param_root)
@@ -217,17 +223,17 @@ class SimuIO():
         KD = KinetoDynamics(params)
 
         if 'analysis' in store:
-            meta.analysis = store['analysis']
+            meta.analysis = store[store_prefix + 'analysis']
         else:
             meta.analysis = {}
 
-        spbs = store['spbs']
+        spbs = store[store_prefix + 'spbs']
 
         KD.spbL.traj = spbs.xs('A', level='side').values.T[0]
         KD.spbR.traj = spbs.xs('B', level='side').values.T[0]
 
-        kts = store['kts']
-        plug_sites = store['plug_sites']
+        kts = store[store_prefix + 'kts']
+        plug_sites = store[store_prefix + 'plug_sites']
         store.close()
 
         for ch, (ch_id, ch_df) in zip(KD.chromosomes, kts.groupby(level="id")):

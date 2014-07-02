@@ -13,6 +13,7 @@ import datetime
 import math
 import multiprocessing
 import itertools
+import tempfile
 
 import pandas as pd
 
@@ -58,6 +59,7 @@ class Pool:
             log.disabled = False
 
         self.simu_path = simu_path
+        self.simu_full_path = self.simu_path + "/simulations.h5"
 
         if not load:
             self.paramtree = paramtree
@@ -81,7 +83,7 @@ class Pool:
             # with paramtree, measuretree, intial_plug,
             # parallel, date/time, n_simu
 
-            store = pd.HDFStore(os.path.join(self.simu_path, "metadata.h5"))
+            store = pd.HDFStore(self.simu_full_path)
             store['params'] = paramtree.to_df()
             store['measures'] = measuretree.to_df()
 
@@ -99,7 +101,7 @@ class Pool:
                 raise FolderNotExistException(
                     "%s does not exists." % self.simu_path)
 
-            store = pd.HDFStore(os.path.join(self.simu_path, "metadata.h5"))
+            store = pd.HDFStore(self.simu_full_path)
             self.paramtree = ParamTree(root=build_tree(store['params']))
             self.measuretree = ParamTree(root=build_tree(store['measures']),
                                          adimentionalized=False)
@@ -117,12 +119,9 @@ class Pool:
             self.metaphases_path = []
             self.digits = int(math.log10(self.n_simu)) + 1
 
-            for i in range(self.n_simu):
-                fname = "simu_%s.h5" % (str(i).zfill(self.digits))
-                self.metaphases_path.append(
-                    os.path.join(self.simu_path, fname))
-
             self.simus_run = True
+
+
 
     def run(self):
         """
@@ -154,8 +153,13 @@ class Pool:
                            'verbose': False,
                            'reduce_p': True}
 
+        if self.parallel:
+            simus_path = [tempfile.mkstemp(prefix="ktsimu_")[1] for _ in range(self.n_simu)]
+        else:
+            simus_path = itertools.repeat(self.simu_full_path)
+
         arguments = zip(itertools.repeat(simu_parameters),
-                        itertools.repeat(self.simu_path),
+                        simus_path,
                         range(self.n_simu),
                         itertools.repeat(self.digits))
 
@@ -182,10 +186,15 @@ class Pool:
             raise CanceledByUserException(
                 'Simulation has been canceled by user')
 
-        for i in range(self.n_simu):
-            fname = "simu_%s.h5" % (str(i).zfill(self.digits))
-            self.metaphases_path.append(
-                os.path.join(self.simu_path, fname))
+        if self.parallel:
+            store = pd.HDFStore(self.simu_full_path)
+            for simu_tmp in simus_path:
+                st = pd.HDFStore(simu_tmp)
+                for key in st.keys():
+                    store[key] = st[key]
+                st.close()
+                os.remove(simu_tmp)
+            store.close()
 
         log.info("Pool simulations are done")
         self.simus_run = True
@@ -193,11 +202,13 @@ class Pool:
     def load_metaphases(self):
         """
         """
-        for i, fname in enumerate(self.metaphases_path):
-            fpath = os.path.join(self.simu_path, fname)
-            yield SimuIO().read(fpath,
-                paramtree=self.paramtree,
-                measuretree=self.measuretree)
+        all_simu_id = [get_simu_id(i, self.digits) for i in range(self.n_simu)]
+
+        for simu_id in all_simu_id:
+            yield SimuIO().read(self.simu_full_path,
+                                simu_id=simu_id,
+                                paramtree=self.paramtree,
+                                measuretree=self.measuretree)
 
     def load_metaphase_parallel(self, pre_processing_func=None , verbose=True):
         """
@@ -226,13 +237,11 @@ def _run_one_simulation(args):
     """
     """
     simu_parameters, simu_path, i, digits = args
-
-    fname = "simu_%s.h5" % (str(i).zfill(digits))
-    fpath = os.path.join(simu_path, fname)
+    simu_id = get_simu_id(i, digits)
     meta = Metaphase(**simu_parameters)
     meta.simul()
-    SimuIO(meta).save(fpath, save_tree=False)
-    return (i, fname)
+    SimuIO(meta).save(simu_path, simu_id, save_tree=True)
+    return (i, simu_id)
 
 def _load_metaphase_single(args):
     fpath, paramtree, measuretree = args
@@ -240,3 +249,6 @@ def _load_metaphase_single(args):
                          paramtree=paramtree,
                          measuretree=measuretree)
     return meta
+
+def get_simu_id(i, digits):
+    return "simu_%s" % (str(i).zfill(digits))
