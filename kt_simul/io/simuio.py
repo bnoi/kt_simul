@@ -178,7 +178,8 @@ class SimuIO():
             # Get ParamTree as Dataframe
             params = self.paramtree.to_df()
             measures = self.measuretree.to_df()
-            df_to_save.extend(['params', 'measures'])
+            store['params'] = params
+            store['measures'] = measures
 
         store.close()
 
