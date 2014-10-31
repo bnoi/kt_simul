@@ -43,13 +43,15 @@ cdef class Organite(object):
     ----------
     parent : an other subclass of :class:`Organite`
         from which the parameters are inheritated.
-    init_pos : float, initial position
+    init_pos : float, initial position (this will be converted to a 3D vect)
+    init_normal : float, angle of the normal w/r to x axis (this will be converted to a 3D vect)
 
     Attributes
     ----------
     KD : a :class:`~spindle_dynamics.KinetoDynamics` instance
     pos : float, the position
-    traj : ndarrat, the trajectory
+    traj : ndarray, the trajectory
+    n_traj : ndarray, the successive values for the normal
 
     Methods
     -------
@@ -57,13 +59,16 @@ cdef class Organite(object):
     get_pos(time_point): returns the position at `time_point`
     """
 
-    def __init__(self, parent, init_pos):
+    def __init__(self, parent, init_pos, init_normal):
         self.parent = parent
         self.KD = parent.KD
         self.num_steps = parent.KD.num_steps
         self.traj = np.zeros(self.num_steps)
+        self.n_traj = np.zeros(self.num_steps)
         self.pos = init_pos
+        self.normal = init_normal
         self.traj[0] = init_pos
+        self.n_traj[0] = init_normal
 
     cdef void set_pos(self, float pos, int time_point=-1):
         """
@@ -88,6 +93,25 @@ cdef class Organite(object):
             return self.pos
         return self.traj[time_point]
 
+    cdef void set_normal(self, float normal, int time_point=-1):
+        """
+        Sets the position. If `time_point` is provided, sets
+        the corresponding value in `self.traj[time_point]`
+        """
+        self.normal = normal % 2*np.pi
+        if time_point >= 0:
+            self.n_traj[time_point] = self.normal
+
+    cdef float get_normal(self, int time_point=-1):
+        """Returns the position.
+
+        If `time_point` is -1 (default), returns the current position
+        If `time_point` is not null, returns the position at time_point
+        """
+        if time_point == 0:
+            return self.normal
+        return self.n_traj[time_point]
+
 
 cdef class Spb(Organite):
     """
@@ -110,7 +134,8 @@ cdef class Spb(Organite):
         """
         self.side = side
         init_pos = side * L0 / 2.
-        Organite.__init__(self, spindle, init_pos)
+        init_normal = np.pi/2
+        Organite.__init__(self, spindle, init_pos, init_normal)
 
 cdef class Chromosome(Organite):
     """
@@ -130,12 +155,9 @@ cdef class Chromosome(Organite):
         #self.dt = spindle.KD.params['dt']
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
+        center_pos = spindle.KD.prng.normal(0, 0.2 * (L0 - d0))
+        Organite.__init__(self, spindle, center_pos, np.pi/2)
 
-        Organite.__init__(self, spindle, 0)
-        center_pos = self.KD.prng.normal(0, 0.2 * (L0 - d0))
-
-        self.pos = center_pos
-        self.traj[0] = center_pos
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
         self.correct_history = np.zeros((self.KD.num_steps, 2))
@@ -162,17 +184,7 @@ cdef class Chromosome(Organite):
         In case the centromeres swap (exchange side), the direction
         of the cohesin restoring force needs to be changed
         """
-        return 1 if self.cen_A.pos < self.cen_B.pos else -1
-
-    cdef int delta2(self):
-
-        """
-        Change the sense of viscous force depending on relative speeds of centromeres A and B
-        """
-        speedA = (self.cen_A.traj[-2] - self.cen_A.traj[-1]) / self.KD.params['dt']
-        speedB = (self.cen_B.traj[-2] - self.cen_B.traj[-1]) / self.KD.params['dt']
-
-        return 1 if speedA > speedB else -1
+        return np.sign(self.cen_B.pos - self.cen_A.pos)
 
     def correct(self):
         """
@@ -272,11 +284,13 @@ cdef class Centromere(Organite):
         d0 = self.chromosome.KD.params['d0']
         if tag == 'A':
             init_pos = chromosome.pos - d0 / 2.
+            init_normal = np.pi / 2
         elif tag == 'B':
             init_pos = chromosome.pos + d0 / 2.
+            init_normal = 0
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
-        Organite.__init__(self, chromosome, init_pos)
+        Organite.__init__(self, chromosome, init_pos, init_normal)
         Mk = int(self.KD.params['Mk'])
         self.toa = 0  # time of arrival at pole
         self.plug_vector = np.zeros(Mk, dtype=np.int)
@@ -318,6 +332,7 @@ cdef class Centromere(Organite):
         return left_hist, right_hist
 
     cdef float P_attachleft(self):
+        # TODO change that with angle
         cdef float orientation
         orientation = self.KD.params['orientation']
         if orientation == 0:
@@ -393,10 +408,12 @@ cdef class PlugSite(Organite):
 
     def __init__(self, centromere, site_id):
         init_pos = centromere.pos
-        Organite.__init__(self, centromere, init_pos)
+        init_normal = centromere.normal
+        self.tag = centromere.tag
+
+        Organite.__init__(self, centromere, init_pos, init_normal)
         initial_plug = self.KD.initial_plug
         self.centromere = centromere
-        self.tag = self.centromere.tag
         self.site_id = site_id
 
         if initial_plug == None:
@@ -415,8 +432,6 @@ cdef class PlugSite(Organite):
             self.plug_state = self.KD.prng.choice([-1,1])
         else:
             self.plug_state = initial_plug
-
-        self.set_pos(init_pos)
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
         self.P_att = 1 - np.exp(- self.KD.params['k_a'])

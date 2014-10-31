@@ -48,11 +48,28 @@
     <unit> </unit>
     <description>Number of attachment sites</description>
   </param>
-<!-- Length dependance -->
-<param max="2." min="0." name="ldep" step="0" value="1">
-  <unit> </unit>
-  <description>Fk length dependance coefficient</description>
-</param>
+  <!-- Length dependance -->
+  <param max="2." min="0." name="ldep" step="0" value="1">
+    <unit> </unit>
+    <description>Fk length dependance coefficient</description>
+  </param>
+  <!-- Damped torsion -->
+  <param max="200." min="1." name="kappa_t" step="0" value="40.0">
+    <unit>pN/rad</unit>
+    <description>Att. site torsion spring</description>
+  </param>
+  <param max="200." min="1." name="mu_t" step="0" value="100.">
+    <unit>pN.s/rad</unit>
+    <description>Att. site torsion damper</description>
+  </param>
+  <param max="200." min="1." name="Kappa_t" step="0" value="40.0">
+    <unit>pN/rad</unit>
+    <description>chromatin torsion spring</description>
+  </param>
+  <param max="200." min="1." name="Mu_t" step="0" value="100.">
+    <unit>pN.s/rad</unit>
+    <description>chromatin torsion damper</description>
+  </param>
 
 <!--  Non free parameters - changing values below this line is useless -->
 <param max="1." min="0." name="k_d0" step="0.001" value="0.06">

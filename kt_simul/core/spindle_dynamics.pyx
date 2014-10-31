@@ -172,7 +172,8 @@ cdef class KinetoDynamics(object):
 
     def calc_A(self):
         """
-        :return: the matrix containing the linear terms of the equation set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
+        :return: the matrix containing the linear terms of the equation set
+        :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
         """
         return self._calc_A()
 
@@ -193,18 +194,16 @@ cdef class KinetoDynamics(object):
         cdef float muco = self.params['muco']
         cdef int dims = 1 + 2 * N * ( Mk + 1 )
         cdef np.ndarray[DTYPE_t, ndim=2] A0
-        cdef int delta2
         A0 = np.zeros((dims, dims))
         A0[0, 0] = - 2 * mus - 4 * Fmz / Vmz
         cdef int n, m
         cdef Chromosome ch
         for n in range(N):
             ch = self.chromosomes[n]
-            delta2 = ch.delta2()
             an = self._idx(0, n)
             bn = self._idx(1, n)
-            A0[an, an] = - Mk * muk - muc + muco 
-            A0[bn, bn] = - Mk * muk - muc - muco 
+            A0[an, an] = - Mk * muk - muc + muco
+            A0[bn, bn] = - Mk * muk - muc - muco
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
