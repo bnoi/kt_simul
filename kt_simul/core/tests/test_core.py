@@ -39,4 +39,4 @@ def test_components():
     assert chromosome.id == 0
 
     cenA = Centromere(chromosome, 'A')
-    assert cenA.pos == chromosome.pos
+    assert cenA.tag == 'A'
