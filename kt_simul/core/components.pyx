@@ -98,7 +98,12 @@ cdef class Organite(object):
         Sets the position. If `time_point` is provided, sets
         the corresponding value in `self.traj[time_point]`
         """
-        self.normal = normal % 2*np.pi
+
+        if normal > np.pi + 1e-6:
+            normal -= 2*np.pi
+        if normal < -np.pi - 1e-6:
+            normal += 2*np.pi
+        self.normal = normal
         if time_point >= 0:
             self.n_traj[time_point] = self.normal
 
@@ -284,7 +289,7 @@ cdef class Centromere(Organite):
         d0 = self.chromosome.KD.params['d0']
         if tag == 'A':
             init_pos = chromosome.pos - d0 / 2.
-            init_normal = np.pi / 2
+            init_normal = np.pi
         elif tag == 'B':
             init_pos = chromosome.pos + d0 / 2.
             init_normal = 0

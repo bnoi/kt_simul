@@ -54,7 +54,7 @@
     <description>Fk length dependance coefficient</description>
   </param>
   <!-- Damped torsion -->
-  <param max="200." min="1." name="kappa_t" step="0" value="40.0">
+  <param max="200." min="1." name="kappa_t" step="0" value="1.">
     <unit>pN/rad</unit>
     <description>Att. site torsion spring</description>
   </param>
@@ -62,7 +62,7 @@
     <unit>pN.s/rad</unit>
     <description>Att. site torsion damper</description>
   </param>
-  <param max="200." min="1." name="Kappa_t" step="0" value="40.0">
+  <param max="200." min="1." name="Kappa_t" step="0" value="1.">
     <unit>pN/rad</unit>
     <description>chromatin torsion spring</description>
   </param>
