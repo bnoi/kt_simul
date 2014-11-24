@@ -99,7 +99,7 @@ cdef class Organite(object):
         the corresponding value in `self.traj[time_point]`
         """
 
-        if normal > np.pi + 1e-6:
+        if normal > np.pi + 1e-6: ### avoid rounding errors
             normal -= 2*np.pi
         if normal < -np.pi - 1e-6:
             normal += 2*np.pi
@@ -416,30 +416,37 @@ cdef class PlugSite(Organite):
         init_normal = centromere.normal
         self.tag = centromere.tag
 
-        Organite.__init__(self, centromere, init_pos, init_normal)
-        initial_plug = self.KD.initial_plug
+        initial_plug = centromere.KD.initial_plug
         self.centromere = centromere
         self.site_id = site_id
 
         if initial_plug == None:
-            self.plug_state = self.KD.prng.choice([-1,0,1])
+            self.plug_state = centromere.KD.prng.choice([-1,0,1])
         elif initial_plug == 'null':
             self.plug_state = 0
         elif initial_plug == 'amphitelic':
             self.plug_state = - 1 if self.tag == 'A' else 1
         elif initial_plug == 'random':
-            self.plug_state = self.KD.prng.choice([-1,0,1])
+            self.plug_state = centromere.KD.prng.choice([-1,0,1])
         elif initial_plug == 'monotelic':
             self.plug_state = - 1 if self.tag == 'A' else 0
         elif initial_plug == 'syntelic':
             self.plug_state = 1
         elif initial_plug == 'merotelic':
-            self.plug_state = self.KD.prng.choice([-1,1])
+            self.plug_state = centromere.KD.prng.choice([-1,1])
         else:
             self.plug_state = initial_plug
-        self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+        self.state_hist = np.zeros(centromere.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
-        self.P_att = 1 - np.exp(- self.KD.params['k_a'])
+        self.P_att = 1 - np.exp(- centromere.KD.params['k_a'])
+        if self.plug_state == 0 :
+            init_normal = np.pi/2
+        elif self.plug_state == -1 :
+            init_normal = np.pi
+        elif self.plug_state == 1 :
+            init_normal = 0
+        Organite.__init__(self, centromere, init_pos, init_normal)
+
 
     cdef void set_plug_state(self, int state, int time_point=-1):
         self.plug_state = state
@@ -485,16 +492,21 @@ cdef class PlugSite(Organite):
         return force_term
 
     cdef void plug_unplug(self, int time_point):
-        cdef float dice, side_dice
+        cdef float dice, side_dice, beta, k_a0, k_a
         dice = self.KD.prng.rand()
+        k_a0 = self.KD.params['k_a']
         # Attachment
-        if self.plug_state == 0 and dice < self.P_att:
-            side_dice = self.KD.prng.rand()
-            P_left = self.centromere.P_attachleft()
-            if side_dice < P_left:
-                self.set_plug_state(-1, time_point)
+        if self.plug_state == 0:# and dice < self.P_att:
+            if np.abs(self.normal) >= np.pi/2:
+                k_a = -np.cos(self.normal) * k_a0
+                P_att = 1 - np.exp(-k_a)
+                if dice < P_att:
+                    self.set_plug_state(-1, time_point)
             else:
-                self.set_plug_state(1, time_point)
+                k_a = np.cos(self.normal) * k_a0
+                P_att = 1 - np.exp(-k_a)
+                if dice < P_att:
+                    self.set_plug_state(1, time_point)
         # Detachment
         elif dice < self.P_det():
             self.set_plug_state(0, time_point)
