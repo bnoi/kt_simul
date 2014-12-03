@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 This module defines all the objects considered in the simulation,
-It uses cython used for the computer intensive bits
+It uses cython for the computer intensive bits
 
 * Chromosome, Spb, Spindle, PlugSite are the spindle components
 * KinetoDynamics wraps all the simulation internals: forces, vectors,
