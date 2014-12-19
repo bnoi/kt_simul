@@ -23,9 +23,3 @@ def pretty_dict(indict, indent_level=0):
             out += "%s%s : %s\n" % (indentation, key, value)
 
     return out
-
-def isstr(s):
-    try:
-        return isinstance(s, basestring)
-    except NameError:
-        return isinstance(s, str)

@@ -1,0 +1,263 @@
+[
+    {
+        "description": "Simulation duration",
+        "max": "2000.",
+        "min": "0.1",
+        "name": "span",
+        "step": "10.",
+        "unit": "s",
+        "value": "1000.0"
+    },
+    {
+        "description": "Time step",
+        "max": "2.",
+        "min": "0.1",
+        "name": "dt",
+        "step": "0.1",
+        "unit": "s",
+        "value": "10"
+    },
+    {
+        "description": "Anaphase A transition",
+        "max": "1000.",
+        "min": "0.",
+        "name": "t_A",
+        "step": "1.",
+        "unit": "s",
+        "value": "750"
+    },
+    {
+        "description": "Aurora Pdet modifier",
+        "max": "100",
+        "min": "0",
+        "name": "d_alpha",
+        "step": "0.005",
+        "unit": "µm",
+        "value": "0.05"
+    },
+    {
+        "description": "Orientation effect ",
+        "max": "100",
+        "min": "0",
+        "name": "orientation",
+        "step": "1",
+        "unit": " ",
+        "value": "1"
+    },
+    {
+        "description": "Non zero: spindle assembly checkpt ",
+        "max": "1",
+        "min": "0",
+        "name": "sac",
+        "step": "1",
+        "unit": " ",
+        "value": "1"
+    },
+    {
+        "description": "MT free attachement frequency",
+        "max": "1.",
+        "min": "0.",
+        "name": "k_a",
+        "step": "0.001",
+        "unit": "Hz",
+        "value": "0.06"
+    },
+    {
+        "description": "attached MT rescue rate",
+        "max": "1.",
+        "min": "0.",
+        "name": "k_res",
+        "step": "0.001",
+        "unit": "Hz",
+        "value": "0.6"
+    },
+    {
+        "description": "MT shrink rate",
+        "max": "0.1",
+        "min": "0.005",
+        "name": "vs",
+        "step": "0",
+        "unit": "µm/s",
+        "value": "0.03"
+    },
+    {
+        "description": "attached MT catastroph rate",
+        "max": "1.",
+        "min": "0.",
+        "name": "k_cat",
+        "step": "0.001",
+        "unit": "Hz",
+        "value": "0.06"
+    },
+    {
+        "description": "MT growth rate",
+        "max": "0.1",
+        "min": "0.005",
+        "name": "vg",
+        "step": "0",
+        "unit": "µm/s",
+        "value": "0.03"
+    },
+    {
+        "description": "Spb drag coefficient",
+        "max": "2000.",
+        "min": "1.",
+        "name": "mus",
+        "step": "1.",
+        "unit": "pN.s/µm",
+        "value": "500.0"
+    },
+    {
+        "description": "Spindle initial length",
+        "max": "15.",
+        "min": "0.",
+        "name": "L0",
+        "step": "0.1",
+        "unit": "µm",
+        "value": "0.3"
+    },
+    {
+        "description": "Number of chromosomes",
+        "max": "23",
+        "min": "0",
+        "name": "N",
+        "step": "1",
+        "unit": " ",
+        "value": "3"
+    },
+    {
+        "description": "Number of attachment sites",
+        "max": "100",
+        "min": "0",
+        "name": "Mk",
+        "step": "1",
+        "unit": " ",
+        "value": "3"
+    },
+    {
+        "description": "Fk length dependance coefficient",
+        "max": "2.",
+        "min": "0.",
+        "name": "ldep",
+        "step": "0",
+        "unit": " ",
+        "value": "1"
+    },
+    {
+        "description": "MT free detachement frequency",
+        "max": "1.",
+        "min": "0.",
+        "name": "k_d0",
+        "step": "0.001",
+        "unit": "Hz",
+        "value": "0.06"
+    },
+    {
+        "description": "Cohesin spring constant",
+        "max": "200.",
+        "min": "1.",
+        "name": "kappa_c",
+        "step": "0",
+        "unit": "pN/µm",
+        "value": "40.0"
+    },
+    {
+        "description": "Chromatid spring  constant",
+        "max": "200.",
+        "min": "1.",
+        "name": "kappa_k",
+        "step": "0",
+        "unit": "pN/µm",
+        "value": "50.0"
+    },
+    {
+        "description": "Chromatid drag coefficient",
+        "max": "2000.",
+        "min": "0.1",
+        "name": "muc",
+        "step": "0",
+        "unit": "pN.s/µm",
+        "value": "400.0"
+    },
+    {
+        "description": "Kt structural friction coef.",
+        "max": "2000.",
+        "min": "1.",
+        "name": "muk",
+        "step": "0",
+        "unit": "pN.s/µm",
+        "value": "500.0"
+    },
+    {
+        "description": "Kinetochore - kinetochore rest length",
+        "max": "1.",
+        "min": "0.01",
+        "name": "d0",
+        "step": "0",
+        "unit": "µm",
+        "value": "0.05"
+    },
+    {
+        "description": "Kineto poleward mvt max. speed",
+        "max": "0.1",
+        "min": "0.005",
+        "name": "Vk",
+        "step": "0",
+        "unit": "µm/s",
+        "value": "0.03"
+    },
+    {
+        "description": "Midzone force max. speed",
+        "max": "0.1",
+        "min": "0.005",
+        "name": "Vmz",
+        "step": "0",
+        "unit": "µm/s",
+        "value": "0.03"
+    },
+    {
+        "description": "Kineto polward mvmt stall force",
+        "max": "100.",
+        "min": "0.1",
+        "name": "Fk",
+        "step": "0",
+        "unit": "pN",
+        "value": "10.0"
+    },
+    {
+        "description": "Midzone stall Force",
+        "max": "1000.",
+        "min": "1.",
+        "name": "Fmz",
+        "step": "0",
+        "unit": "pN",
+        "value": "100.0"
+    },
+    {
+        "description": "Mean kt-spb distance",
+        "max": "2.",
+        "min": "0.",
+        "name": "k_spb",
+        "step": "0.1",
+        "unit": "µm",
+        "value": "1"
+    },
+    {
+        "description": "Length dependence balance",
+        "max": "2.",
+        "min": "0.",
+        "name": "ldep_balance",
+        "step": "0",
+        "unit": " ",
+        "value": "1"
+    },
+    {
+        "description": "Cohesin structural friction coefficient",
+        "max": "10000.",
+        "min": "1.0",
+        "name": "muco",
+        "step": "1",
+        "unit": "pN.s/µm",
+        "value": "0"
+    }
+]

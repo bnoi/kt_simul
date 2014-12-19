@@ -18,8 +18,8 @@ from ..io import ParamTree
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
-PARAMFILE = os.path.join(ROOT_DIR, 'data', 'params.xml')
-MEASUREFILE = os.path.join(ROOT_DIR, 'data', 'measures.xml')
+PARAMFILE = os.path.join(ROOT_DIR, 'io', 'params.json')
+MEASUREFILE = os.path.join(ROOT_DIR, 'io', 'measures.json')
 
 log = logging.getLogger(__name__)
 
@@ -149,4 +149,4 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
 
     for key, val in list(params.items()):
         if key not in force_parameters:
-            paramtree.change_dic(key, val, verbose=False)
+            paramtree[key] = val

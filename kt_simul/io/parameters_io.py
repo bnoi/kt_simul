@@ -10,12 +10,9 @@ from __future__ import print_function
 
 import logging
 import io
-from xml.etree.ElementTree import parse, tostring
 
 import numpy as np
 import pandas as pd
-
-from ..utils.format import isstr
 
 # Those strings should be respected in the xml file
 SPRING_UNIT = u'pN/µm'
@@ -25,27 +22,9 @@ FREQ_UNIT = u'Hz'
 FORCE_UNIT = u'pN'
 SPEED_UNIT = u'µm/s'
 
-__all__ = ["ParamTree", "indent", "ResultTree"]
+__all__ = ["ParamTree"]
 
 log = logging.getLogger(__name__)
-
-
-def indent(elem, level=0):
-    """
-    Utility to have a nice printing of the xml tree
-    Source : http://effbot.org/zone/element-lib.htm#prettyprint
-    """
-    i = "\n" + level * "  "
-    if len(elem):
-        if not elem.text or not elem.text.strip():
-            elem.text = i + "  "
-        for elem in elem:
-            indent(elem, level + 1)
-        if not elem.tail or not elem.tail.strip():
-            elem.tail = i
-    else:
-        if level and (not elem.tail or not elem.tail.strip()):
-            elem.tail = i
 
 
 class ParamTree(object):
@@ -59,211 +38,65 @@ class ParamTree(object):
     whereas the value in the dictionnary is changed.
     """
 
-    def __init__(self, xmlfile=None, root=None, adimentionalized=True):
+    def __init__(self, df=None, jsonfile=None, adimentionalized=True):
+        """
+        """
+        if jsonfile:
+            self.params = pd.read_json(jsonfile, orient='records')
+        elif isinstance(df, pd.DataFrame):
+            self.params = df
 
-        if xmlfile is not None:
+        self.adimentionalized = adimentionalized
+        self.build_tree()
 
-            if isinstance(xmlfile, io.IOBase) or isinstance(xmlfile, io.StringIO):
-                self.tree = parse(xmlfile)
-            elif isstr(xmlfile):
-                source = open(xmlfile, "r")
-                self.tree = parse(source)
-                source.close()
+    def build_tree(self):
+        """
+        """
+        self.absolute_dic = self.params.loc[:, ['name', 'value']]
+        self.absolute_dic = self.absolute_dic.set_index('name').to_dict()['value']
+        self.relative_dic = self.absolute_dic.copy()
 
-            self.root = self.tree.getroot()
-
-        elif root is not None:
-            self.root = root
-        else:
-            log.error('A etree root or a xmlfile should be provided')
-
-        list = []
-        a = self.root.findall("param")
-        for i in a:
-            n = i.get("name")
-            v = i.get("value")
-            if '.' in v or 'e' in v:
-                v = float(v)
-            else:
-                v = int(v)
-            list.append((n, v))
-        self.absolute_dic = dict(list)
-        self.relative_dic = dict(list)
-        if adimentionalized:
+        if self.adimentionalized:
             self.adimentionalize()
-
-    def has_unit(self, param, UNIT):
-
-        unit_str = param.find("unit").text
-        if unit_str == UNIT:
-            return True
-        else:
-            return False
 
     def adimentionalize(self):
         """
         This function scales everything taking dt as unit time, Vk as
         unit speed, and Fk as unit force. It relies on a correct
         definition of the units of the elements of the param tree,
-        thus a correct spelling in the xml file, so please beware
-
-        Note that the "value" attribute of the ElementTree instance are
-        NOT modified. Also, applying this function on an already
-        adimentionalized  dictionnary won"t change any thing
+        thus a correct spelling in the json file, so please beware.
         """
-
         Vk = self.absolute_dic["Vk"]
         Fk = self.absolute_dic["Fk"]
         dt = self.absolute_dic["dt"]
-        params = self.root.findall("param")
 
-        for param in params:
-            key = param.get("name")
-            val = self.absolute_dic[key]
-            if self.has_unit(param, SPRING_UNIT):
-                val /= Fk
-            elif self.has_unit(param, DRAG_UNIT):
-                val *= Vk / Fk
-            elif self.has_unit(param, SPEED_UNIT):
-                val /= Vk
-            elif self.has_unit(param, FREQ_UNIT):
-                val *= dt
-            elif self.has_unit(param, FORCE_UNIT):
-                val /= Fk
-            self.relative_dic[key] = val
-
-    def change_dic(self, key, new_value, verbose=True):
-        """
-        Changes the Element tree and re-creates the associated dictionnary.
-        If write is True, re_writes the parameters files
-        (older version is backed up if back_up is True)
-
-        new_value is absolute - it has units
-        """
-
-        if self.absolute_dic is None:
-            self.create_dic()
-        a = self.root.findall('param')
-        for item in a:
-            if item.attrib['name'] == key:
-                item.attrib['value'] = str(new_value)
-                try:
-                    self.absolute_dic[key] = new_value
-                except KeyError:
-                    log.error("Couldn't find the parameter %s" % key)
-                    return 0
-                break
-        try:
-            self.adimentionalize()
-        except KeyError:
-            if 'metaph_rate' in self.absolute_dic.keys():
-                self.relative_dic = self.absolute_dic
-            else:
-                log.error('Oooups')
-                raise()
+        for i, p in self.params.iterrows():
+            key = p['name']
+            value = p['value']
+            if p['unit'] == SPRING_UNIT:
+                value /= Fk
+            elif p['unit'] == DRAG_UNIT:
+                value *= Vk / Fk
+            elif p['unit'] == SPEED_UNIT:
+                value /= Vk
+            elif p['unit'] == FREQ_UNIT:
+                value *= dt
+            elif p['unit'] == FORCE_UNIT:
+                value /= Fk
+            self.relative_dic[key] = value
 
     def save(self, path):
+        """Save as json file
         """
-        Save root tree to a xml file
-        """
-
         f = open(path, "w")
-        f.write(tostring(self.root))
+        f.write(self.params.to_json(orient='records'))
         f.close()
 
-    def to_df(self):
+    def __setitem__(self, key, item):
         """
-        Convert self.tree to :class:`pandas.DataFrame`
-
-        Returns
-        -------
-        :class:`pandas.DataFrame`
         """
+        params = self.params.set_index('name')
+        params.loc[key, 'value'] = item
+        self.params = params.reset_index()
 
-        attributs = {'name': [], 'value': [], 'min': [], 'max': [], 'step': []}
-        tags = {'unit': [], 'description': []}
-
-        for el in self.root.findall("param"):
-
-            for name in attributs:
-                value = el.get(name)
-                attributs[name].append(str(value))
-            for name in tags:
-                value = el.find(name).text
-                tags[name].append(str(value))
-
-        attributs.update(tags)
-        df = pd.DataFrame.from_dict(attributs)
-        cols_ordered = ['name', 'value', 'unit', 'description', 'min', 'max', 'step']
-        df = df.reindex_axis(cols_ordered, axis=1)
-
-        return df
-
-
-class ResultTree(ParamTree):
-
-    def __init__(self, xmlfile, datafile):
-
-        ParamTree.__init__(self, xmlfile=xmlfile, adimentionalized=False)
-        self.data = np.load(datafile)
-
-    def get_spb_trajs(self):
-        Rcol = None
-        Lcol = None
-        for traj in self.tree.getiterator("trajectory"):
-            if traj.get("name") == "rightspb":
-                Rcol = traj.get("column")
-            if traj.get("name") == "leftspb":
-                Lcol = traj.get("column")
-            if Rcol is not None and Lcol is not None:
-                break
-        spb_trajs = self.data.take((Rcol, Lcol), axis=1)
-        return spb_trajs
-
-    def get_centromere_trajs(self):
-        N = int(self.relative_dic['N'])
-        cols = []
-        for traj in self.tree.getiterator("trajectory"):
-            if 'centromere' in traj.get("name"):
-                col = traj.get("column")
-                cols.append(col)
-            if len(cols) == N * 2:
-                break
-        cols = tuple(cols)
-        kineto_trajs = self.data.take(cols, axis=1)
-        return kineto_trajs
-
-    def get_all_trajs(self):
-        cols = []
-        for traj in self.tree.getiterator("trajectory"):
-            col = int(traj.get("column"))
-            cols.append(col)
-        cols = tuple(cols)
-        return self.data.take(cols, axis=1)
-
-    def get_all_correct(self):
-
-        cols = []
-        for traj in self.tree.getiterator("numbercorrect"):
-            col = int(traj.get("column"))
-            cols.append(col)
-        cols = tuple(cols)
-        return self.data.take(cols, axis=1)
-
-    def get_all_erroneous(self):
-        cols = []
-        for traj in self.tree.getiterator("numbererroneous"):
-            col = int(traj.get("column"))
-            cols.append(col)
-
-        cols = tuple(cols)
-        return self.data.take(cols, axis=1)
-
-    def get_all_plug_state(self):
-        cols = []
-        for state_hist in self.tree.getiterator("state"):
-            col = int(state_hist.get("column"))
-            cols.append(col)
-
-        cols = tuple(cols)
-        return self.data.take(cols, axis=1)
+        self.build_tree()

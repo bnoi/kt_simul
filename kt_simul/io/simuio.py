@@ -9,7 +9,6 @@ from __future__ import print_function
 
 import os
 import logging
-import xml.etree.ElementTree as ET
 
 import pandas as pd
 
@@ -37,7 +36,8 @@ class SimuIO():
             self.paramtree = self.meta.paramtree
             self.measuretree = self.meta.measuretree
 
-    def save(self, simufname, simu_id=None, metadata=None, save_tree=True, verbose=False):
+    def save(self, simufname, simu_id=None,
+             metadata=None, save_tree=True, verbose=False):
         """
         Save :class:`~kt_simul.core.simul_spindle.Metaphase` instance to
         HDF5 file. Each of the following element will be stored via
@@ -176,8 +176,8 @@ class SimuIO():
 
         if save_tree and ('params' not in store and 'measures' not in store):
             # Get ParamTree as Dataframe
-            params = self.paramtree.to_df()
-            measures = self.measuretree.to_df()
+            params = self.paramtree.params
+            measures = self.measuretree.params
             store['params'] = params
             store['measures'] = measures
 
@@ -186,7 +186,8 @@ class SimuIO():
         if verbose:
             log.info("Simulation saved to file %s " % simufname)
 
-    def read(self, simufname, simu_id=None, paramtree=None, measuretree=None, verbose=False):
+    def read(self, simufname, simu_id=None,
+             paramtree=None, measuretree=None, verbose=False):
         """
         Creates a simul_spindle.Metaphase from a results.zip file.
 
@@ -213,14 +214,11 @@ class SimuIO():
             store_prefix = ""
 
         if not paramtree:
-            param_root = build_tree(store['params'])
-            paramtree = ParamTree(root=param_root)
+            paramtree = ParamTree(df=store['params'])
         params = paramtree.relative_dic
 
         if not measuretree:
-            measure_root = build_tree(store['measures'])
-            measuretree = ParamTree(root=measure_root,
-                                    adimentionalized=False)
+            measuretree = ParamTree(df=store['measures'], adimentionalized=False)
 
         meta = Metaphase(paramtree=paramtree, measuretree=measuretree, verbose=False)
         KD = KinetoDynamics(params)
@@ -269,32 +267,3 @@ class SimuIO():
         meta.KD.simulation_done = True
 
         return meta
-
-
-def build_tree(df):
-    """
-    Build :class:`ElementTree` instance from :class:`pandas.DataFrame`.
-
-    Parameters
-    ----------
-
-    df : :class:`pandas.DataFrame`
-        df should come from ParamTree.to_df() method.
-
-    Returns
-    -------
-    :class:`ElementTree`
-    """
-
-    root = ET.Element("parameters")
-    tags = ['unit', 'description']
-    for i, p in df.iterrows():
-        et = ET.SubElement(root, "param")
-
-        for key, value in list(p.iteritems()):
-            if key not in tags:
-                et.set(key, value)
-            else:
-                subet = ET.SubElement(et, key)
-                subet.text = value
-    return root
