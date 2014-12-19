@@ -11,16 +11,29 @@ from __future__ import print_function
 import logging
 import os
 
-from kt_simul.io.xml_handler import ParamTree
+import numpy as np
+from scipy import linalg
+
+from ..io import ParamTree
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
 PARAMFILE = os.path.join(ROOT_DIR, 'data', 'params.xml')
 MEASUREFILE = os.path.join(ROOT_DIR, 'data', 'measures.xml')
-MEASURETREE = ParamTree(MEASUREFILE, adimentionalized=False)
-MEASURES = MEASURETREE.absolute_dic
 
 log = logging.getLogger(__name__)
+
+
+def get_default_paramtree():
+    """
+    """
+    return ParamTree(PARAMFILE)
+
+
+def get_default_measuretree():
+    """
+    """
+    return ParamTree(MEASUREFILE, adimentionalized=False)
 
 
 def reduce_params(paramtree, measuretree, force_parameters=[]):
@@ -31,9 +44,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     Parameters
     ----------
 
-    paramtree : :class:`~kt_simul.io.xml_handler.ParamTree` instance
+    paramtree : :class:`~kt_simul.io.ParamTree` instance
         Modified in place.
-    measuretree : :class:`~kt_simul.io.xml_handler.MeasureTree` instance
+    measuretree : :class:`~kt_simul.io.MeasureTree` instance
 
     References
     ----------

@@ -22,7 +22,7 @@ import pandas as pd
 from ..core.simul_spindle import Metaphase
 from ..io.simuio import SimuIO
 from ..io.simuio import build_tree
-from ..io.xml_handler import ParamTree
+from ..io import ParamTree
 from ..utils.progress import pprogress
 from ..utils.dict import sanitize_dict
 from ..utils.dict import guess_number_dict

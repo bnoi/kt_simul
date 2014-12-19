@@ -20,22 +20,14 @@ import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()})
 
 from ..core.spindle_dynamics import KinetoDynamics
-from ..io.xml_handler import ParamTree
+from ..io import ParamTree
 from ..core import parameters
 from ..utils.progress import pprogress
 from ..utils.format import pretty_dict
 
 log = logging.getLogger(__name__)
 
-__all__ = ["Metaphase", "PARAMFILE", "MEASUREFILE"]
-
-CURRENT_DIR = parameters.CURRENT_DIR
-ROOT_DIR = parameters.ROOT_DIR
-PARAMFILE = parameters.PARAMFILE
-MEASUREFILE = parameters.MEASUREFILE
-MEASURETREE = parameters.MEASURETREE
-MEASURES = parameters.MEASURES
-
+__all__ = ["Metaphase"]
 
 class SimulationAlreadyDone(Exception):
     pass
@@ -47,63 +39,19 @@ class Metaphase(object):
     An instance of the Metaphase class is a wrapper around
     the whole simulation.
 
-    Launch a new simulation::
-
-        from kt_simul.io.xml_handler import ParamTree
-        from kt_simul.core.simul_spindle import Metaphase
-        from kt_simul.io.simuio import SimuIO
-        from kt_simul.core import parameters
-
-        PARAMFILE = parameters.PARAMFILE
-        MEASUREFILE = parameters.MEASUREFILE
-
-        # Change some parameters
-        paramtree = ParamTree(PARAMFILE)
-        paramtree.change_dic('dt', 10)
-        paramtree.change_dic('span', 2000)
-        paramtree.change_dic('t_A', 1750)
-
-        measuretree = ParamTree(MEASUREFILE, adimentionalized=False)
-
-        # Init simu
-        meta = Metaphase(verbose=True, paramtree=paramtree, measuretree=measuretree, initial_plug='random')
-
-        # Launch simu
-        meta.simul()
-
-        # Save results
-        SimuIO(meta).save("simu.h5")
-
-        # Show trajectories (matplotlib needed)
-        meta.show()
-
-
     Parameters
     ----------
 
-    paramtree : :class:`~kt_simul.io.xml_handler.ParamTree` instance or None
+    paramtree : :class:`~kt_simul.io.ParamTree` instance or None
         The paramtree contains the parameters for the simulation
         if paramtree is None, the parameters are read
         from the file paramfile. Defaults to None.
 
-    measuretree : :class:`~kt_simul.io.xml_handler.ParamTree` instance or None
+    measuretree : :class:`~kt_simul.io.MeasureTree` instance or None
         The measuretree contains the observed characteristics
         of the mitosis e.g. metaphase spindle elongation rate, etc.
         if measuretree is None, the measures are read from the file
         indicated by the measurefile argument. Defaults to None.
-
-    paramfile : str
-        Path to a xml file to read the parameters from. Defaults to the
-        file params.xml in the module's default directory. Other parameter
-        files can be produced by editing and changing the default one.
-        If the paramtree argument is not None,  paramfile is ignored
-
-    measurefile : str
-        Path to a xml file to read the measures from. Defaults to the
-        file measures.xml in the module's default directory.
-        Other measure files can be produced by editing and changing
-        the default one. If the measuretree argument is not None, measurefile
-        is ignored
 
     initial_plug : string or None
         Defines globally the initial attachment states. This argument can have
@@ -116,11 +64,6 @@ class Metaphase(object):
             left ones are detached
             - 'syntelic' : all kinetochores are attached to the same pole
 
-    reduce_p : bool
-        If True, changes the parameters according to the measures
-        so that the simulation average behaviour complies with
-        the data in the measures dictionary
-
     keep_same_random_seed : bool
         To launch simulations with same random state
 
@@ -129,9 +72,8 @@ class Metaphase(object):
     RANDOM_STATE = None
 
     def __init__(self,  paramtree=None, measuretree=None,
-                 paramfile=None, measurefile=None,
-                 initial_plug='random', reduce_p=True,
-                 verbose=False, keep_same_random_seed=False,
+                 initial_plug='random', verbose=False,
+                 keep_same_random_seed=False,
                  force_parameters=[]):
 
         # Enable or disable log console
@@ -142,22 +84,18 @@ class Metaphase(object):
         else:
             log.disabled = False
 
-        if not paramfile:
-            paramfile = PARAMFILE
-        if not measurefile:
-            measurefile = MEASUREFILE
-
         if paramtree is None:
-            self.paramtree = ParamTree(paramfile)
+            self.paramtree = parameters.get_default_paramtree()
         else:
             self.paramtree = paramtree
+
         if measuretree is None:
-            self.measuretree = ParamTree(measurefile, adimentionalized=False)
+            self.measuretree = parameters.get_default_measuretree()
         else:
             self.measuretree = measuretree
 
-        if reduce_p:
-            parameters.reduce_params(self.paramtree, self.measuretree, force_parameters=force_parameters)
+        parameters.reduce_params(self.paramtree, self.measuretree,
+                                 force_parameters=force_parameters)
 
         log.info('Parameters loaded')
 

@@ -56,8 +56,7 @@ cdef class KinetoDynamics(object):
         """
         KinetoDynamics instenciation method
 
-        :param parameters: A dictionnary of parameters as obtained from a
-            xml_handler.ParamTree instance
+        :param parameters: A dictionnary of parameters as obtained from a ParamTree instance
         :type parameters: ParamTree instance
 
         :param initial_plug: Defines globally the initial attachment states.

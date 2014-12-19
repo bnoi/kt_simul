@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Handler for the parameters xml files -- to allow phase space exploration
+Handler for the parameters files
 """
 
 from __future__ import unicode_literals

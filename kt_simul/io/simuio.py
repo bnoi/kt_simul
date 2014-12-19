@@ -15,7 +15,7 @@ import pandas as pd
 
 from ..core.simul_spindle import Metaphase
 from ..core.spindle_dynamics import KinetoDynamics
-from .xml_handler import ParamTree
+from . import ParamTree
 
 log = logging.getLogger(__name__)
 
