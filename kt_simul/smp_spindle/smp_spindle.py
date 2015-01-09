@@ -68,10 +68,15 @@ class SympySpindle:
         self.ud_dep = []
         self._setup_done = False
 
+        ### Kinematic diff
+        self.kd = []
+        ### Constraints
+        self.configuration_constraints = []
+        self.speed_constraints = []
+
     @property
     def lagrangian(self):
         return sympify(sum(self.forcebalance['lagrangian']))
-
     @property
     def q(self):
         return self.forcebalance['q_ind'] + self.forcebalance['q_dep']
@@ -247,8 +252,11 @@ class LinearFV():
         ell_name = indexer('ell', index, expo)
         self.ell = dynamicsymbols(ell_name)
         self.elld = dynamicsymbols(ell_name, 1)
+        ## generalized speed
+
+        self.vell = dynamicsymbols('v'+ell_name, 1)
         ## coordinate constraint
-        self.coord_constraint  = self.ell - (point1.pos_from(point2) & e_F)
+        self.coord_constraint  = self.ell - (point2.pos_from(point1) & e_F)
 
         ## generalized speed
         self.v_g = dynamicsymbols(indexer('v_g', index, expo))
@@ -271,10 +279,10 @@ class LinearFV():
 
         spindle.q_dep.append(lfv.ell)
         spindle.qd_dep.append(lfv.elld)
+        spindle.kd.append(lfv.elld - lfv.vell)
         spindle.u_dep.append(lfv.v_g)
-        spindle.forcebalance['kd'].append(lfv.elld - lfv.ell)
-        spindle.forcebalance['configuration_constraints'].append(lfv.coord_constraint)
-        spindle.forcebalance['speed_constraints'].append(lfv.speed_constraint)
+        spindle.configuration_constraints.append(lfv.coord_constraint)
+        spindle.speed_constraints.append(lfv.speed_constraint)
         return lfv
 
 def indexer(name, index=None, expo=None):
