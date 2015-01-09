@@ -38,3 +38,9 @@ nosetests.xml
 doc/build/
 build/
 dist/
+
+## emacs and latex
+*.*~
+*.aux
+*.log
+*.out
