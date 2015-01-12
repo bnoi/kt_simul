@@ -72,7 +72,8 @@ class SympySpindle:
         self.kd = []
         ### Constraints
         self.configuration_constraints = []
-        self.speed_constraints = []
+        self.velocity_constraints = []
+        self.u_auxiliary = []
 
     @property
     def lagrangian(self):
@@ -201,7 +202,7 @@ class LinearFV():
     >>> expl_spindle = SympySpindle('expl')
 
     >>> ### coordinates
-    >>>  q1, q2 = dynamicsymbols("q1, q2")
+    >>> q1, q2 = dynamicsymbols("q1, q2")
     >>> q1d, q2d = dynamicsymbols("q1d, q2d")
     >>> N = ReferenceFrame('N')
     >>> ### points
@@ -249,24 +250,24 @@ class LinearFV():
         self.point2 = point2
 
         ## generalized coordinate
-        ell_name = indexer('ell', index, expo)
-        self.ell = dynamicsymbols(ell_name)
-        self.elld = dynamicsymbols(ell_name, 1)
+        #ell_name = indexer('ell', index, expo)
+        #self.ell = dynamicsymbols(ell_name)
+        #self.elld = dynamicsymbols(ell_name, 1)
         ## generalized speed
+        self.vell = dynamicsymbols(indexer('v', index, expo))
 
-        self.vell = dynamicsymbols('v'+ell_name, 1)
+
         ## coordinate constraint
-        self.coord_constraint  = self.ell - (point2.pos_from(point1) & e_F)
+        #self.coord_constraint  = self.ell - (point2.pos_from(point1) & e_F)
 
-        ## generalized speed
-        self.v_g = dynamicsymbols(indexer('v_g', index, expo))
-        ## speed constraint (v_g = V_max - gamma * ld)
-        self.speed_constraint = self.v_g + gamma * self.elld - V_max # == 0
+        #self.kd = self.vell + gamma * self.elld - V_max
+        v = (point2.pos_from(point1) & e_F).diff(dynamicsymbols._t)
+        self.speed_constraint  = self.vell + gamma * v - V_max
 
-        ## Force
-        self.F = (F_max / V_max) * self.v_g * e_F
-
-        self.F_ = self.F.subs(self.v_g, V_max - gamma * self.elld)
+        #self.kd = self.vell + gamma * v - V_max
+        ### Force
+        self.F = (F_max / V_max) * self.vell * e_F
+        #self.F = F_max * (1 - gamma * self.vell / V_max) * e_F
 
     @classmethod
     def new(cls, spindle, *args, **kwargs):
@@ -277,12 +278,13 @@ class LinearFV():
         spindle.forcebalance['forces'].extend([(lfv.point1, lfv.F),
                                                (lfv.point2, - lfv.F)])
 
-        spindle.q_dep.append(lfv.ell)
-        spindle.qd_dep.append(lfv.elld)
-        spindle.kd.append(lfv.elld - lfv.vell)
-        spindle.u_dep.append(lfv.v_g)
-        spindle.configuration_constraints.append(lfv.coord_constraint)
-        spindle.speed_constraints.append(lfv.speed_constraint)
+        #spindle.q_dep.append(lfv.ell)
+        #spindle.qd_dep.append(lfv.elld)
+        #spindle.kd.append(lfv.kd)
+        spindle.u_dep.append(lfv.vell)
+        #spindle.configuration_constraints.append(lfv.coord_constraint)
+        #spindle.u_auxiliary.append(lfv.vell)
+        spindle.velocity_constraints.append(lfv.speed_constraint)
         return lfv
 
 def indexer(name, index=None, expo=None):
