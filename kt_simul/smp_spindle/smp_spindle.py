@@ -223,7 +223,7 @@ class LinearFV():
     >>> assert lfv.ell.diff() == lfv.elld
     '''
 
-    def __init__(self, point1, point2, F_max,
+    def __init__(self, N, point1, point2, F_max,
                  V_max, gamma, e_F,
                  index=None, expo=None):
 
@@ -236,7 +236,7 @@ class LinearFV():
          the maximum speed (in intended regime)
         gamma: int
          if gamma = 1, force tends to extend the distance ell
-         if gamma = 0, force tends to reduce ell
+         if gamma = -1, force tends to reduce ell
         e_F : unit vector
          the unit vector along which the force is applied
          (should probably be  in the reference frame used to
@@ -248,26 +248,13 @@ class LinearFV():
 
         self.point1 = point1
         self.point2 = point2
-
-        ## generalized coordinate
-        #ell_name = indexer('ell', index, expo)
-        #self.ell = dynamicsymbols(ell_name)
-        #self.elld = dynamicsymbols(ell_name, 1)
         ## generalized speed
-        self.vell = dynamicsymbols(indexer('v', index, expo))
+        #self.vell = dynamicsymbols(indexer('v', index, expo))
 
-
-        ## coordinate constraint
-        #self.coord_constraint  = self.ell - (point2.pos_from(point1) & e_F)
-
-        #self.kd = self.vell + gamma * self.elld - V_max
-        v = (point2.pos_from(point1) & e_F).diff(dynamicsymbols._t)
-        self.speed_constraint  = self.vell + gamma * v - V_max
-
-        #self.kd = self.vell + gamma * v - V_max
+        v = (point2.vel(N) - point1.vel(N)) & e_F
+        #self.speed_constraint  = self.vell + gamma * v - V_max
         ### Force
-        self.F = (F_max / V_max) * self.vell * e_F
-        #self.F = F_max * (1 - gamma * self.vell / V_max) * e_F
+        self.F = F_max * (1 - gamma * v / V_max) * e_F
 
     @classmethod
     def new(cls, spindle, *args, **kwargs):
@@ -275,16 +262,12 @@ class LinearFV():
 
         lfv = cls(*args, **kwargs)
         ## Register
-        spindle.forcebalance['forces'].extend([(lfv.point1, lfv.F),
-                                               (lfv.point2, - lfv.F)])
+        # if extending, force goes outward the segment, thus is negative for point1
+        spindle.forcebalance['forces'].extend([(lfv.point1, - lfv.F),
+                                               (lfv.point2, lfv.F)])
 
-        #spindle.q_dep.append(lfv.ell)
-        #spindle.qd_dep.append(lfv.elld)
-        #spindle.kd.append(lfv.kd)
-        spindle.u_dep.append(lfv.vell)
-        #spindle.configuration_constraints.append(lfv.coord_constraint)
-        #spindle.u_auxiliary.append(lfv.vell)
-        spindle.velocity_constraints.append(lfv.speed_constraint)
+        #spindle.u_dep.append(lfv.vell)
+        #spindle.velocity_constraints.append(lfv.speed_constraint)
         return lfv
 
 def indexer(name, index=None, expo=None):
