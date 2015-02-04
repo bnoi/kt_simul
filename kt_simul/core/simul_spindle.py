@@ -587,6 +587,29 @@ class Metaphase(object):
 
         return fig
 
+    def get_attachment_vector(self):
+        """Get attachment states for all chromosomes and all timepoints.
+        """
+
+        att = []
+
+        time = np.arange(0, self.KD.duration, self.KD.dt)
+        anaphase = self.KD.params['t_A']
+        index_anaphase = np.argwhere(time == anaphase)[0][0]
+
+        for ch in self.KD.chromosomes:
+            ch.calc_correct_history()
+            ch.calc_erroneous_history()
+
+            # Return attachment history for all timepoints
+            c_hist = ch.correct_history
+            e_hist = ch.erroneous_history
+            state = [self.get_attachment(np.concatenate((c, e))) for c, e in zip(c_hist, e_hist)]
+
+            att.append(state)
+
+        return np.array(att).T
+
     def get_attachment(self, state):
         """
         Get attachment state name according to biological classification:
