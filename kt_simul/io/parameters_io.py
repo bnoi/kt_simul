@@ -38,13 +38,15 @@ class ParamTree(object):
     whereas the value in the dictionnary is changed.
     """
 
-    def __init__(self, df=None, jsonfile=None, adimentionalized=True):
+    def __init__(self, jsonfile=None, df=None, adimentionalized=True):
         """
         """
         if jsonfile:
             self.params = pd.read_json(jsonfile, orient='records')
         elif isinstance(df, pd.DataFrame):
             self.params = df
+        else:
+            raise Exception("ParamTree need a DataFrame or json file.")
 
         self.adimentionalized = adimentionalized
         self.build_tree()

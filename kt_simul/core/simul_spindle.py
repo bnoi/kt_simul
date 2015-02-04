@@ -639,3 +639,11 @@ class Metaphase(object):
         names = ['amphitelic', 'monotelic', 'syntelic',
                  'merotelic', 'unattached', 'error']
         return names
+
+    def __del__(self):
+        """
+        """
+        del self.KD
+        del self.analysis
+        del self.measuretree
+        del self.paramtree

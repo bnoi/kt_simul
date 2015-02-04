@@ -30,14 +30,6 @@ from ..utils.dict import guess_number_dict
 log = logging.getLogger(__name__)
 
 
-class FolderExistException(Exception):
-    pass
-
-
-class FolderNotExistException(Exception):
-    pass
-
-
 class Pool:
 
     """
@@ -61,7 +53,7 @@ class Pool:
             log.disabled = False
 
         self.simu_path = simu_path
-        self.simu_full_path = self.simu_path + "/simulations.h5"
+        self.simu_full_path = self.simu_path
 
         if not load:
             self.paramtree = paramtree
@@ -71,11 +63,8 @@ class Pool:
             self.parallel = parallel
             self.n_simu = n_simu
 
-            # Create a folder. Raise an exeception if it exists.
-            if os.path.isdir(self.simu_path):
-                raise FolderExistException("%s exists." % self.simu_path)
-            else:
-                os.makedirs(self.simu_path)
+            if os.path.isfile(self.simu_path):
+                raise Exception("%s exists." % self.simu_path)
 
             self.metaphases_path = []
             self.simus_run = False
@@ -86,8 +75,8 @@ class Pool:
             # parallel, date/time, n_simu
 
             store = pd.HDFStore(self.simu_full_path)
-            store['params'] = paramtree.to_df()
-            store['measures'] = measuretree.to_df()
+            store['params'] = paramtree.params
+            store['measures'] = measuretree.params
 
             metadata = {'n_simu': self.n_simu,
                         'parallel': self.parallel,
@@ -99,14 +88,9 @@ class Pool:
             store.close()
 
         else:
-            if not os.path.isdir(self.simu_path):
-                raise FolderNotExistException(
-                    "%s does not exists." % self.simu_path)
-
             store = pd.HDFStore(self.simu_full_path)
-            self.paramtree = ParamTree(root=build_tree(store['params']))
-            self.measuretree = ParamTree(root=build_tree(store['measures']),
-                                         adimentionalized=False)
+            self.paramtree = ParamTree(df=store['params']))
+            self.measuretree = ParamTree(df=store['measures'], adimentionalized=False)
 
             metadata = guess_number_dict(store['metadata'].to_dict())
             self.n_simu = metadata['n_simu']
@@ -152,8 +136,7 @@ class Pool:
                            'measuretree': self.measuretree,
                            'initial_plug': self.initial_plug,
                            'force_parameters': self.force_parameters,
-                           'verbose': False,
-                           'reduce_p': True}
+                           'verbose': False}
 
         if self.parallel:
             simus_path = []
@@ -216,10 +199,14 @@ class Pool:
         all_simu_id = [get_simu_id(i, self.digits) for i in range(self.n_simu)]
 
         for simu_id in all_simu_id:
-            yield SimuIO().read(self.simu_full_path,
-                                simu_id=simu_id,
-                                paramtree=self.paramtree,
-                                measuretree=self.measuretree)
+
+            ioo = SimuIO()
+            meta = ioo.read(self.simu_full_path,
+                            simu_id=simu_id,
+                            paramtree=self.paramtree,
+                            measuretree=self.measuretree)
+            del ioo
+            yield meta
 
     def load_metaphase_parallel(self, pre_processing_func=None , verbose=True):
         """

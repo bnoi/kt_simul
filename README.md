@@ -45,11 +45,11 @@ LICENCE for full details).
 Dependencies
 ------------
 
-- Python 2.7 and Python 3
-- numpy >= 1.7
+- Python 2.7 and Python 3.4
+- numpy >= 1.8
 - scipy >= 0.12
 - cython >= 0.19
-- pandas >= 0.12
+- pandas >= 0.15.2
 - matplotlib (optional) >= 1.2
 - PyQt4 (optional)
 

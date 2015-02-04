@@ -102,6 +102,24 @@ cdef class KinetoDynamics(object):
         self.all_plugsites = self.spindle.get_all_plugsites()
         self.speeds = np.zeros(dim)
 
+    def __del__(self):
+        """
+        """
+        del self.spindle
+        del self.spbR
+        del self.spbL
+        del self.initial_plug
+        del self.simulation_done
+        del self.params
+        del self.chromosomes
+        del self.B_mat
+        del self.At_mat
+        del self.A0_mat
+        del self.anaphase
+        del self.all_plugsites
+        del self.speeds
+        del self.prng
+
     cdef _idx(self, int side, int n, int m=-1):
         """
         :return: The index dictionnary
@@ -202,8 +220,8 @@ cdef class KinetoDynamics(object):
             delta2 = ch.delta2()
             an = self._idx(0, n)
             bn = self._idx(1, n)
-            A0[an, an] = - Mk * muk - muc + muco 
-            A0[bn, bn] = - Mk * muk - muc - muco 
+            A0[an, an] = - Mk * muk - muc + muco
+            A0[bn, bn] = - Mk * muk - muc - muco
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
