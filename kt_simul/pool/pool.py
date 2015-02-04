@@ -21,7 +21,6 @@ import pandas as pd
 
 from ..core.simul_spindle import Metaphase
 from ..io.simuio import SimuIO
-from ..io.simuio import build_tree
 from ..io import ParamTree
 from ..utils.progress import pprogress
 from ..utils.dict import sanitize_dict
@@ -89,7 +88,7 @@ class Pool:
 
         else:
             store = pd.HDFStore(self.simu_full_path)
-            self.paramtree = ParamTree(df=store['params']))
+            self.paramtree = ParamTree(df=store['params'])
             self.measuretree = ParamTree(df=store['measures'], adimentionalized=False)
 
             metadata = guess_number_dict(store['metadata'].to_dict())

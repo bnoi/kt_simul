@@ -102,3 +102,13 @@ class ParamTree(object):
         self.params = params.reset_index()
 
         self.build_tree()
+
+    def __getitem__(self, key):
+        """
+        """
+        return self.params.set_index('name').loc[key, 'value']
+
+    def copy(self):
+        """
+        """
+        return ParamTree(df=self.params.copy(), adimentionalized=self.adimentionalized)

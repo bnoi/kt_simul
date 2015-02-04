@@ -17,7 +17,7 @@ import numpy as np
 import collections
 
 import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()})
+pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=True)
 
 from ..core.spindle_dynamics import KinetoDynamics
 from ..io import ParamTree
@@ -643,7 +643,11 @@ class Metaphase(object):
     def __del__(self):
         """
         """
-        del self.KD
-        del self.analysis
-        del self.measuretree
-        del self.paramtree
+        if hasattr(self, 'KD'):
+            del self.KD
+        if hasattr(self, 'analysis'):
+            del self.analysis
+        if hasattr(self, 'measuretree'):
+            del self.measuretree
+        if hasattr(self, 'paramtree'):
+            del self.paramtree

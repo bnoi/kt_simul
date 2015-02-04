@@ -449,6 +449,9 @@ cdef class PlugSite(Organite):
         ldep = self.KD.params['ldep']
         ldep_balance = self.KD.params['ldep_balance']
 
+        if ldep == 0:
+            return 1
+
         # The mean
         lbase = (1 - ldep * ldep_balance)
 
@@ -460,21 +463,48 @@ cdef class PlugSite(Organite):
         pole_pos = self.KD.spbR.pos * self.plug_state
         mt_length = abs(pole_pos - self.pos)
 
-        force_term = ldep * mt_length + lbase
+        ldep_factor = ldep * mt_length + lbase
 
-        return force_term
+        return ldep_factor
+
+    def calc_ldep_for_attachment(self):
+        """
+        """
+
+        # Gaussian parameters
+        std = self.KD.params['ldep_for_attachment_std']
+        mu = self.KD.params['ldep_for_attachment_mu']
+
+        if std == 0:
+            return 1
+
+        def get_gaussian(mu, std, x):
+            return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
+
+        ldep_factor_max = get_gaussian(mu, std, mu)
+
+        dist_to_center = self.pos
+
+        ldep_factor = get_gaussian(mu, std, dist_to_center)
+        ldep_factor /= ldep_factor_max
+
+        return ldep_factor
 
     cdef void plug_unplug(self, int time_point):
         cdef float dice, side_dice
         dice = self.KD.prng.rand()
+
         # Attachment
         if self.plug_state == 0 and dice < self.P_att:
             side_dice = self.KD.prng.rand()
             P_left = self.centromere.P_attachleft()
+            P_left *= self.calc_ldep_for_attachment()
+
             if side_dice < P_left:
                 self.set_plug_state(-1, time_point)
             else:
                 self.set_plug_state(1, time_point)
+
         # Detachment
         elif dice < self.P_det():
             self.set_plug_state(0, time_point)

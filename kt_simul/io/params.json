@@ -141,7 +141,7 @@
         "name": "ldep",
         "step": "0",
         "unit": " ",
-        "value": "1"
+        "value": "0"
     },
     {
         "description": "MT free detachement frequency",
@@ -234,15 +234,6 @@
         "value": "100.0"
     },
     {
-        "description": "Mean kt-spb distance",
-        "max": "2.",
-        "min": "0.",
-        "name": "k_spb",
-        "step": "0.1",
-        "unit": "µm",
-        "value": "1"
-    },
-    {
         "description": "Length dependence balance",
         "max": "2.",
         "min": "0.",
@@ -251,6 +242,7 @@
         "unit": " ",
         "value": "1"
     },
+
     {
         "description": "Cohesin structural friction coefficient",
         "max": "10000.",
@@ -258,6 +250,24 @@
         "name": "muco",
         "step": "1",
         "unit": "pN.s/µm",
+        "value": "0"
+    },
+    {
+        "description": "Length dependence for attachment (std)",
+        "max": "0",
+        "min": "0",
+        "name": "ldep_for_attachment_std",
+        "step": "0",
+        "unit": " ",
+        "value": "0"
+    },
+    {
+        "description": "Length dependence for attachment (mu)",
+        "max": "0",
+        "min": "0",
+        "name": "ldep_for_attachment_mu",
+        "step": "0",
+        "unit": " ",
         "value": "0"
     }
 ]

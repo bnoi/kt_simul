@@ -86,7 +86,7 @@ cdef class KinetoDynamics(object):
         self.spindle = Spindle(self)
         self.spbR = Spb(self.spindle, RIGHT, L0)  # right spb (RIGHT = 1)
         self.spbL = Spb(self.spindle, LEFT, L0)  # left one (LEFT = -1)
-        self.initial_plug = initial_plug#.decode('UTF-8')
+        self.initial_plug = initial_plug
         cdef Chromosome ch
         self.chromosomes = []
         for n in range(N):
