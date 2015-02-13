@@ -72,6 +72,7 @@ cdef class Centromere(Organite):
 
 cdef class PlugSite(Organite):
     cdef public Centromere centromere
+    cdef public unicode current_side
     cdef public unicode tag
     cdef public int plug_state, plugged
     cdef public np.ndarray state_hist

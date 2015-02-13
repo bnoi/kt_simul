@@ -397,6 +397,7 @@ cdef class PlugSite(Organite):
         initial_plug = self.KD.initial_plug
         self.centromere = centromere
         self.tag = self.centromere.tag
+        self.current_side = ""
         self.site_id = site_id
 
         if initial_plug == None:
@@ -475,6 +476,13 @@ cdef class PlugSite(Organite):
         std = self.KD.params['ldep_for_attachment_std']
         mu = self.KD.params['ldep_for_attachment_mu']
 
+        if self.current_side == 'right':
+            mu = -mu
+        elif self.current_side == 'left':
+            mu = mu
+        else:
+            raise Exception('Wrong side idiot !')
+
         if std == 0:
             return 1
 
@@ -488,26 +496,54 @@ cdef class PlugSite(Organite):
         ldep_factor = get_gaussian(mu, std, dist_to_center)
         ldep_factor /= ldep_factor_max
 
-        return ldep_factor
+        return ldep_factor + 0.5
+
+    # cdef void plug_unplug(self, int time_point):
+    #     cdef float dice, side_dice
+    #     dice = self.KD.prng.rand()
+
+    #     # Attachment
+    #     if self.plug_state == 0 and dice < self.P_att:
+    #         side_dice = self.KD.prng.rand()
+    #         P_left = self.centromere.P_attachleft()
+    #         P_left *= self.calc_ldep_for_attachment()
+
+    #         if side_dice < P_left:
+    #             self.set_plug_state(-1, time_point)
+    #         else:
+    #             self.set_plug_state(1, time_point)
+
+    #     # Detachment
+    #     elif dice < self.P_det():
+    #         self.set_plug_state(0, time_point)
 
     cdef void plug_unplug(self, int time_point):
         cdef float dice, side_dice
         dice = self.KD.prng.rand()
 
-        # Attachment
-        if self.plug_state == 0 and dice < self.P_att:
-            side_dice = self.KD.prng.rand()
-            P_left = self.centromere.P_attachleft()
-            P_left *= self.calc_ldep_for_attachment()
+        side_dice = self.KD.prng.rand()
+        P_left = self.centromere.P_attachleft()
 
-            if side_dice < P_left:
+        if side_dice < P_left:
+            # Attachment
+            self.current_side = "left"
+            pa = self.P_att * self.calc_ldep_for_attachment()
+            if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(-1, time_point)
-            else:
+            # Detachment
+            elif dice < self.P_det():
+                self.set_plug_state(0, time_point)
+        else:
+            # Attachment
+            self.current_side = "right"
+            pa = self.P_att * self.calc_ldep_for_attachment()
+            if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(1, time_point)
+            # Detachment
+            elif dice < self.P_det():
+                self.set_plug_state(0, time_point)
 
-        # Detachment
-        elif dice < self.P_det():
-            self.set_plug_state(0, time_point)
+            #
 
     def is_correct(self, int time_point=-1):
         """
