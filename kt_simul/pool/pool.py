@@ -43,7 +43,8 @@ class Pool:
                  initial_plug='random',
                  force_parameters=[],
                  parallel=True,
-                 verbose=True):
+                 verbose=True,
+                 erase=True):
 
         self.verbose = verbose
         if not self.verbose:
@@ -63,7 +64,10 @@ class Pool:
             self.n_simu = n_simu
 
             if os.path.isfile(self.simu_path):
-                raise Exception("%s exists." % self.simu_path)
+                if not erase:
+                    raise Exception("%s exists." % self.simu_path)
+                else:
+                    os.remove(self.simu_path)
 
             self.metaphases_path = []
             self.simus_run = False
