@@ -115,10 +115,11 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         mean_ldep = get_gaussian(params['ldep_for_attachment_mu'],
                                  params['ldep_for_attachment_std'],
                                  np.arange(-mean_size/2, mean_size/2, 0.1))
+
         mean_ldep /= get_gaussian(params['ldep_for_attachment_mu'],
                                   params['ldep_for_attachment_std'],
                                   params['ldep_for_attachment_mu'])
-        mean_ldep[mean_ldep < 0.3] = 0.3
+        mean_ldep[mean_ldep < 0.1] = 0.1
         mean_ldep = mean_ldep.mean()
 
         k_a_eff = k_a * mean_ldep
