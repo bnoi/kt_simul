@@ -107,8 +107,26 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         #log.warning("Things don't go well without Aurora ")
         k_d_eff = k_d0
 
-    # alpha_mean = float(mean_attachment(k_a/fd_eff) / Mk)
-    alpha_mean = 1 / (1 + k_d_eff / k_a)
+    if params['ldep_for_attachment_std'] != 0:
+        def get_gaussian(mu, std, x):
+            return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
+
+        mean_size = 3
+        mean_ldep = get_gaussian(params['ldep_for_attachment_mu'],
+                                 params['ldep_for_attachment_std'],
+                                 np.arange(-mean_size/2, mean_size/2, 0.1))
+        mean_ldep /= get_gaussian(params['ldep_for_attachment_mu'],
+                                  params['ldep_for_attachment_std'],
+                                  params['ldep_for_attachment_mu'])
+        mean_ldep[mean_ldep < 0.3] = 0.3
+        mean_ldep = mean_ldep.mean()
+
+        k_a_eff = k_a * mean_ldep
+    else:
+        k_a_eff = k_a
+
+    alpha_mean = 1 / (1 + k_d_eff / k_a_eff)
+    # log.info("Mean atatchment rate is {}".format(alpha_mean))
 
     # Take metaphase kt pair distance as the maximum one
     # TODO : kc = Fk * Mt * alpha_mean / (max_metaph_k_dist - d0)

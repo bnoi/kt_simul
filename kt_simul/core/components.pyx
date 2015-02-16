@@ -501,8 +501,8 @@ cdef class PlugSite(Organite):
         # Scale to 1 (max of gaussian will be 1)
         ldep_factor /= ldep_factor_max
 
-        if ldep_factor < 0.5:
-            return 0.5
+        if ldep_factor < 0.1:
+             return 0.1
         else:
             return ldep_factor
 
