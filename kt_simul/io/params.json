@@ -269,5 +269,14 @@
         "step": "0",
         "unit": " ",
         "value": "0"
+    },
+    {
+        "description": "Length dependence for attachment (base)",
+        "max": "0",
+        "min": "0",
+        "name": "ldep_for_attachment_base",
+        "step": "0",
+        "unit": " ",
+        "value": "0"
     }
 ]

@@ -475,6 +475,7 @@ cdef class PlugSite(Organite):
         # Gaussian parameters
         std = float(self.KD.params['ldep_for_attachment_std'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
+        base = float(self.KD.params['ldep_for_attachment_base'])
 
         if std == 0:
             return 1
@@ -501,8 +502,8 @@ cdef class PlugSite(Organite):
         # Scale to 1 (max of gaussian will be 1)
         ldep_factor /= ldep_factor_max
 
-        if ldep_factor < 0.1:
-             return 0.1
+        if ldep_factor < base:
+             return base
         else:
             return ldep_factor
 

@@ -78,6 +78,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     d_alpha = params['d_alpha']
     N = int(params['N'])
     Mk = int(params['Mk'])
+    ldep_for_attachment_base = float(params['ldep_for_attachment_base'])
 
     kappa_k = params['kappa_k']
     Fk = params['Fk']
@@ -119,7 +120,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         mean_ldep /= get_gaussian(params['ldep_for_attachment_mu'],
                                   params['ldep_for_attachment_std'],
                                   params['ldep_for_attachment_mu'])
-        mean_ldep[mean_ldep < 0.1] = 0.1
+        mean_ldep[mean_ldep < ldep_for_attachment_base] = ldep_for_attachment_base
         mean_ldep = mean_ldep.mean()
 
         k_a_eff = k_a * mean_ldep
