@@ -93,8 +93,8 @@ cdef class Spb(Organite):
     """
     A spindle pole object.
 
-    Attributes:
-    ===========
+    Attributes
+    ==========
 
     side: 1 or -1
     1 corresponds to the right SPB, i.e. to the Spb with x > 0.
@@ -312,7 +312,8 @@ cdef class Centromere(Organite):
         cdef np.ndarray[ITYPE_t, ndim = 2] state_hist
         cdef np.ndarray[ITYPE_t] right_hist, left_hist
         cdef PlugSite plugsite
-        state_hist = np.array([plugsite.state_hist for plugsite in self.plugsites])
+        state_hist = np.array([plugsite.state_hist
+                               for plugsite in self.plugsites])
         right_hist = np.array(state_hist > 0).sum(axis=0)
         left_hist = np.array(state_hist < 0).sum(axis=0)
         return left_hist, right_hist
