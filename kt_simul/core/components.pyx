@@ -420,7 +420,7 @@ cdef class PlugSite(Organite):
         self.set_pos(init_pos)
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
-        self.P_att = 1 - np.exp(- self.KD.params['k_a'])
+        # self.P_att = 1 - np.exp(- self.KD.params['k_a'])
 
     cdef void set_plug_state(self, int state, int time_point=-1):
         self.plug_state = state
@@ -511,7 +511,9 @@ cdef class PlugSite(Organite):
         if side_dice < P_left:
             # Attachment
             self.current_side = "left"
-            pa = self.P_att * self.calc_ldep_for_attachment()
+            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+            pa = self.P_att = 1 - np.exp(-k_a)
+
             if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(-1, time_point)
             # Detachment
@@ -520,7 +522,9 @@ cdef class PlugSite(Organite):
         else:
             # Attachment
             self.current_side = "right"
-            pa = self.P_att * self.calc_ldep_for_attachment()
+            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+            pa = self.P_att = 1 - np.exp(-k_a)
+
             if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(1, time_point)
             # Detachment
