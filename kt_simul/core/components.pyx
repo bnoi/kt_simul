@@ -493,14 +493,8 @@ cdef class PlugSite(Organite):
         def get_gaussian(mu, std, x):
             return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
 
-        ldep_factor_max = get_gaussian(mu, std, mu)
-
         dist_to_center = self.pos
-
         ldep_factor = get_gaussian(mu, std, dist_to_center)
-
-        # Scale to 1 (max of gaussian will be 1)
-        ldep_factor /= ldep_factor_max
 
         if ldep_factor < base:
              return base
