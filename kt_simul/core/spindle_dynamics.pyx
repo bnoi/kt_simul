@@ -56,8 +56,7 @@ cdef class KinetoDynamics(object):
         """
         KinetoDynamics instenciation method
 
-        :param parameters: A dictionnary of parameters as obtained from a
-            xml_handler.ParamTree instance
+        :param parameters: A dictionnary of parameters as obtained from a ParamTree instance
         :type parameters: ParamTree instance
 
         :param initial_plug: Defines globally the initial attachment states.
@@ -87,7 +86,7 @@ cdef class KinetoDynamics(object):
         self.spindle = Spindle(self)
         self.spbR = Spb(self.spindle, RIGHT, L0)  # right spb (RIGHT = 1)
         self.spbL = Spb(self.spindle, LEFT, L0)  # left one (LEFT = -1)
-        self.initial_plug = initial_plug#.decode('UTF-8')
+        self.initial_plug = initial_plug
         cdef Chromosome ch
         self.chromosomes = []
         for n in range(N):
@@ -102,6 +101,24 @@ cdef class KinetoDynamics(object):
         self.anaphase = False
         self.all_plugsites = self.spindle.get_all_plugsites()
         self.speeds = np.zeros(dim)
+
+    def __del__(self):
+        """
+        """
+        del self.spindle
+        del self.spbR
+        del self.spbL
+        del self.initial_plug
+        del self.simulation_done
+        del self.params
+        del self.chromosomes
+        del self.B_mat
+        del self.At_mat
+        del self.A0_mat
+        del self.anaphase
+        del self.all_plugsites
+        del self.speeds
+        del self.prng
 
     cdef _idx(self, int side, int n, int m=-1):
         """
@@ -203,8 +220,8 @@ cdef class KinetoDynamics(object):
             delta2 = ch.delta2()
             an = self._idx(0, n)
             bn = self._idx(1, n)
-            A0[an, an] = - Mk * muk - muc + muco 
-            A0[bn, bn] = - Mk * muk - muc - muco 
+            A0[an, an] = - Mk * muk - muc + muco
+            A0[bn, bn] = - Mk * muk - muc - muco
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)

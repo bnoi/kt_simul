@@ -11,16 +11,29 @@ from __future__ import print_function
 import logging
 import os
 
-from kt_simul.io.xml_handler import ParamTree
+import numpy as np
+from scipy import linalg
+
+from ..io import ParamTree
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
-PARAMFILE = os.path.join(ROOT_DIR, 'data', 'params.xml')
-MEASUREFILE = os.path.join(ROOT_DIR, 'data', 'measures.xml')
-MEASURETREE = ParamTree(MEASUREFILE, adimentionalized=False)
-MEASURES = MEASURETREE.absolute_dic
+PARAMFILE = os.path.join(ROOT_DIR, 'io', 'params.json')
+MEASUREFILE = os.path.join(ROOT_DIR, 'io', 'measures.json')
 
 log = logging.getLogger(__name__)
+
+
+def get_default_paramtree():
+    """
+    """
+    return ParamTree(PARAMFILE)
+
+
+def get_default_measuretree():
+    """
+    """
+    return ParamTree(MEASUREFILE, adimentionalized=False)
 
 
 def reduce_params(paramtree, measuretree, force_parameters=[]):
@@ -31,9 +44,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     Parameters
     ----------
 
-    paramtree : :class:`~kt_simul.io.xml_handler.ParamTree` instance
+    paramtree : :class:`~kt_simul.io.ParamTree` instance
         Modified in place.
-    measuretree : :class:`~kt_simul.io.xml_handler.MeasureTree` instance
+    measuretree : :class:`~kt_simul.io.MeasureTree` instance
 
     References
     ----------
@@ -65,6 +78,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     d_alpha = params['d_alpha']
     N = int(params['N'])
     Mk = int(params['Mk'])
+    ldep_for_attachment_base = float(params['ldep_for_attachment_base'])
 
     kappa_k = params['kappa_k']
     Fk = params['Fk']
@@ -94,8 +108,29 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         #log.warning("Things don't go well without Aurora ")
         k_d_eff = k_d0
 
-    # alpha_mean = float(mean_attachment(k_a/fd_eff) / Mk)
-    alpha_mean = 1 / (1 + k_d_eff / k_a)
+    # if params['ldep_for_attachment_std'] != 0:
+    #     def get_gaussian(mu, std, x):
+    #         return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
+
+    #     mean_size = 3
+    #     mean_ldep = get_gaussian(params['ldep_for_attachment_mu'],
+    #                              params['ldep_for_attachment_std'],
+    #                              np.arange(-mean_size/2, mean_size/2, 0.1))
+
+    #     mean_ldep /= get_gaussian(params['ldep_for_attachment_mu'],
+    #                               params['ldep_for_attachment_std'],
+    #                               params['ldep_for_attachment_mu'])
+    #     mean_ldep[mean_ldep < ldep_for_attachment_base] = ldep_for_attachment_base
+    #     mean_ldep = mean_ldep.mean()
+
+    #     k_a_eff = k_a * mean_ldep
+    # else:
+    #     k_a_eff = k_a
+
+    k_a_eff = k_a
+
+    alpha_mean = 1 / (1 + k_d_eff / k_a_eff)
+    # log.info("Mean atatchment rate is {}".format(alpha_mean))
 
     # Take metaphase kt pair distance as the maximum one
     # TODO : kc = Fk * Mt * alpha_mean / (max_metaph_k_dist - d0)
@@ -136,4 +171,4 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
 
     for key, val in list(params.items()):
         if key not in force_parameters:
-            paramtree.change_dic(key, val, verbose=False)
+            paramtree[key] = val
