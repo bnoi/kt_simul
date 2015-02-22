@@ -110,8 +110,6 @@ class Pool:
 
             self.simus_run = True
 
-
-
     def run(self):
         """
         Run simulations
