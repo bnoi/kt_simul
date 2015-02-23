@@ -398,6 +398,7 @@ class Metaphase(object):
         """
 
         import matplotlib.pyplot as plt
+        import matplotlib
 
         duration = self.KD.duration
         dt = self.KD.dt
@@ -421,17 +422,19 @@ class Metaphase(object):
 
         main_ax = self.get_kymo_plot(main_ax)
 
+        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+
         for (ax1, ax2), color, kt in zip(axs, self.chrom_colors, kts):
             correctA = kt.correct_history.T[1]
             correctB = kt.correct_history.T[0]
             errA = kt.erroneous_history.T[1]
             errB = kt.erroneous_history.T[0]
 
-            ax1.plot(times, correctA, color=color, alpha=0.8)
-            ax1.plot(times, errA, color=color, alpha=0.8, ls='--')
+            ax1.plot(times, correctB, color=color, alpha=0.8)
+            ax1.plot(times, errB, color=color, alpha=0.8, ls='--')
 
-            ax2.plot(times, correctB, color=color, alpha=0.8)
-            ax2.plot(times, errB, color=color, alpha=0.8, ls='--')
+            ax2.plot(times, correctA, color=color, alpha=0.8)
+            ax2.plot(times, errA, color=color, alpha=0.8, ls='--')
 
             ax1.set_yticks(list(range(0, 5, 2)))
             ax2.set_yticks(list(range(0, 5, 2)))
@@ -445,20 +448,17 @@ class Metaphase(object):
             for lab in ax2.xaxis.get_majorticklabels():
                 lab.set_visible(False)
 
-        for lab in ax1.xaxis.get_majorticklabels():
-            lab.set_visible(True)
-
         for lab in ax2.xaxis.get_majorticklabels():
             lab.set_visible(True)
 
         axs[-1][1].set_xlabel('Time (s)')
         main_ax.set_ylabel('Distance from center (um)')
 
+        # fig.tight_layout()
+        plt.subplots_adjust(hspace=.001)
         # fig.suptitle("Kymograph")
 
-        fig.tight_layout()
         plt.show()
-
         return fig
 
     def show_kymo(self, lims=[-3, 3]):
