@@ -122,6 +122,13 @@ class SympySpindle:
         q_zero = {q:0 for q in self.q_ind}
         return self.eoms.subs(u_zero).subs(q_zero)
 
+    @property
+    def attach_state(self):
+        astate = Matrix([[site_A.lbda, site_A.rho, site_B.lbda, site_B.rho]
+                         for ch in self.chromosomes for (site_A, site_B)
+                         in zip(ch.cen_A.plugsites, ch.cen_B.plugsites)
+                     ]).reshape(2 * self.N * self.Mk, 2)
+        return astate
 
 class Organite:
 
@@ -246,18 +253,26 @@ class PlugSite(Organite):
             pos = self.strech * S.x
             vel = centromere.point.vel(S) + self.strech_vel * S.x
         Organite.__init__(self, name, centromere.point, S, pos, vel)
+        ## Attachment state
+        self.lbda = symbols('lambda_{}{}^{}'.format(*self.site_id))
+        self.rho = symbols('rho_{}{}^{}'.format(*self.site_id))
+        self.pi = symbols('pi_{}{}^{}'.format(*self.site_id))
+        self.pi_to_lr = {self.pi: -self.lbda + self.rho}
+        self.lr_to_pi = {self.lbda: self.pi * (self.pi - 1)/2,
+                         self.rho: self.pi * (self.pi + 1)/2}
+
         self.spindle.points.append(self.point)
         self.kt_MT_forces()
+
+
 
     def kt_MT_forces(self):
         F_k = parameters['F_k']
         V_k = parameters['V_k']
-        self.lbda = symbols('lambda_{}{}^{}'.format(*self.site_id))
         kt_pull_L = LinearFV.new(self.spindle, self.spindle.S,
                                  self.spindle.spbL.point, self.point,
                                  self.lbda * F_k, V_k,
                                  -1, e_F=self.spindle.S.x)
-        self.rho = symbols('rho_{}{}^{}'.format(*self.site_id))
         kt_pull_R = LinearFV.new(self.spindle, self.spindle.S,
                                  self.point, self.spindle.spbR.point,
                                  self.rho * F_k, V_k,
