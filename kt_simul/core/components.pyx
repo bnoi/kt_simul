@@ -487,19 +487,16 @@ cdef class PlugSite(Organite):
         else:
             raise Exception('Wrong side idiot !')
 
-        if std == 0:
-            return 1
-
         def get_gaussian(mu, std, x):
             return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
 
         dist_to_center = self.pos
         ldep_factor = get_gaussian(mu, std, dist_to_center)
 
-        if ldep_factor < base:
-             return base
-        else:
-            return ldep_factor
+        gauss_max = get_gaussian(mu, std, mu)
+        real_base = gauss_max * base
+
+        return ldep_factor + real_base
 
     cdef void plug_unplug(self, int time_point):
         cdef float dice, side_dice
