@@ -44,7 +44,7 @@ class Pool:
                  force_parameters=[],
                  parallel=True,
                  verbose=True,
-                 erase=True):
+                 erase=False):
 
         self.verbose = verbose
         if not self.verbose:
