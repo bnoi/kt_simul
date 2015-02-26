@@ -15,6 +15,8 @@ cimport numpy as np
 cimport cython
 from cpython cimport bool
 
+from scipy.stats import cauchy
+
 __all__ = ["Spb", "Chromosome",
            "Centromere", "PlugSite", "Spindle"]
 
@@ -165,7 +167,6 @@ cdef class Chromosome(Organite):
         return 1 if self.cen_A.pos < self.cen_B.pos else -1
 
     cdef int delta2(self):
-
         """
         Change the sense of viscous force depending on relative speeds of centromeres A and B
         """
@@ -473,30 +474,28 @@ cdef class PlugSite(Organite):
         """
 
         # Gaussian parameters
-        std = float(self.KD.params['ldep_for_attachment_std'])
+        gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
-        base = float(self.KD.params['ldep_for_attachment_base'])
+        N = float(self.KD.params['ldep_for_attachment_N'])
 
-        if std == 0:
+        if N == 0:
             return 1
 
         if self.current_side == 'right':
-            mu = -mu
+            spb_pos = self.KD.spbR.pos
         elif self.current_side == 'left':
-            mu = mu
+            spb_pos = self.KD.spbL.pos
         else:
             raise Exception('Wrong side idiot !')
 
-        def get_gaussian(mu, std, x):
-            return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
+        mt_size = np.abs(self.pos - spb_pos)
 
-        dist_to_center = self.pos
-        ldep_factor = get_gaussian(mu, std, dist_to_center)
+        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma)
 
-        gauss_max = get_gaussian(mu, std, mu)
-        real_base = gauss_max * base
+        # Transform to number of MTs for this size
+        factor *= N
 
-        return ldep_factor + real_base
+        return factor
 
     cdef void plug_unplug(self, int time_point):
         """

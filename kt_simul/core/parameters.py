@@ -13,6 +13,7 @@ import os
 
 import numpy as np
 from scipy import linalg
+from scipy.stats import cauchy
 
 from ..io import ParamTree
 
@@ -76,6 +77,10 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         mus = params['mus']
         Fk = params['Fk']
 
+        ldep_mu = params['ldep_for_attachment_mu']
+        ldep_gamma = params['ldep_for_attachment_gamma']
+        ldep_N = params['ldep_for_attachment_N']
+
     except KeyError:
         log.warning("Some parametree / measuretree values are missing")
         return False
@@ -128,7 +133,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         k_d_eff = k_a
 
     ## Get mean attachment rate
-    k_a_eff = k_a
+    factor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma)
+    factor *= ldep_N
+    k_a_eff = k_a * factor
 
     ## Compute mean attachment state during a simulation
     alpha_mean = 1 / (1 + k_d_eff / k_a_eff)

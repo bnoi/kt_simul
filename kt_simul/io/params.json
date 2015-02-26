@@ -244,10 +244,10 @@
         "value": "0"
     },
     {
-        "description": "Length dependence for attachment (std)",
+        "description": "Length dependence for attachment (gamma)",
         "max": "0",
         "min": "0",
-        "name": "ldep_for_attachment_std",
+        "name": "ldep_for_attachment_gamma",
         "step": "0",
         "unit": " ",
         "value": "0"
@@ -262,10 +262,10 @@
         "value": "0"
     },
     {
-        "description": "Length dependence for attachment (base)",
+        "description": "Length dependence for attachment (N)",
         "max": "0",
         "min": "0",
-        "name": "ldep_for_attachment_base",
+        "name": "ldep_for_attachment_N",
         "step": "0",
         "unit": " ",
         "value": "0"
