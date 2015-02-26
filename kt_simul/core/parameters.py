@@ -56,6 +56,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     """
     params = paramtree.absolute_dic
     measures = measuretree.absolute_dic
+
     try:
         poleward_speed = measures['poleward_speed']
         metaph_rate = measures['metaph_rate']
@@ -67,27 +68,27 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         tau_c = measures['tau_c']
         obs_d0 = measures['obs_d0']
         mean_kt_spb_dist = measures["mean_kt_spb_dist"]
+
+        k_a = params['k_a']
+        d_alpha = params['d_alpha']
+        N = int(params['N'])
+        Mk = int(params['Mk'])
+        mus = params['mus']
+        Fk = params['Fk']
+
     except KeyError:
-        log.warning("The measures dictionary should contain"
-                    "at least the following keys: ")
-        log.warning(list(MEASURES.keys()))
+        log.warning("Some parametree / measuretree values are missing")
         return False
 
-    k_a = params['k_a']  # 'free' attachement event frequency
-    k_d0 = params['k_d0']  # 'free' detachement event frequency
-    d_alpha = params['d_alpha']
-    N = int(params['N'])
-    Mk = int(params['Mk'])
-    ldep_for_attachment_base = float(params['ldep_for_attachment_base'])
-
-    kappa_k = params['kappa_k']
-    Fk = params['Fk']
-
-    #Let's go for the direct relations
+    # Set various parameters from measures
     if 'd0' not in force_parameters:
         params['d0'] = obs_d0
     d0 = params['d0']
 
+    if 'ldep_balance' not in force_parameters:
+        params['ldep_balance'] = mean_kt_spb_dist
+
+    # Set max speed from measures
     Vk = poleward_speed
     if 'Vk' not in force_parameters:
         params['Vk'] = poleward_speed
@@ -98,76 +99,45 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         params['Vmz'] = anaph_rate
     Vmz = params['Vmz']
 
-    if 'ldep_balance' not in force_parameters:
-        params['ldep_balance'] = mean_kt_spb_dist
-
-    #Aurora modifies fd
-    if d_alpha != 0:
-        k_d_eff = k_a * d_alpha / (mean_metaph_k_dist / 2)
-    else:
-        #log.warning("Things don't go well without Aurora ")
-        k_d_eff = k_d0
-
-    # if params['ldep_for_attachment_std'] != 0:
-    #     def get_gaussian(mu, std, x):
-    #         return (1 / (std * np.square(2*np.pi))) * np.exp(- (x - mu)**2 / (2 * std**2))
-
-    #     mean_size = 3
-    #     mean_ldep = get_gaussian(params['ldep_for_attachment_mu'],
-    #                              params['ldep_for_attachment_std'],
-    #                              np.arange(-mean_size/2, mean_size/2, 0.1))
-
-    #     mean_ldep /= get_gaussian(params['ldep_for_attachment_mu'],
-    #                               params['ldep_for_attachment_std'],
-    #                               params['ldep_for_attachment_mu'])
-    #     mean_ldep[mean_ldep < ldep_for_attachment_base] = ldep_for_attachment_base
-    #     mean_ldep = mean_ldep.mean()
-
-    #     k_a_eff = k_a * mean_ldep
-    # else:
-    #     k_a_eff = k_a
-
-    k_a_eff = k_a
-
-    alpha_mean = 1 / (1 + k_d_eff / k_a_eff)
-    # log.info("Mean atatchment rate is {}".format(alpha_mean))
-
-    # Take metaphase kt pair distance as the maximum one
-    # TODO : kc = Fk * Mt * alpha_mean / (max_metaph_k_dist - d0)
+    # Set spring constant from measures
     if 'kappa_c' not in force_parameters:
         params['kappa_c'] = Fk * Mk * 2 / (max_metaph_k_dist - d0)
     kappa_c = params['kappa_c']
-
-    #kop = alpha_mean * ( 1 + metaph_rate/2 ) / ( outer_inner_dist )
 
     if 'kappa_k' not in force_parameters:
         params['kappa_k'] = Fk * Mk * 2 / (2 * outer_inner_dist)
     kappa_k = params['kappa_k']
 
-    # Ensure we have sufficientely small time steps
-    dt = params['dt']
-    # params['dt'] = min(tau_c / 4., tau_k / 4., params['dt'])
-    # if params['dt'] != dt:
-    #     log.info('Time step changed')
-
-    mus = params['mus']
-    Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk))
-           + mus * metaph_rate / 2.) / (1 - metaph_rate / Vmz)
-
-    if 'Fmz' not in force_parameters:
-        params['Fmz'] = Fmz
-
-    muc = (tau_c * kappa_c)
+    # Set drag coefficient from measure
     if 'muc' not in force_parameters:
+        muc = (tau_c * kappa_c)
         params['muc'] = muc
 
-    muk = (tau_k * kappa_k)
     if 'muk' not in force_parameters:
+        muk = (tau_k * kappa_k)
         params['muk'] = muk
 
-    # muco = (tau_k * kappa_c)
-    # if 'muco' not in force_parameters:
-    #     params['muco'] = muco
+    # Get "average" constant of simulation
+
+    ## Get mean detachment rate (depend on Aurora parameter)
+    if d_alpha != 0:
+        x0 = 0
+        factor = (2 / (np.pi * d_alpha)) / (1 + ((mean_metaph_k_dist - x0) / (d_alpha / 2)) ** 2)
+        k_d_eff = k_a * factor
+    else:
+        k_d_eff = k_a
+
+    ## Get mean attachment rate
+    k_a_eff = k_a
+
+    ## Compute mean attachment state during a simulation
+    alpha_mean = 1 / (1 + k_d_eff / k_a_eff)
+
+    # Compute max force generated by spindle midzone motor
+    if 'Fmz' not in force_parameters:
+        Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk))
+               + mus * metaph_rate / 2.) / (1 - metaph_rate / Vmz)
+        params['Fmz'] = Fmz
 
     for key, val in list(params.items()):
         if key not in force_parameters:

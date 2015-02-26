@@ -152,7 +152,7 @@ cdef class Chromosome(Organite):
 
         cdef int right_A, right_B
         right_A = self.cen_A.right_plugged() + self.cen_B.left_plugged()
-        left_A =  self.cen_A.left_plugged() + self.cen_B.right_plugged()
+        left_A = self.cen_A.left_plugged() + self.cen_B.right_plugged()
         if right_A >= left_A:
             return True
         return False
@@ -191,7 +191,7 @@ cdef class Chromosome(Organite):
         for lA, rA, lB, rB in zip(leftA, rightA, leftB, rightB):
             erroneous = (rA, lB) if lA + rB > rA + lB else (lA, rB)
             erroneous_hist.append(erroneous)
-        self.erroneous_history =  np.array(erroneous_hist)
+        self.erroneous_history = np.array(erroneous_hist)
 
     def calc_correct_history(self):
         leftA, rightA = self.cen_A.calc_plug_history()
@@ -401,19 +401,19 @@ cdef class PlugSite(Organite):
         self.site_id = site_id
 
         if initial_plug == None:
-            self.plug_state = self.KD.prng.choice([-1,0,1])
+            self.plug_state = self.KD.prng.choice([-1, 0, 1])
         elif initial_plug == 'null':
             self.plug_state = 0
         elif initial_plug == 'amphitelic':
             self.plug_state = - 1 if self.tag == 'A' else 1
         elif initial_plug == 'random':
-            self.plug_state = self.KD.prng.choice([-1,0,1])
+            self.plug_state = self.KD.prng.choice([-1, 0, 1])
         elif initial_plug == 'monotelic':
             self.plug_state = - 1 if self.tag == 'A' else 0
         elif initial_plug == 'syntelic':
             self.plug_state = 1
         elif initial_plug == 'merotelic':
-            self.plug_state = self.KD.prng.choice([-1,1])
+            self.plug_state = self.KD.prng.choice([-1, 1])
         else:
             self.plug_state = initial_plug
 
@@ -499,6 +499,8 @@ cdef class PlugSite(Organite):
         return ldep_factor + real_base
 
     cdef void plug_unplug(self, int time_point):
+        """
+        """
         cdef float dice, side_dice
         dice = self.KD.prng.rand()
 
@@ -554,32 +556,31 @@ cdef class PlugSite(Organite):
                 return True if plug_state == 1 else False
 
     cdef float P_det(self):
+        """
+        """
         cdef float d_alpha, k_d0
         cdef double k_shrink
-
-        k_shrink = 1
+        cdef float dist
+        cdef float spindle_center
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
+
         if d_alpha == 0:
             return k_d0
-        cdef float dist
-        dist = abs(self.pos -
-                   (self.centromere.chromosome.cen_A.pos +
-                    self.centromere.chromosome.cen_B.pos) / 2.)
+
+        spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
+        spindle_center /= 2
+        dist = np.abs(self.pos - spindle_center)
 
         if dist == 0:
-            return 1.
-        k_dc = k_d0 * np.exp(d_alpha / dist
+            return 1
+
+        x0 = 0
+        k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
 
         if k_dc > 1e4:
-            return 1.
-
-        if self.KD.time_point > 1:
-            cum_di = np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0]
-            cum_di *= self.plug_state
-            if cum_di > 0:
-                k_dc *= k_shrink
+            return 1
 
         return 1 - np.exp(-k_dc)
 
