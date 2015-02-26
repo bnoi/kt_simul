@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 
 __all__ = ["Metaphase"]
 
+
 class SimulationAlreadyDone(Exception):
     pass
 
@@ -112,8 +113,10 @@ class Metaphase(object):
         params['dt'] = self.paramtree.absolute_dic['dt']
 
         self.KD = KinetoDynamics(params, initial_plug=initial_plug, prng=self.prng)
+
         dt = self.paramtree.absolute_dic['dt']
         duration = self.paramtree.absolute_dic['span']
+
         self.num_steps = int(duration / dt)
         self.KD.anaphase = False
         self.timelapse = np.arange(0, duration, dt)
@@ -306,8 +309,9 @@ class Metaphase(object):
         if t >= t_A and self._plug_checkpoint():
             self.delay = t - t_A
             self.analysis['real_t_A'] = t
+
             # Then we just get rid of cohesin
-            self.KD.params['kappa_c'] = 0.
+            self.KD.params['kappa_c'] = 0
             self.KD.calc_B()
             nb_mero = self._mero_checkpoint()
             if nb_mero:
@@ -391,7 +395,7 @@ class Metaphase(object):
                 return True
         return True
 
-    def show(self):
+    def show(self, ylim=[-3, 3]):
         """
         Quickly show kymograph of current simulation.
         Matplotlib is required.
@@ -402,188 +406,84 @@ class Metaphase(object):
 
         duration = self.KD.duration
         dt = self.KD.dt
-        # steps = self.KD.num_steps
         times = np.arange(0, duration, dt)
         kts = self.KD.chromosomes
+        spbA = self.KD.spbL.traj
+        spbB = self.KD.spbR.traj
+        anaphase = self.analysis['real_t_A']
 
-        h = len(kts) * 2 + 6
-        fig = plt.figure(figsize=(14, h))
+        total_subplots = len(kts) * 2 + 1
+        height_ratios = [1 for _ in range(len(kts))] + [len(kts) * 2] + [1 for _ in range(len(kts))]
+        gs = matplotlib.gridspec.GridSpec(total_subplots, 1, height_ratios=height_ratios)
 
-        mainrowspan = int(len(kts) * 2)
-        tot = len(kts) * 2 + mainrowspan
+        h = len(kts) * 2 + 4
+        fig = plt.figure(figsize=(12, h))
 
-        main_ax = plt.subplot2grid((tot, 1), (3, 0), rowspan=mainrowspan)
-        axs = []
-        for i in range(len(kts)):
-            ax1 = plt.subplot2grid((tot, 1), (i, 0), rowspan=1, sharex=main_ax)
-            ax2 = plt.subplot2grid((tot, 1), (i + len(kts) + mainrowspan, 0),
-                                   rowspan=1, sharex=main_ax)
-            axs.append((ax1, ax2))
+        # Plot kymo
+        ax = plt.subplot(gs[len(kts)])
 
-        main_ax = self.get_kymo_plot(main_ax)
+        ax.plot(times, spbA, color='black', lw=2)
+        ax.plot(times, spbB, color='black', lw=2)
 
-        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.axvline(anaphase, color='black')
 
-        for (ax1, ax2), color, kt in zip(axs, self.chrom_colors, kts):
+        cm = matplotlib.cm.get_cmap('Set1')
+        colors = [cm(1 * i / len(kts)) for i in range(len(kts))]
+        for color, kt in zip(colors, kts):
+            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8, lw=2)
+            ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8, lw=2)
+
+        if ylim:
+            ax.set_ylim(ylim)
+
+        for i in ax.spines.values():
+            i.set_linewidth(0)
+
+        ax.xaxis.set_ticklabels([])
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+
+        # Plot defects
+        kwargs = dict(alpha=0.8, lw=2)
+        for i, (color, kt) in enumerate(zip(colors, kts)):
+            ax1 = plt.subplot(gs[i])
+            ax2 = plt.subplot(gs[i + len(kts) + 1])
+
             correctA = kt.correct_history.T[1]
             correctB = kt.correct_history.T[0]
             errA = kt.erroneous_history.T[1]
             errB = kt.erroneous_history.T[0]
 
-            ax1.plot(times, correctB, color=color, alpha=0.8)
-            ax1.plot(times, errB, color=color, alpha=0.8, ls='--')
+            ax1.plot(times, correctB, color=color, **kwargs)
+            ax1.plot(times, errB, color=color, ls='--', **kwargs)
 
-            ax2.plot(times, correctA, color=color, alpha=0.8)
-            ax2.plot(times, errA, color=color, alpha=0.8, ls='--')
+            ax2.plot(times, correctA, color=color, **kwargs)
+            ax2.plot(times, errA, color=color, ls='--', **kwargs)
 
-            ax1.set_yticks(list(range(0, 5, 2)))
-            ax2.set_yticks(list(range(0, 5, 2)))
+            ax1.set_yticks(np.arange(0, self.paramtree['Mk']))
+            ax2.set_yticks(np.arange(0, self.paramtree['Mk']))
 
-            ax1.grid()
-            ax2.grid()
+            ax1.xaxis.set_ticklabels([])
+            ax1.yaxis.set_ticklabels([])
+            ax1.xaxis.set_ticks_position('none')
+            ax1.yaxis.set_ticks_position('none')
+            ax1.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
 
-            for lab in ax1.xaxis.get_majorticklabels():
-                lab.set_visible(False)
+            ax2.xaxis.set_ticklabels([])
+            ax2.yaxis.set_ticklabels([])
+            ax2.xaxis.set_ticks_position('none')
+            ax2.yaxis.set_ticks_position('none')
+            ax2.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
 
-            for lab in ax2.xaxis.get_majorticklabels():
-                lab.set_visible(False)
+            for s in ax1.spines.values():
+                s.set_linewidth(0)
 
-        for lab in ax2.xaxis.get_majorticklabels():
-            lab.set_visible(True)
+            for s in ax2.spines.values():
+                s.set_linewidth(0)
 
-        axs[-1][1].set_xlabel('Time (s)')
-        main_ax.set_ylabel('Distance from center (um)')
-
-        # fig.tight_layout()
-        plt.subplots_adjust(hspace=.001)
-        # fig.suptitle("Kymograph")
-
-        plt.show()
-        return fig
-
-    def show_kymo(self, lims=[-3, 3]):
-        """
-        """
-        import matplotlib.pyplot as plt
-
-        fig = plt.figure(figsize=(12, 7))
-        main_ax = plt.subplot(111)
-
-        main_ax = self.get_kymo_plot(main_ax, lims=lims)
-
-        main_ax.set_xlabel('Time (s)')
-        main_ax.set_ylabel('Distance from center (um)')
-
-        # fig.suptitle("Kymograph")
-
-        fig.tight_layout()
-        plt.show()
-
-        return fig
-
-    def get_kymo_plot(self, ax, lims=[-3, 3]):
-        """
-        """
-
-        import matplotlib
-
-        import matplotlib.pyplot as plt
-        import matplotlib.colors as colors
-        import matplotlib.cm as cmx
-
-        dt = self.KD.dt
-        duration = self.KD.duration
-        anaphase = self.KD.params['t_A']
-        times = np.arange(0, duration, dt)
-        spbA = self.KD.spbL.traj
-        spbB = self.KD.spbR.traj
-        kts = self.KD.chromosomes
-
-        ax.plot(times, spbA, color='black')
-        ax.plot(times, spbB, color='black')
-
-        if len(self.chrom_colors) == len(kts):
-            colors = lambda x: self.chrom_colors[x]
-        else:
-            cm = plt.get_cmap('gist_rainbow')
-            norm  = colors.Normalize(vmin=0, vmax=len(kts))
-            sm = cmx.ScalarMappable(norm=norm, cmap=cm)
-            colors = sm.to_rgba
-
-        for i, kt in enumerate(kts):
-            ax.plot(times, kt.cen_A.traj, color=colors(i), alpha=0.8)
-            ax.plot(times, kt.cen_B.traj, color=colors(i), alpha=0.8)
-        ax.grid()
-
-        for lab in ax.xaxis.get_majorticklabels():
-            lab.set_visible(False)
-
-        ax.axvline(anaphase, color='black')
-        if lims:
-            ax.set_ylim(*lims)
-
-        return ax
-
-    def kymo_figure(self, axis_min=5, size=(2*5, 5)):
-        """
-        """
-
-        colors = ["black",  # SPB
-                  "#004bff",  # Kt 1
-                  "#009d1c",  # Kt 2
-                  "#ff2f00"]  # Kt 3
-
-        import matplotlib.pyplot as plt
-
-        fig = plt.figure(figsize=size)
-        ax = plt.subplot(111)
-
-        drawer = ax.plot
-
-        dt = self.KD.dt
-        duration = self.KD.duration
-        anaphase = self.KD.params['t_A']
-        times = np.arange(0, duration, dt)
-        spbA = self.KD.spbL.traj
-        spbB = self.KD.spbR.traj
-        kts = self.KD.chromosomes
-
-        times = times / 60
-
-        for i, kt in enumerate(kts):
-            ax.plot(times, kt.cen_A.traj, color=colors[i+1], lw=3)
-            ax.plot(times, kt.cen_B.traj, color=colors[i+1], lw=3)
-
-        # Draw SPB
-        drawer(times, spbA, label="SPB A", color=colors[0], lw=3)
-        drawer(times, spbB, label="SPB B", color=colors[0], lw=3)
-
-        # Set axis limit
-        ax.set_xlim(min(times), max(times))
-        ax.set_ylim(-4, 4)
-
-        import matplotlib
-
-        ax.xaxis.set_ticks([])
-        ax.yaxis.set_ticks([])
-
-        majorLocator = matplotlib.ticker.MultipleLocator(axis_min)
-        ax.xaxis.set_major_locator(majorLocator)
-        ax.minorticks_off()
-
-        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        ax.xaxis.set_major_formatter(majorFormatter)
-        majorFormatter = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        ax.yaxis.set_major_formatter(majorFormatter)
-
-        majorLocator = matplotlib.ticker.MultipleLocator(2)
-        ax.yaxis.set_major_locator(majorLocator)
-
-        for i in ax.spines.values():
-            i.set_linewidth(2)
-            i.set_color('black')
-
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=1)
+        plt.tight_layout()
+        fig.subplots_adjust(hspace=0)
 
         return fig
 

@@ -62,8 +62,7 @@ class ParamTree(object):
             self.adimentionalize()
 
     def adimentionalize(self):
-        """
-        This function scales everything taking dt as unit time, Vk as
+        """This function scales everything taking dt as unit time, Vk as
         unit speed, and Fk as unit force. It relies on a correct
         definition of the units of the elements of the param tree,
         thus a correct spelling in the json file, so please beware.
