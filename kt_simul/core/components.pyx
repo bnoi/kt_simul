@@ -570,7 +570,7 @@ cdef class PlugSite(Organite):
 
         if dist == 0:
             return 1.
-        k_dc = k_d0 * d_alpha / dist
+        k_dc = k_d0 * np.exp(d_alpha / dist
 
         if k_dc > 1e4:
             return 1.
