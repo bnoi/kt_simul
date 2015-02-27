@@ -461,8 +461,8 @@ class Metaphase(object):
             ax2.plot(times, correctA, color=color, **kwargs)
             ax2.plot(times, errA, color=color, ls='--', **kwargs)
 
-            ax1.set_yticks(np.arange(0, self.paramtree['Mk']))
-            ax2.set_yticks(np.arange(0, self.paramtree['Mk']))
+            ax1.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
+            ax2.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
 
             ax1.xaxis.set_ticklabels([])
             ax1.yaxis.set_ticklabels([])

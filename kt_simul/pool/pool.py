@@ -170,8 +170,9 @@ class Pool:
             if self.verbose:
                 pprogress(-1)
 
-            pool.terminate()
-            pool.join()
+            if self.parallel:
+                pool.terminate()
+                pool.join()
 
         except KeyboardInterrupt:
             pool.terminate()
@@ -240,11 +241,12 @@ def _run_one_simulation(args):
     simu_id = get_simu_id(i, digits)
     meta = Metaphase(**simu_parameters)
     meta.simul()
-    SimuIO(meta).save(simu_path, simu_id, save_tree=True)
+    SimuIO(meta).save(simu_path, simu_id, save_tree=False)
     del meta.KD
     del meta
     gc.collect()
     return (i, simu_id)
+
 
 def _load_metaphase_single(args):
     fpath, paramtree, measuretree = args

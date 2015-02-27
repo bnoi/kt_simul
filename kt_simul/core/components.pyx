@@ -470,10 +470,9 @@ cdef class PlugSite(Organite):
         return ldep_factor
 
     def calc_ldep_for_attachment(self):
-        """
+        """Using Cauchy distribution
         """
 
-        # Gaussian parameters
         gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
         N = float(self.KD.params['ldep_for_attachment_N'])
