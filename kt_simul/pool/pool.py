@@ -243,7 +243,7 @@ def _run_one_simulation(args):
     simu_id = get_simu_id(i, digits)
     meta = Metaphase(**simu_parameters)
     meta.simul()
-    SimuIO(meta).save(simu_path, simu_id, save_tree=False)
+    SimuIO(meta).save(simu_path, simu_id, save_tree=True)
     del meta.KD
     del meta
     gc.collect()
@@ -252,9 +252,9 @@ def _run_one_simulation(args):
 
 def _load_metaphase_single(args):
     fpath, paramtree, measuretree = args
-    meta = SimuIO().read(fpath,
-                         paramtree=paramtree,
-                         measuretree=measuretree)
+    meta = SimuIO().read(fpath)
+                         # paramtree=paramtree,
+                         # measuretree=measuretree)
     return meta
 
 
