@@ -133,11 +133,14 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         k_d_eff = k_a
 
     # Get mean attachment rate
-    x = np.linspace(0, mean_spb_size, 100)
-    cauchy_cdf = cauchy.pdf(x, loc=ldep_mu, scale=ldep_gamma)
-    total_area = np.trapz(cauchy_cdf, x=x)
-    factor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
-    factor *= ldep_N_mt
+    if ldep_N_mt > 0:
+        x = np.linspace(0, mean_spb_size, 100)
+        cauchy_cdf = cauchy.pdf(x, loc=ldep_mu, scale=ldep_gamma)
+        total_area = np.trapz(cauchy_cdf, x=x)
+        factor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
+        factor *= ldep_N_mt
+    else:
+        factor = 1
 
     k_a_eff = k_a * factor
 
