@@ -566,64 +566,32 @@ cdef class PlugSite(Organite):
             else:
                 return True if plug_state == 1 else False
 
-    # cdef float P_det(self):
-    #     """
-    #     """
-    #     cdef float d_alpha, k_d0
-    #     cdef double k_shrink
-    #     cdef float dist
-    #     cdef float spindle_center
-
-    #     d_alpha = self.KD.params['d_alpha']
-    #     k_d0 = self.KD.params['k_a']
-
-    #     if d_alpha == 0:
-    #         return k_d0
-
-    #     spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
-    #     spindle_center /= 2
-    #     dist = np.abs(self.pos - spindle_center)
-
-    #     if dist == 0:
-    #         return 1
-
-    #     x0 = 0
-    #     k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
-    #     k_dc = k_d0 * (d_alpha / ())
-
-    #     if k_dc > 1e4:
-    #         return 1
-
-    #     return 1 - np.exp(-k_dc)
-
-
     cdef float P_det(self):
+        """
+        """
         cdef float d_alpha, k_d0
         cdef double k_shrink
-
-        k_shrink = 1
+        cdef float dist
+        cdef float spindle_center
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
+
         if d_alpha == 0:
             return k_d0
-        cdef float dist
-        dist = abs(self.pos -
-                   (self.centromere.chromosome.cen_A.pos +
-                    self.centromere.chromosome.cen_B.pos) / 2.)
+
+        spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
+        spindle_center /= 2
+        dist = np.abs(self.pos - spindle_center)
 
         if dist == 0:
-            return 1.
-        k_dc = k_d0 * d_alpha / dist
+            return 1
+
+        x0 = 0
+        k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
 
         if k_dc > 1e4:
-            return 1.
-
-        if self.KD.time_point > 1:
-            cum_di = np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0]
-            cum_di *= self.plug_state
-            if cum_di > 0:
-                k_dc *= k_shrink
+            return 1
 
         return 1 - np.exp(-k_dc)
 
