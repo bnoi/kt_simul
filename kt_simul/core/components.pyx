@@ -499,7 +499,7 @@ cdef class PlugSite(Organite):
         # Integrate density distribution along the spindle
         total_area = np.trapz(cauchy_cdf, x=x)
 
-        # Now compute a k_alpha prefactor for a given MT size
+        # Now compute a k_a prefactor for a given MT size
         # Then we normalize this pre factor by the total area of the density
         # distribution for the current spindle size
         factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / total_area
@@ -522,7 +522,7 @@ cdef class PlugSite(Organite):
             # Attachment
             self.current_side = "left"
             k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
-            pa = self.P_att = 1 - np.exp(-k_a)
+            pa = 1 - np.exp(-k_a)
 
             if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(-1, time_point)
@@ -533,7 +533,7 @@ cdef class PlugSite(Organite):
             # Attachment
             self.current_side = "right"
             k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
-            pa = self.P_att = 1 - np.exp(-k_a)
+            pa = 1 - np.exp(-k_a)
 
             if self.plug_state == 0 and dice < pa:
                 self.set_plug_state(1, time_point)
@@ -566,32 +566,64 @@ cdef class PlugSite(Organite):
             else:
                 return True if plug_state == 1 else False
 
+    # cdef float P_det(self):
+    #     """
+    #     """
+    #     cdef float d_alpha, k_d0
+    #     cdef double k_shrink
+    #     cdef float dist
+    #     cdef float spindle_center
+
+    #     d_alpha = self.KD.params['d_alpha']
+    #     k_d0 = self.KD.params['k_a']
+
+    #     if d_alpha == 0:
+    #         return k_d0
+
+    #     spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
+    #     spindle_center /= 2
+    #     dist = np.abs(self.pos - spindle_center)
+
+    #     if dist == 0:
+    #         return 1
+
+    #     x0 = 0
+    #     k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
+    #     k_dc = k_d0 * (d_alpha / ())
+
+    #     if k_dc > 1e4:
+    #         return 1
+
+    #     return 1 - np.exp(-k_dc)
+
+
     cdef float P_det(self):
-        """
-        """
         cdef float d_alpha, k_d0
         cdef double k_shrink
-        cdef float dist
-        cdef float spindle_center
+
+        k_shrink = 1
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
-
         if d_alpha == 0:
             return k_d0
-
-        spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
-        spindle_center /= 2
-        dist = np.abs(self.pos - spindle_center)
+        cdef float dist
+        dist = abs(self.pos -
+                   (self.centromere.chromosome.cen_A.pos +
+                    self.centromere.chromosome.cen_B.pos) / 2.)
 
         if dist == 0:
-            return 1
-
-        x0 = 0
-        k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
+            return 1.
+        k_dc = k_d0 * d_alpha / dist
 
         if k_dc > 1e4:
-            return 1
+            return 1.
+
+        if self.KD.time_point > 1:
+            cum_di = np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0]
+            cum_di *= self.plug_state
+            if cum_di > 0:
+                k_dc *= k_shrink
 
         return 1 - np.exp(-k_dc)
 
