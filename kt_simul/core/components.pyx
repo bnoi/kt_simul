@@ -128,8 +128,8 @@ cdef class Chromosome(Organite):
         """
         self.ch_id = ch_id
         self.id = self.ch_id
-        #self.dt = .absolute_dic['dt']
-        #self.dt = spindle.KD.params['dt']
+        # self.dt = .absolute_dic['dt']
+        # self.dt = spindle.KD.params['dt']
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
 

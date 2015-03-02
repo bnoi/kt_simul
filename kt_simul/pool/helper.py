@@ -11,56 +11,35 @@ from . import Pool
 
 def simu_analyzer(simu, params):
 
-    d = {}
-    d.update(params.to_dict())
+    results = []
 
-    # Load trajs
     times = simu.time
-
     anaphase = simu.time_anaphase
     index_anaphase = simu.index_anaphase
 
-    # Get mean spindle length in metaphase
-    spindle_length = np.abs(simu.KD.spbL.traj - simu.KD.spbR.traj)
-    d['spindle_size_metaphase'] = spindle_length[:index_anaphase].mean()
-
-    # Get spindle length at anaphase onset
-    d['spindle_size_ana_onset'] = spindle_length[index_anaphase]
-
-    # Get spindle elongation rate
-    d['spindle_elongation'] = np.abs(spindle_length[index_anaphase] - spindle_length[0]) / anaphase
-
-    d['stretch_mean_metaphase'] = []
-    d['stretch_mean_ana_onset'] = []
-    d['kt_pos_mean_ana_onset'] = []
-    d['kt_pos_mean_metaphase'] = []
-    d['kt_pos_mean_ana_onset_relative'] = []
-    d['kt_pos_mean_metaphase_relative'] = []
-    for i in range(1, 3):
-        d["magn_{}".format(i)] = []
-        d["period_{}".format(i)] = []
-
     spindle_size = np.abs(simu.KD.spbL.traj - simu.KD.spbR.traj)
 
-    for ch in simu.KD.chromosomes:
+    for j, ch in enumerate(simu.KD.chromosomes):
 
-        # Get mean stretch in metaphase
-        d['stretch_mean_metaphase'].append(np.abs(ch.cen_A.traj - ch.cen_B.traj)[:index_anaphase].mean())
+        d = {}
+        d.update(params.to_dict())
+        d['ch_id'] = j
 
-        # Get stretch at anaphase onset
-        d['stretch_mean_ana_onset'].append(np.abs(ch.cen_A.traj - ch.cen_B.traj)[index_anaphase])
+        d['spindle_size_metaphase'] = spindle_size[:index_anaphase].mean()
+        d['spindle_size_ana_onset'] = spindle_size[index_anaphase]
+        d['spindle_elongation'] = np.abs(spindle_size[index_anaphase] - spindle_size[0]) / anaphase
 
-        # Get mean kt psoition during metaphase
+        d['stretch_mean_metaphase'] = np.abs(ch.cen_A.traj - ch.cen_B.traj)[:index_anaphase].mean()
+        d['stretch_mean_ana_onset'] = np.abs(ch.cen_A.traj - ch.cen_B.traj)[index_anaphase]
+
         kt_traj = np.abs((ch.cen_A.traj + ch.cen_B.traj) / 2)
 
-        d['kt_pos_mean_ana_onset'].append(kt_traj[index_anaphase])
-        d['kt_pos_mean_metaphase'].append(kt_traj[:index_anaphase].mean())
-        d['kt_pos_mean_ana_onset_relative'].append((kt_traj / spindle_size)[index_anaphase])
-        d['kt_pos_mean_metaphase_relative'].append((kt_traj / spindle_size)[:index_anaphase].mean())
+        d['kt_pos_mean_ana_onset'] = kt_traj[index_anaphase]
+        d['kt_pos_mean_metaphase'] = kt_traj[:index_anaphase].mean()
+        d['kt_pos_mean_ana_onset_relative'] = (kt_traj / spindle_size)[index_anaphase]
+        d['kt_pos_mean_metaphase_relative'] = (kt_traj / spindle_size)[:index_anaphase].mean()
 
-        # Amplitude and Period of oscillations in metaphase
-        ch_traj = (ch.cen_A.traj + ch.cen_B.traj) / 2
-        fft_mag, rfreqs = get_fft(ch_traj[400:], simu.KD.dt)
+        fft_mag, rfreqs = get_fft(kt_traj[400:], simu.KD.dt)
 
         # Get peaks
         max_peaks_idxs = signal.argrelmax(fft_mag)[0]
@@ -82,31 +61,17 @@ def simu_analyzer(simu, params):
             max_magn_idxs = max_peaks_idxs[sorted_idxs]
 
             for i, peak_idx in zip(range(1, 3), max_magn_idxs):
-                d["magn_{}".format(i)].append(fft_mag[peak_idx] * 2)
-                d["period_{}".format(i)].append(1 / rfreqs[peak_idx])
+                d["magn_{}".format(i)] = fft_mag[peak_idx] * 2
+                d["period_{}".format(i)] = 1 / rfreqs[peak_idx]
 
-    d['stretch_mean_metaphase'] = np.mean(d['stretch_mean_metaphase'])
-    d['stretch_mean_ana_onset'] = np.mean(d['stretch_mean_ana_onset'])
+        # Attachment defect at anaphase
+        atts = simu.get_attachment_vector()
+        d['attachment_defect_ana_onset'] = np.sum(atts[index_anaphase] != 0)
+        d['attachment_defect_ana_onset'] /= atts[index_anaphase].shape[0]
 
-    d['kt_pos_mean_ana_onset'] = np.mean(d['kt_pos_mean_ana_onset'])
-    d['kt_pos_mean_metaphase'] = np.mean(d['kt_pos_mean_metaphase'])
-    d['kt_pos_mean_ana_onset_relative'] = np.mean(d['kt_pos_mean_ana_onset_relative'])
-    d['kt_pos_mean_metaphase_relative'] = np.mean(d['kt_pos_mean_metaphase_relative'])
+        results.append(d)
 
-    for i in range(1, 3):
-        d["magn_{}".format(i)] = np.mean(d["magn_{}".format(i)])
-        d["period_{}".format(i)] = np.mean(d["period_{}".format(i)])
-
-    # Attachment defect at anaphase
-    atts = simu.get_attachment_vector()
-    d['attachment_defect_ana_onset'] = np.sum(atts[index_anaphase] != 0) / atts[index_anaphase].shape[0]
-
-    d['time_anaphase'] = simu.time_anaphase
-
-    # Get aneuploidy rate
-    # TODO
-
-    return d
+    return results
 
 
 def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters):
@@ -151,11 +116,11 @@ def processor(i, params, simu_path, paramtree, measuretree, pool_parameters, n_p
     # Load and analyze simus
     for j, simu in enumerate(pool.load_metaphases()):
 
-        d = simu_analyzer(simu, params)
+        results = simu_analyzer(simu, params)
         del simu
         gc.collect()
 
-        data.append(d)
+        data.extend(results)
 
     os.remove(pool.simu_path)
 

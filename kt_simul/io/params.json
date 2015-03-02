@@ -262,10 +262,10 @@
         "value": "0"
     },
     {
-        "description": "Length dependence for attachment (N)",
+        "description": "Length dependence for attachment (N_mt)",
         "max": "0",
         "min": "0",
-        "name": "ldep_for_attachment_N",
+        "name": "ldep_for_attachment_N_mt",
         "step": "0",
         "unit": " ",
         "value": "0"
