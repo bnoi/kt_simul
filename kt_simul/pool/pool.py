@@ -128,8 +128,8 @@ class Pool:
                 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
             ncore = multiprocessing.cpu_count() + 1
-            log.info('Parallel mode enabled: %i cores will be used to run %i simulations' %
-                       (ncore, self.n_simu))
+            mess = 'Parallel mode enabled: {} cores will be used to run {} simulations'
+            log.info(mess.format(ncore, self.n_simu))
             pool = multiprocessing.Pool(
                 processes=ncore, initializer=init_worker)
 
@@ -180,8 +180,7 @@ class Pool:
         except KeyboardInterrupt:
             pool.terminate()
             pool.join()
-            raise CanceledByUserException(
-                'Simulation has been canceled by user')
+            raise Exception('Simulation has been canceled by user')
 
         if self.parallel:
             store = pd.HDFStore(self.simu_full_path)
@@ -213,7 +212,7 @@ class Pool:
             del ioo
             yield meta
 
-    def load_metaphase_parallel(self, pre_processing_func=None , verbose=True):
+    def load_metaphase_parallel(self, pre_processing_func=None, verbose=True):
         """
         """
         all_fpath = [os.path.join(self.simu_path, fname) for i, fname in enumerate(self.metaphases_path)]
