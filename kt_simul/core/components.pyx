@@ -475,9 +475,9 @@ cdef class PlugSite(Organite):
 
         gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
-        N = float(self.KD.params['ldep_for_attachment_N'])
+        N_mt = float(self.KD.params['ldep_for_attachment_N_mt'])
 
-        if N == 0:
+        if N_mt == 0:
             return 1
 
         if self.current_side == 'right':
@@ -488,11 +488,24 @@ cdef class PlugSite(Organite):
             raise Exception('Wrong side idiot !')
 
         mt_size = np.abs(self.pos - spb_pos)
+        spb_size = np.abs(self.KD.spbR.pos - self.KD.spbL.pos)
 
-        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma)
+        # Get vector of spindle asize
+        x = np.linspace(0, spb_size, 100)
 
-        # Transform to number of MTs for this size
-        factor *= N
+        # Get Cauchy/Lorentz distribution according to current spindle size
+        cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
+
+        # Integrate density distribution along the spindle
+        total_area = np.trapz(cauchy_cdf, x=x)
+
+        # Now compute a k_alpha prefactor for a given MT size
+        # Then we normalize this pre factor by the total area of the density
+        # distribution for the current spindle size
+        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / total_area
+
+        # Next we convert a probability in MT number
+        factor *= N_mt
 
         return factor
 

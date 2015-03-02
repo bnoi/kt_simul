@@ -68,6 +68,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         tau_c = measures['tau_c']
         obs_d0 = measures['obs_d0']
         mean_kt_spb_dist = measures["mean_kt_spb_dist"]
+        mean_spb_size = measures["mean_spb_size"]
 
         k_a = params['k_a']
         d_alpha = params['d_alpha']
@@ -78,7 +79,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
 
         ldep_mu = params['ldep_for_attachment_mu']
         ldep_gamma = params['ldep_for_attachment_gamma']
-        ldep_N = params['ldep_for_attachment_N']
+        ldep_N_mt = params['ldep_for_attachment_N_mt']
 
     except KeyError:
         log.warning("Some parametree / measuretree values are missing")
@@ -132,8 +133,12 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         k_d_eff = k_a
 
     # Get mean attachment rate
-    factor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma)
-    factor *= ldep_N
+    x = np.linspace(0, mean_spb_size, 100)
+    cauchy_cdf = cauchy.pdf(x, loc=ldep_mu, scale=ldep_gamma)
+    total_area = np.trapz(cauchy_cdf, x=x)
+    factor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
+    factor *= ldep_N_mt
+
     k_a_eff = k_a * factor
 
     # Compute mean attachment state during a simulation

@@ -97,5 +97,14 @@
         "step": "1e-5",
         "unit": "µm/s",
         "value": "10e-3"
+    },
+    {
+        "description": "Mean spindle size during metaphase",
+        "max": "100",
+        "min": "1e-4",
+        "name": "mean_spb_size",
+        "step": "1e-5",
+        "unit": "µm",
+        "value": "2.25"
     }
 ]
