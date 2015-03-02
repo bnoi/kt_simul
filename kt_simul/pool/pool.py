@@ -22,7 +22,7 @@ import pandas as pd
 from ..core.simul_spindle import Metaphase
 from ..io.simuio import SimuIO
 from ..io import ParamTree
-from ..utils.progress import pprogress
+from ..utils.progress import print_progress
 from ..utils.dict import sanitize_dict
 from ..utils.dict import guess_number_dict
 
@@ -167,11 +167,11 @@ class Pool:
             for i in range(self.n_simu):
                 next(results)
                 if self.verbose:
-                    pprogress((i + 1) / self.n_simu * 100, "(%i / %i)" %
+                    print_progress((i + 1) / self.n_simu * 100, "(%i / %i)" %
                               (i + 1, self.n_simu))
 
             if self.verbose:
-                pprogress(-1)
+                print_progress(-1)
 
             if self.parallel:
                 pool.terminate()
@@ -223,7 +223,7 @@ class Pool:
         results = []
         for i, meta in enumerate(proc_pool.imap_unordered(_load_metaphase_single, args)):
             if verbose:
-                pprogress(int(i * 100 / self.n_simu))
+                print_progress(int(i * 100 / self.n_simu))
             print(meta.KD.chromosomes)
             if pre_processing_func:
                 results.append(pre_processing_func(meta))
@@ -231,7 +231,7 @@ class Pool:
                 results.append(meta)
 
         if verbose:
-            pprogress(-1)
+            print_progress(-1)
 
         return results
 

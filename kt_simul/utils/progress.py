@@ -5,7 +5,8 @@ from __future__ import print_function
 
 import sys
 
-def pprogress(percent, suffix_message=None, size=50):
+
+def print_progress(percent, suffix_message=None, size=50):
     """
     Print a progress bar
     percent = -1 to end and remove the progress bar

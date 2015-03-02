@@ -22,7 +22,7 @@ pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=
 from ..core.spindle_dynamics import KinetoDynamics
 from ..io import ParamTree
 from ..core import parameters
-from ..utils.progress import pprogress
+from ..utils.progress import print_progress
 from ..utils.format import pretty_dict
 
 log = logging.getLogger(__name__)
@@ -209,7 +209,7 @@ class Metaphase(object):
             progress = int((time_point * 100.0) / self.num_steps)
 
             if self.verbose and progress != bef:
-                pprogress(int(progress))
+                print_progress(int(progress))
                 bef = progress
 
             # Ablation test
@@ -221,7 +221,7 @@ class Metaphase(object):
             # Anaphase transition ?
             if self._anaphase_test(time_point):
                 if not log_anaphase_onset:
-                    pprogress(-1)
+                    print_progress(-1)
                     if self.verbose:
                         log.info("Anaphase onset at %i / %i" %
                                    (time_point, self.num_steps))
@@ -232,7 +232,7 @@ class Metaphase(object):
                 # print self.KD.At_mat
 
         if self.verbose:
-            pprogress(-1)
+            print_progress(-1)
 
         if self.verbose:
             log.info('Simulation done')
