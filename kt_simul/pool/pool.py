@@ -69,6 +69,9 @@ class Pool:
                 else:
                     os.remove(self.simu_path)
 
+            if not os.path.isdir(os.path.dirname(self.simu_path)):
+                os.makedirs(os.path.dirname(self.simu_path))
+
             self.metaphases_path = []
             self.simus_run = False
             self.digits = int(math.log10(self.n_simu)) + 1
