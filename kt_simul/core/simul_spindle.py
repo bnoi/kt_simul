@@ -426,17 +426,18 @@ class Metaphase(object):
 
         cm = matplotlib.cm.get_cmap('Set1')
         colors = [cm(1 * i / len(kts)) for i in range(len(kts))]
-        for color, kt in zip(colors, kts):
-            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8, lw=2)
+        for i, (color, kt) in enumerate(zip(colors, kts)):
+            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8, lw=2, label='ch n°{}'.format(i))
             ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8, lw=2)
 
+        ax.legend()
         if ylim:
             ax.set_ylim(ylim)
 
         for i in ax.spines.values():
             i.set_linewidth(0)
 
-        ax.xaxis.set_ticklabels([])
+        #ax.xaxis.set_ticklabels([])
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
         ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
