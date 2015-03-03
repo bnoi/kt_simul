@@ -9,9 +9,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import logging
-import io
 
-import numpy as np
 import pandas as pd
 
 # Those strings should be respected in the xml file
@@ -105,7 +103,8 @@ class ParamTree(object):
     def __getitem__(self, key):
         """
         """
-        return self.params.set_index('name').loc[key, 'value']
+        return self.relative_dic[key]
+        # return self.params.set_index('name').loc[key, 'value']
 
     def copy(self):
         """

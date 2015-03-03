@@ -169,8 +169,8 @@ cdef class KinetoDynamics(object):
         cdef int N, M, n, m
         N = int(self.params['N'])
         Mk = int(self.params['Mk'])
-        cdef np.ndarray[DTYPE_t, ndim=1] X
-        X = np.zeros(1 + 2*N * ( Mk + 1 ))
+        cdef np.ndarray[DTYPE_t, ndim = 1] X
+        X = np.zeros(1 + 2*N * (Mk + 1))
         X[0] = self.spbR.pos
         cdef int an, bn, anm, bnm
         cdef Chromosome ch
@@ -194,7 +194,7 @@ cdef class KinetoDynamics(object):
         return self._calc_A()
 
     cdef _calc_A(self):
-        cdef np.ndarray[DTYPE_t, ndim=2] A
+        cdef np.ndarray[DTYPE_t, ndim = 2] A
         self.time_dependentA()
         A = self.A0_mat + self.At_mat
         return A
@@ -208,8 +208,8 @@ cdef class KinetoDynamics(object):
         cdef float Vmz = self.params['Vmz']
         cdef float Fmz = self.params['Fmz']
         cdef float muco = self.params['muco']
-        cdef int dims = 1 + 2 * N * ( Mk + 1 )
-        cdef np.ndarray[DTYPE_t, ndim=2] A0
+        cdef int dims = 1 + 2 * N * (Mk + 1)
+        cdef np.ndarray[DTYPE_t, ndim = 2] A0
         cdef int delta2
         A0 = np.zeros((dims, dims))
         A0[0, 0] = - 2 * mus - 4 * Fmz / Vmz
@@ -239,7 +239,7 @@ cdef class KinetoDynamics(object):
         cdef float pi_nmA, pi_nmB
         cdef int pluggedA, pluggedB
         cdef int n, m, anm, bnm
-        self.At_mat[0,0] = 0
+        self.At_mat[0, 0] = 0
         cdef Chromosome ch
         cdef PlugSite plugsite_A, plugsite_B
         for n in range(N):
@@ -260,14 +260,14 @@ cdef class KinetoDynamics(object):
                     # pi_nmA *= plugsite_A.calc_attach_trans()
                     # pi_nmB *= plugsite_B.calc_attach_trans()
 
-                #spbs diag terms:
+                # spbs diag terms:
                 self.At_mat[0, 0] -= pluggedA + pluggedB
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
                 self.At_mat[anm, anm] = - pluggedA
                 self.At_mat[0, anm] = pi_nmA
                 self.At_mat[anm, 0] = pi_nmA
-                #B side
+                # B side
                 self.At_mat[bnm, bnm] = -  pluggedB
                 self.At_mat[0, bnm] = pi_nmB
                 self.At_mat[bnm, 0] = pi_nmB
@@ -282,7 +282,7 @@ cdef class KinetoDynamics(object):
         cdef float kappa_c, kappa_k
         kappa_k = self.params['kappa_k']
         kappa_c = self.params['kappa_c']
-        cdef np.ndarray[DTYPE_t, ndim=2] Bk, Bc
+        cdef np.ndarray[DTYPE_t, ndim = 2] Bk, Bc
         Bk = self.kinetochore_B()
         Bc = self.cohesin_B()
         self.B_mat = kappa_k * Bk + kappa_c * Bc
@@ -397,7 +397,7 @@ cdef class KinetoDynamics(object):
         cdef double Vk = self.params['Vk']
         cdef np.ndarray[DTYPE_t] speeds
         speeds = self.speeds
-        speeds *= Vk * dt # Back to real space
+        speeds *= Vk * dt  # Back to real space
         self.spbR.set_pos(self.spbR.pos + speeds[0], time_point)
         self.spbL.set_pos(self.spbL.pos - speeds[0], time_point)
         cdef int n, m, an, anm, bn, bnm

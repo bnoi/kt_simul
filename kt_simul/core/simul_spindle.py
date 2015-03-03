@@ -20,7 +20,6 @@ import pyximport
 pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=True)
 
 from ..core.spindle_dynamics import KinetoDynamics
-from ..io import ParamTree
 from ..core import parameters
 from ..utils.progress import print_progress
 from ..utils.format import pretty_dict
@@ -163,7 +162,7 @@ class Metaphase(object):
 
     @property
     def time(self):
-        return np.arange(0, self.KD.duration, self.KD.dt)
+        return np.arange(0, self.paramtree['span'], self.KD.dt)
 
     @property
     def time_anaphase(self):
@@ -247,9 +246,7 @@ class Metaphase(object):
             ch.cen_B.calc_toa()
 
     def get_report(self, time=0):
-        """
-        Print simulation state about a specific time point
-
+        """Print simulation state about a specific time point
         """
         params = self.paramtree.relative_dic
 
@@ -492,10 +489,6 @@ class Metaphase(object):
         """
 
         att = []
-
-        time = np.arange(0, self.KD.duration, self.KD.dt)
-        anaphase = self.KD.params['t_A']
-        index_anaphase = np.argwhere(time == anaphase)[0][0]
 
         for ch in self.KD.chromosomes:
             ch.calc_correct_history()

@@ -570,9 +570,8 @@ cdef class PlugSite(Organite):
         """
         """
         cdef float d_alpha, k_d0
-        cdef double k_shrink
         cdef float dist
-        cdef float spindle_center
+        cdef float ch_center
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
@@ -580,15 +579,19 @@ cdef class PlugSite(Organite):
         if d_alpha == 0:
             return k_d0
 
-        spindle_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
-        spindle_center /= 2
-        dist = np.abs(self.pos - spindle_center)
+        ch_center = self.centromere.chromosome.cen_A.pos + self.centromere.chromosome.cen_B.pos
+        ch_center /= 2
+        dist = np.abs(self.pos - ch_center)
 
         if dist == 0:
             return 1
 
-        x0 = 0
-        k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
+        # Cauchy distribution
+        # x0 = 0
+        # k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0) / (d_alpha / 2)) ** 2)
+
+        # Inverse distribution
+        k_dc = k_d0 * d_alpha / dist
 
         if k_dc > 1e4:
             return 1
