@@ -59,6 +59,9 @@ class SympySpindle:
         self.name = name
         self.N = N
         self.Mk = Mk
+
+        self.points = []
+        self.S = ReferenceFrame('S')
         self.forces = []
         ## Coordinates
         self.q_ind = []
@@ -66,8 +69,6 @@ class SympySpindle:
         self.u_ind = []
 
         ## points
-        self.points = []
-        self.S = ReferenceFrame('S')
         self.center = Point('C')
         self.center.set_vel(self.S, 0)
 
@@ -150,10 +151,10 @@ class Spb(Organite):
         self.side = side
         self.spindle = spindle
         Organite.__init__(self, name, spindle.center, spindle.S, pos, vel)
+        self.spindle.points.append(self.point)
         mu_s = parameters['mu_s']
         viscous = ViscousDrag.new(self.spindle, self.spindle.S,
                                   self.point, mu_s)
-        self.spindle.points.append(self.point)
 
 
 class Chromosome(Organite):
@@ -210,7 +211,7 @@ class Centromere(Organite):
                    + parameters['d_0']) * spindle.S.x / 2
             vel = (chromosome.point.vel(spindle.S)
                   + chromosome.strech_vel * spindle.S.x / 2)
-        Organite.__init__(self, name, spindle.center, spindle.S, pos, vel)
+        Organite.__init__(self, name, chromosome.point, spindle.S, pos, vel)
         self.spindle.points.append(self.point)
         mu_ch = parameters['mu_ch']
         viscous = ViscousDrag.new(self.spindle,
@@ -257,6 +258,7 @@ class PlugSite(Organite):
         self.lbda = symbols('lambda_{}{}^{}'.format(*self.site_id))
         self.rho = symbols('rho_{}{}^{}'.format(*self.site_id))
         self.pi = symbols('pi_{}{}^{}'.format(*self.site_id))
+
         self.pi_to_lr = {self.pi: -self.lbda + self.rho}
         self.lr_to_pi = {self.lbda: self.pi * (self.pi - 1)/2,
                          self.rho: self.pi * (self.pi + 1)/2}

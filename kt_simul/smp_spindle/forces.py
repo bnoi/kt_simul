@@ -83,7 +83,7 @@ class DampedSpring:
                                (spring.point2, spring.F_v)])
         return spring
 
-class LinearFV():
+class LinearFV:
     '''
     Linear Force velocity relationship
     F = F_max(1 - gamma * (u2 - u1)/V_max)e_F
