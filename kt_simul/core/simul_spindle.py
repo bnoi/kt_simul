@@ -24,6 +24,7 @@ from ..core import parameters
 from ..utils.progress import print_progress
 from ..utils.format import pretty_dict
 
+
 log = logging.getLogger(__name__)
 
 __all__ = ["Metaphase"]

@@ -142,6 +142,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         total_area = np.trapz(cauchy_cdf, x=x)
         prefactor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
         prefactor *= ldep_N_mt
+
         k_a_eff = k_a * prefactor
     else:
         k_a_eff = k_a

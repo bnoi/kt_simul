@@ -491,7 +491,7 @@ cdef class PlugSite(Organite):
         spb_size = np.abs(self.KD.spbR.pos - self.KD.spbL.pos)
 
         # Get vector of spindle asize
-        x = np.linspace(0, spb_size, 100)
+        x = np.linspace(0, spb_size, 50)
 
         # Get Cauchy/Lorentz distribution according to current spindle size
         cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
