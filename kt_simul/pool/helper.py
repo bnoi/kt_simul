@@ -74,7 +74,7 @@ def simu_analyzer(simu, params):
     return results
 
 
-def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters):
+def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters, force_parameters):
     """
     """
 
@@ -94,7 +94,8 @@ def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters):
                    'initial_plug': pool_parameters['initial_plug'],
                    'parallel': False,
                    'verbose': False,
-                   'erase': False}
+                   'erase': False,
+                   'force_parameters': force_parameters}
 
     pool = Pool(**pool_params)
     pool.run()
@@ -102,14 +103,15 @@ def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters):
     return pool
 
 
-def processor(i, params, simu_path, paramtree, measuretree, pool_parameters, n_params):
+def processor(i, params, simu_path, paramtree, measuretree,
+              pool_parameters, n_params, force_parameters):
 
     # Log
     real_i = (i + 1) * pool_parameters["N"]
     logging.info("Processing simulations: {}/{}".format(real_i, n_params))
 
     # Run pool of simus
-    pool = run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters)
+    pool = run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters, force_parameters)
 
     data = []
 
