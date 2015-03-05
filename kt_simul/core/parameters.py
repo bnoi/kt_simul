@@ -70,6 +70,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         mean_kt_spb_dist = measures["mean_kt_spb_dist"]
         mean_spb_size = measures["mean_spb_size"]
 
+        k_d0 = params['k_d0']
         k_a = params['k_a']
         d_alpha = params['d_alpha']
         N = int(params['N'])
@@ -120,30 +121,29 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         muk = (tau_k * kappa_k)
         params['muk'] = muk
 
+    if 'k_d0' not in force_parameters:
+        params['k_d0'] = k_a
+
     # Get "average" constant of simulation
 
     # Get mean detachment rate (depend on Aurora parameter)
     if d_alpha != 0:
-        # Cauchy distribution
-        # x0 = 0
-        # prefactor = (2 / (np.pi * d_alpha)) / (1 + ((mean_metaph_k_dist - x0) / (d_alpha / 2)) ** 2)
-
         # Inverse distribution
         prefactor = d_alpha / (mean_metaph_k_dist / 2)
 
-        k_d_eff = k_a * prefactor
+        k_d_eff = k_d0 * prefactor
     else:
-        k_d_eff = k_a
+        k_d_eff = k_d0
 
     # Get mean attachment rate
     if ldep_N_mt > 0:
-        x = np.linspace(0, mean_spb_size, 100)
+        x = np.linspace(0, mean_spb_size, 50)
         cauchy_cdf = cauchy.pdf(x, loc=ldep_mu, scale=ldep_gamma)
         total_area = np.trapz(cauchy_cdf, x=x)
         prefactor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
-        prefactor *= ldep_N_mt
+        # prefactor *= ldep_N_mt
 
-        k_a_eff = k_a * prefactor
+        k_a_eff = k_a# * prefactor
     else:
         k_a_eff = k_a
 

@@ -421,7 +421,6 @@ cdef class PlugSite(Organite):
         self.set_pos(init_pos)
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
-        # self.P_att = 1 - np.exp(- self.KD.params['k_a'])
 
     cdef void set_plug_state(self, int state, int time_point=-1):
         self.plug_state = state
@@ -469,15 +468,23 @@ cdef class PlugSite(Organite):
 
         return ldep_factor
 
-    def calc_ldep_for_attachment(self):
+    cdef float calc_ldep_for_attachment(self):
         """Using Cauchy distribution
         """
 
+        cdef float gamma
+        cdef float mu
+        cdef int N_mt
+        cdef float mt_size
+        cdef float spb_size
+        cdef float factor
+        cdef float total_area
+
         gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
-        N_mt = float(self.KD.params['ldep_for_attachment_N_mt'])
+        N_mt = int(self.KD.params['ldep_for_attachment_N_mt'])
 
-        if N_mt == 0:
+        if gamma == 0:
             return 1
 
         if self.current_side == 'right':
@@ -491,7 +498,7 @@ cdef class PlugSite(Organite):
         spb_size = np.abs(self.KD.spbR.pos - self.KD.spbL.pos)
 
         # Get vector of spindle asize
-        x = np.linspace(0, spb_size, 50)
+        x = np.linspace(0, spb_size, 20)
 
         # Get Cauchy/Lorentz distribution according to current spindle size
         cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
@@ -505,7 +512,7 @@ cdef class PlugSite(Organite):
         factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / total_area
 
         # Next we convert a probability in MT number
-        factor *= N_mt
+        # factor *= N_mt
 
         return factor
 
@@ -574,7 +581,7 @@ cdef class PlugSite(Organite):
         cdef float ch_center
 
         d_alpha = self.KD.params['d_alpha']
-        k_d0 = self.KD.params['k_a']
+        k_d0 = self.KD.params['k_d0']
 
         if d_alpha == 0:
             return k_d0
