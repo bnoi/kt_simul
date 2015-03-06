@@ -422,6 +422,8 @@ cdef class PlugSite(Organite):
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
 
+        self.tmp = []
+
     cdef void set_plug_state(self, int state, int time_point=-1):
         self.plug_state = state
         self.plugged = 0 if state == 0 else 1
@@ -503,17 +505,15 @@ cdef class PlugSite(Organite):
         # Get Cauchy/Lorentz distribution according to current spindle size
         cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
 
-        # Integrate density distribution along the spindle
-        total_area = np.trapz(cauchy_cdf, x=x)
-
         # Now compute a k_a prefactor for a given MT size
         # Then we normalize this pre factor by the total area of the density
         # distribution for the current spindle size
-        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / total_area
+        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / cauchy_cdf.mean()
 
         # Next we convert a probability in MT number
         # factor *= N_mt
 
+        self.tmp.append((self.pos, factor))
         return factor
 
     cdef void plug_unplug(self, int time_point):

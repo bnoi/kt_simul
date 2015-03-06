@@ -84,3 +84,4 @@ cdef class PlugSite(Organite):
     cdef public int site_id
     cdef public double calc_attach_trans(PlugSite)
     cdef public float calc_ldep_for_attachment(PlugSite)
+    cdef public list tmp
