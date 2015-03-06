@@ -506,14 +506,9 @@ cdef class PlugSite(Organite):
         cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
 
         # Now compute a k_a prefactor for a given MT size
-        # Then we normalize this pre factor by the total area of the density
-        # distribution for the current spindle size
+        # Then we normalize this pre factor to 1
         factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / cauchy_cdf.mean()
 
-        # Next we convert a probability in MT number
-        # factor *= N_mt
-
-        self.tmp.append((self.pos, factor))
         return factor
 
     cdef void plug_unplug(self, int time_point):

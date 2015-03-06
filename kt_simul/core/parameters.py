@@ -136,16 +136,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         k_d_eff = k_d0
 
     # Get mean attachment rate
-    if ldep_N_mt > 0:
-        x = np.linspace(0, mean_spb_size, 50)
-        cauchy_cdf = cauchy.pdf(x, loc=ldep_mu, scale=ldep_gamma)
-        total_area = np.trapz(cauchy_cdf, x=x)
-        prefactor = cauchy.pdf(mean_kt_spb_dist, loc=ldep_mu, scale=ldep_gamma) / total_area
-        # prefactor *= ldep_N_mt
-
-        k_a_eff = k_a# * prefactor
-    else:
-        k_a_eff = k_a
+    k_a_eff = k_a
 
     # Compute mean attachment state during a simulation
     alpha_mean = 1 / (1 + k_d_eff / k_a_eff)
