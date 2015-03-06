@@ -68,7 +68,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         tau_c = measures['tau_c']
         obs_d0 = measures['obs_d0']
         mean_kt_spb_dist = measures["mean_kt_spb_dist"]
-        mean_spb_size = measures["mean_spb_size"]
 
         k_d0 = params['k_d0']
         k_a = params['k_a']
@@ -77,10 +76,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         Mk = int(params['Mk'])
         mus = params['mus']
         Fk = params['Fk']
-
-        ldep_mu = params['ldep_for_attachment_mu']
-        ldep_gamma = params['ldep_for_attachment_gamma']
-        ldep_N_mt = params['ldep_for_attachment_N_mt']
 
     except KeyError:
         log.warning("Some parametree / measuretree values are missing")
