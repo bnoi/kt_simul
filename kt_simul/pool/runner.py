@@ -1,4 +1,3 @@
-import os
 import logging
 import gc
 
@@ -6,7 +5,7 @@ import numpy as np
 from scipy import signal
 
 from ..signal.fft import get_fft
-from . import Pool
+from ..core.simul_spindle import Metaphase
 
 
 def simu_analyzer(simu, params):
@@ -74,11 +73,15 @@ def simu_analyzer(simu, params):
     return results
 
 
-def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters, force_parameters):
+def runner(i, n_total, params,
+           paramtree,
+           measuretree,
+           force_parameters,
+           initial_plug):
     """
     """
 
-    simu_name = os.path.join(simu_path, 'simu_{}.h5'.format(i))
+    logging.info("Processing simulation: {}/{}".format(i, n_total))
 
     current_paramtree = paramtree.copy()
     current_measuretree = measuretree.copy()
@@ -86,47 +89,17 @@ def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters, forc
     for k, v in params.iteritems():
         current_paramtree[k] = v
 
-    pool_params = {'simu_path': simu_name,
-                   'load': False,
-                   'n_simu': pool_parameters['N'],
-                   'paramtree': current_paramtree,
-                   'measuretree': current_measuretree,
-                   'initial_plug': pool_parameters['initial_plug'],
-                   'parallel': False,
-                   'verbose': False,
-                   'erase': False,
-                   'force_parameters': force_parameters}
+    simu = Metaphase(verbose=False,
+                     paramtree=current_paramtree,
+                     measuretree=current_measuretree,
+                     force_parameters=force_parameters,
+                     initial_plug=initial_plug)
 
-    pool = Pool(**pool_params)
-    pool.run()
+    simu.simul()
 
-    return pool
+    results = simu_analyzer(simu, params)
 
-
-def processor(i, params, simu_path, paramtree, measuretree,
-              pool_parameters, n_params, force_parameters):
-
-    # Log
-    real_i = (i + 1) * pool_parameters["N"]
-    logging.info("Processing simulations: {}/{}".format(real_i, n_params))
-
-    # Run pool of simus
-    pool = run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters, force_parameters)
-
-    data = []
-
-    # Load and analyze simus
-    for j, simu in enumerate(pool.load_metaphases()):
-
-        results = simu_analyzer(simu, params)
-        del simu
-        gc.collect()
-
-        data.extend(results)
-
-    os.remove(pool.simu_path)
-
-    del pool
+    del simu
     gc.collect()
 
-    return data
+    return results
