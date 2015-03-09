@@ -487,6 +487,55 @@ class Metaphase(object):
 
         return fig
 
+    def kymo_figure(self):
+        """
+        """
+
+        import matplotlib.pyplot as plt
+        import matplotlib
+
+        duration = self.KD.duration
+        dt = self.KD.dt
+        times = np.arange(0, duration, dt) / 60
+        kts = self.KD.chromosomes
+        spbA = self.KD.spbL.traj
+        spbB = self.KD.spbR.traj
+
+        fig, ax = plt.subplots(figsize=(14, 12))
+
+        # Plot kymo
+        colors = ['red', 'blue', 'green']
+        for i, (color, kt) in enumerate(zip(colors, kts)):
+            ax.plot(times, kt.cen_A.traj, color=color, alpha=1, lw=8)
+            ax.plot(times, kt.cen_B.traj, color=color, alpha=1, lw=8)
+
+        ax.plot(times, spbA, color='black', lw=8)
+        ax.plot(times, spbB, color='black', lw=8)
+
+        ax.set_yticks(np.arange(-4, 4, 2))
+        ax.set_xticks(np.arange(0, 20, 5))
+        ax.set_ylim(-4, 4)
+        ax.set_xlim(times[0], times[-1])
+
+        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
+        ax.xaxis.set_major_formatter(nullform)
+        ax.yaxis.set_major_formatter(nullform)
+
+        ax.xaxis.set_ticks_position('none')
+        ax.yaxis.set_ticks_position('none')
+
+        for i in ax.spines.values():
+            i.set_linewidth(8)
+            i.set_color('black')
+
+        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.set_axisbelow(True)
+
+        plt.tight_layout()
+        fig.subplots_adjust(hspace=0)
+
+        return fig
+
     def get_attachment_vector(self):
         """Get attachment states for all chromosomes and all timepoints.
         """
