@@ -11,9 +11,6 @@ from __future__ import print_function
 import logging
 import os
 
-import numpy as np
-from scipy.stats import cauchy
-
 from ..io import ParamTree
 
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))

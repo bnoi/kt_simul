@@ -277,6 +277,7 @@ cdef class Centromere(Organite):
             init_pos = chromosome.pos + d0 / 2.
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
+
         Organite.__init__(self, chromosome, init_pos)
         Mk = int(self.KD.params['Mk'])
         self.toa = 0  # time of arrival at pole

@@ -289,7 +289,7 @@ class Metaphase(object):
 
     def _anaphase_test(self, time_point):
         """
-        At anaphase onset, set the cohesin spring constent to 0 and
+        At anaphase onset, set the cohesin spring constant to 0 and
         self.KD.anaphase to True.
 
         Returns
@@ -302,8 +302,10 @@ class Metaphase(object):
         t_A = int(self.KD.params['t_A'])
         dt = self.KD.params['dt']
         t = time_point * dt
+
         if self.KD.anaphase:
             return True
+
         if t >= t_A and self._plug_checkpoint():
             self.delay = t - t_A
             self.analysis['real_t_A'] = t
@@ -349,15 +351,14 @@ class Metaphase(object):
                 plugsite.set_plug_state(0, time_point)
 
     def _plug_checkpoint(self):
-        """
-        If the spindle assembly checkpoint is active, returns True
+        """If the spindle assembly checkpoint is active, returns True
         if all chromosomes are plugged by at least one kMT, False
         otherwise.
-
         """
         sac = self.KD.params['sac']
         if sac == 0:
             return True
+
         for ch in self.KD.chromosomes:
             if not ch.cen_A.is_attached() or not ch.cen_B.is_attached():
                 return False
@@ -438,7 +439,7 @@ class Metaphase(object):
         for i in ax.spines.values():
             i.set_linewidth(0)
 
-        #ax.xaxis.set_ticklabels([])
+        # ax.xaxis.set_ticklabels([])
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
         ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
@@ -454,11 +455,11 @@ class Metaphase(object):
             errA = kt.erroneous_history.T[1]
             errB = kt.erroneous_history.T[0]
 
-            ax1.plot(times, correctB, color=color, **kwargs)
-            ax1.plot(times, errB, color=color, ls='--', **kwargs)
+            ax1.plot(times, correctA, color=color, **kwargs)
+            ax1.plot(times, errA, color=color, ls='--', **kwargs)
 
-            ax2.plot(times, correctA, color=color, **kwargs)
-            ax2.plot(times, errA, color=color, ls='--', **kwargs)
+            ax2.plot(times, correctB, color=color, **kwargs)
+            ax2.plot(times, errB, color=color, ls='--', **kwargs)
 
             ax1.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
             ax2.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
