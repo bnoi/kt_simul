@@ -447,13 +447,13 @@ class Metaphase(object):
         # Plot defects
         kwargs = dict(alpha=0.8, lw=2)
         for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax1 = plt.subplot(gs[i])
-            ax2 = plt.subplot(gs[i + len(kts) + 1])
+            ax1 = plt.subplot(gs[i], sharex=ax)
+            ax2 = plt.subplot(gs[i + len(kts) + 1], sharex=ax)
 
-            correctA = kt.correct_history.T[1]
-            correctB = kt.correct_history.T[0]
-            errA = kt.erroneous_history.T[1]
-            errB = kt.erroneous_history.T[0]
+            correctA = kt.correct_history.T[0]
+            correctB = kt.correct_history.T[1]
+            errA = kt.erroneous_history.T[0]
+            errB = kt.erroneous_history.T[1]
 
             ax1.plot(times, correctA, color=color, **kwargs)
             ax1.plot(times, errA, color=color, ls='--', **kwargs)
@@ -464,14 +464,14 @@ class Metaphase(object):
             ax1.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
             ax2.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
 
-            ax1.xaxis.set_ticklabels([])
-            ax1.yaxis.set_ticklabels([])
+            # ax1.xaxis.set_ticklabels([])
+            # ax1.yaxis.set_ticklabels([])
             ax1.xaxis.set_ticks_position('none')
             ax1.yaxis.set_ticks_position('none')
             ax1.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
 
-            ax2.xaxis.set_ticklabels([])
-            ax2.yaxis.set_ticklabels([])
+            # ax2.xaxis.set_ticklabels([])
+            # ax2.yaxis.set_ticklabels([])
             ax2.xaxis.set_ticks_position('none')
             ax2.yaxis.set_ticks_position('none')
             ax2.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
