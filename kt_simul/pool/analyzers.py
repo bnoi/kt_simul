@@ -61,8 +61,8 @@ def simu_analyzer(simu, params):
 
         # Attachment defect at anaphase
         atts = simu.get_attachment_vector()
-        d['attachment_defect_ana_onset'] = np.sum(atts[index_anaphase] != 0)
-        d['attachment_defect_ana_onset'] /= atts[index_anaphase].shape[0]
+        atts[atts != 0] = 1
+        d['attachment_defect_ana_onset'] = atts[index_anaphase].mean()
 
         results.append(d)
 
