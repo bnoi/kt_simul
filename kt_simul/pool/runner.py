@@ -1,83 +1,109 @@
 import logging
 import gc
+import itertools
+import os
 
-import numpy as np
-from scipy import signal
+import pandas as pd
+import joblib as jb
 
-from ..signal.fft import get_fft
 from ..core.simul_spindle import Metaphase
+from . import analyzers
 
 
-def simu_analyzer(simu, params):
+class Runner:
+    """
+    """
 
-    results = []
+    def __init__(self):
+        """
+        """
+        self.paramtree = None
+        self.measuretree = None
+        self.n_simus = None
+        self.n_simus_total = None
+        self.params_matrix = None
 
-    times = simu.time
-    anaphase = simu.time_anaphase
-    index_anaphase = simu.index_anaphase
+        self.path = None
+        self.results = None
 
-    spindle_size = np.abs(simu.KD.spbL.traj - simu.KD.spbR.traj)
+        self.force_parameters = []
+        self.initial_plug = 'random'
 
-    for j, ch in enumerate(simu.KD.chromosomes):
+        self.analyzer = None
 
-        d = {}
-        d.update(params.to_dict())
-        d['ch_id'] = j
+    def set_path(self, path):
+        """
+        """
+        self.path = path
 
-        d['spindle_size_metaphase'] = spindle_size[:index_anaphase].mean()
-        d['spindle_size_ana_onset'] = spindle_size[index_anaphase]
-        d['spindle_elongation'] = np.abs(spindle_size[index_anaphase] - spindle_size[0]) / anaphase
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-        d['stretch_mean_metaphase'] = np.abs(ch.cen_A.traj - ch.cen_B.traj)[:index_anaphase].mean()
-        d['stretch_mean_ana_onset'] = np.abs(ch.cen_A.traj - ch.cen_B.traj)[index_anaphase]
+        logging.basicConfig(filename=os.path.join(path, "progress.log"),
+                            level=logging.INFO,
+                            format='%(asctime)s:%(levelname)s:%(message)s')
+        logging.getLogger('kt_simul').setLevel(logging.WARNING)
 
-        kt_traj = np.abs((ch.cen_A.traj + ch.cen_B.traj) / 2)
+        simu_path = os.path.join(path, 'simus')
+        if not os.path.exists(simu_path):
+            os.makedirs(simu_path)
 
-        d['kt_pos_mean_ana_onset'] = kt_traj[index_anaphase]
-        d['kt_pos_mean_metaphase'] = kt_traj[:index_anaphase].mean()
-        d['kt_pos_mean_ana_onset_relative'] = (kt_traj / spindle_size)[index_anaphase]
-        d['kt_pos_mean_metaphase_relative'] = (kt_traj / spindle_size)[:index_anaphase].mean()
+    def set_params_from_list(self, params):
+        """
+        """
 
-        fft_mag, rfreqs = get_fft(kt_traj[400:], simu.KD.dt)
+        self.params_matrix = pd.DataFrame(params)
+        self.params_matrix.to_hdf(os.path.join(self.path, 'reference.h5'), 'params_matrix')
 
-        # Get peaks
-        max_peaks_idxs = signal.argrelmax(fft_mag)[0]
+        self.n_simus_total = len(self.params_matrix) * self.n_simus
 
-        # Remove peaks which are greater than half the entire duration
-        if len(max_peaks_idxs) > 0:
-            first_max_peak_id = max_peaks_idxs[0]
-            peak_duration = 1 / rfreqs[first_max_peak_id]
-            event_half_duration = times.max() / 2
-            if peak_duration > event_half_duration:
-                fft_mag = np.delete(fft_mag, first_max_peak_id)
-                rfreqs = np.delete(rfreqs, first_max_peak_id)
+    def set_params_from_vector(self, params):
+        """
+        """
 
-            # Set freq 0hZ to -np.inf
-            fft_mag[0] = -np.inf
+        labels = [p['name'] for p in params]
+        self.params_matrix = [p['range'] for p in params]
+        self.params_matrix = pd.DataFrame(list(itertools.product(*self.params_matrix)),
+                                          columns=labels)
 
-            # Sort peaks by magnitude
-            sorted_idxs = np.argsort(fft_mag[max_peaks_idxs])[::-1]
-            max_magn_idxs = max_peaks_idxs[sorted_idxs]
+        self.n_simus_total = len(self.params_matrix) * self.n_simus
 
-            for i, peak_idx in zip(range(1, 3), max_magn_idxs):
-                d["magn_{}".format(i)] = fft_mag[peak_idx] * 2
-                d["period_{}".format(i)] = 1 / rfreqs[peak_idx]
+    def run(self, analyzer=analyzers.simu_analyzer, n_jobs=-1, backend="multiprocessing"):
+        """
+        """
 
-        # Attachment defect at anaphase
-        atts = simu.get_attachment_vector()
-        d['attachment_defect_ana_onset'] = np.sum(atts[index_anaphase] != 0)
-        d['attachment_defect_ana_onset'] /= atts[index_anaphase].shape[0]
+        jobs = []
+        i = 1
+        for param_id, params in self.params_matrix.iterrows():
+            for _ in range(self.n_simus):
+                kwargs = {"i": i,
+                          "n_total": self.n_simus_total,
+                          "params": params,
+                          "paramtree": self.paramtree,
+                          "measuretree": self.measuretree,
+                          "force_parameters": self.force_parameters,
+                          "initial_plug": self.initial_plug}
 
-        results.append(d)
+                jobs.append(jb.delayed(run_simu)(analyzer=analyzer, **kwargs))
+                i += 1
 
-    return results
+        p = jb.Parallel(n_jobs=n_jobs, verbose=11, backend=backend)
+        results = p(jobs)
+
+        results = list(itertools.chain(*results))
+        self.results = pd.DataFrame(results)
+        self.results.to_hdf(os.path.join(self.path, "results.h5"), 'df')
+
+        logging.info('Done')
 
 
-def runner(i, n_total, params,
-           paramtree,
-           measuretree,
-           force_parameters,
-           initial_plug):
+def run_simu(i, n_total,
+             params,
+             paramtree,
+             measuretree,
+             force_parameters,
+             initial_plug,
+             analyzer=analyzers.simu_analyzer):
     """
     """
 
@@ -97,7 +123,7 @@ def runner(i, n_total, params,
 
     simu.simul()
 
-    results = simu_analyzer(simu, params)
+    results = analyzer(simu, params)
 
     del simu
     gc.collect()
