@@ -450,6 +450,10 @@ cdef class PlugSite(Organite):
         cdef double pole_pos
         cdef double force_term
 
+        # Disable ldep if current time point lower than time_ldep
+        if 'time_ldep' in self.KD.params.keys() and self.KD.time_point < self.KD.params['time_ldep']:
+            return 1
+
         ldep = self.KD.params['ldep']
         ldep_balance = self.KD.params['ldep_balance']
 
@@ -482,6 +486,10 @@ cdef class PlugSite(Organite):
         cdef float spb_size
         cdef float factor
         cdef float total_area
+
+        # Disable ldep if current time point lower than time_ldep
+        if 'time_ldep' in self.KD.params.keys() and self.KD.time_point < self.KD.params['time_ldep']:
+            return 1
 
         gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
