@@ -451,8 +451,11 @@ cdef class PlugSite(Organite):
         cdef double force_term
 
         # Disable ldep if current time point lower than time_ldep
-        if 'time_ldep' in self.KD.params.keys() and self.KD.time_point < self.KD.params['time_ldep']:
-            return 1
+        if 'time_ldep' in self.KD.params.keys() and 'time_ldep_inject' in self.KD.params.keys():
+            if self.KD.params['time_ldep_inject'] and self.KD.time_point < self.KD.params['time_ldep']:
+                return 1
+            if not self.KD.params['time_ldep_inject'] and self.KD.time_point > self.KD.params['time_ldep']:
+                return 1
 
         ldep = self.KD.params['ldep']
         ldep_balance = self.KD.params['ldep_balance']
@@ -488,8 +491,11 @@ cdef class PlugSite(Organite):
         cdef float total_area
 
         # Disable ldep if current time point lower than time_ldep
-        if 'time_ldep' in self.KD.params.keys() and self.KD.time_point < self.KD.params['time_ldep']:
-            return 1
+        if 'time_ldep' in self.KD.params.keys() and 'time_ldep_inject' in self.KD.params.keys():
+            if self.KD.params['time_ldep_inject'] and self.KD.time_point < self.KD.params['time_ldep']:
+                return 1
+            if not self.KD.params['time_ldep_inject'] and self.KD.time_point > self.KD.params['time_ldep']:
+                return 1
 
         gamma = float(self.KD.params['ldep_for_attachment_gamma'])
         mu = float(self.KD.params['ldep_for_attachment_mu'])
