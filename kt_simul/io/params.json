@@ -15,7 +15,7 @@
         "name": "dt",
         "step": "0.1",
         "unit": "s",
-        "value": "10"
+        "value": "1"
     },
     {
         "description": "Anaphase A transition",

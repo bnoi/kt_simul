@@ -7,6 +7,7 @@ import pandas as pd
 import joblib as jb
 
 from ..core.simul_spindle import Metaphase
+from ..io.simuio import SimuIO
 from . import analyzers
 
 
@@ -61,7 +62,7 @@ class Runner:
         """
         """
 
-        labels = [p['name'] for p in params]
+        labels = [p['label'] for p in params]
         self.params_matrix = [p['range'] for p in params]
         self.params_matrix = pd.DataFrame(list(itertools.product(*self.params_matrix)),
                                           columns=labels)
@@ -78,13 +79,15 @@ class Runner:
             for _ in range(self.n_simus):
                 kwargs = {"i": i,
                           "n_total": self.n_simus_total,
-                          "params": params,
+                          "params": params.dropna(),
                           "paramtree": self.paramtree,
                           "measuretree": self.measuretree,
                           "force_parameters": self.force_parameters,
-                          "initial_plug": self.initial_plug}
+                          "initial_plug": self.initial_plug,
+                          "analyzer": analyzer,
+                          "save": False}
 
-                jobs.append(jb.delayed(run_simu)(analyzer=analyzer, **kwargs))
+                jobs.append(jb.delayed(run_simu)(**kwargs))
                 i += 1
 
         p = jb.Parallel(n_jobs=n_jobs, verbose=11, backend=backend)
@@ -103,6 +106,7 @@ def run_simu(i, n_total,
              measuretree,
              force_parameters,
              initial_plug,
+             save=False,
              analyzer=analyzers.simu_analyzer):
     """
     """
@@ -114,6 +118,8 @@ def run_simu(i, n_total,
 
     for k, v in params.iteritems():
         current_paramtree[k] = v
+        if k in ['k_d0', 'kappa_c', 'Fmz', 'Vmz']:
+            force_parameters.append(k)
 
     simu = Metaphase(verbose=False,
                      paramtree=current_paramtree,
@@ -122,6 +128,9 @@ def run_simu(i, n_total,
                      initial_plug=initial_plug)
 
     simu.simul()
+
+    if save and type(save) == str:
+        SimuIO(meta).save(save, save_tree=False)
 
     results = analyzer(simu, params)
 
