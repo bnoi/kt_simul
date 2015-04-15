@@ -24,7 +24,7 @@
         "name": "poleward_speed",
         "step": "0.001",
         "unit": "µm/s",
-        "value": "0.03"
+        "value": "0.04"
     },
     {
         "description": "Mean kt-kt distance",
