@@ -56,10 +56,13 @@ cdef class KinetoDynamics(object):
         """
         KinetoDynamics instenciation method
 
-        :param parameters: A dictionnary of parameters as obtained from a ParamTree instance
-        :type parameters: ParamTree instance
+        Parameters
+        ----------
+        parameters : ParamTree instance
+            A dictionnary of parameters as obtained from a ParamTree instance
 
-        :param initial_plug: Defines globally the initial attachment states.
+        initial_plug : string or None
+            Defines globally the initial attachment states.
             This argument can have the following values:
                 * 'null': all kinetochores are detached
                 * 'amphitelic': all chromosmes are amphitelic
@@ -68,7 +71,9 @@ cdef class KinetoDynamics(object):
                 * 'monotelic': right kinetochores are attached to the same pole,
                            left ones are detached
                 * 'syntelic' : all kinetochores are attached to the same pole
-        :type initial_plug: string or None
+
+        prng : None
+            Random engine init.
         """
 
         if not prng:
