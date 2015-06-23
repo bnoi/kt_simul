@@ -167,7 +167,8 @@ cdef class Chromosome(Organite):
     cdef int delta2(self):
 
         """
-        Change the sense of viscous force depending on relative speeds of centromeres A and B
+        Change the sense of viscous force depending on relative speeds
+        of centromeres A and B
         """
         speedA = (self.cen_A.traj[-2] - self.cen_A.traj[-1]) / self.KD.params['dt']
         speedB = (self.cen_B.traj[-2] - self.cen_B.traj[-1]) / self.KD.params['dt']
