@@ -5,13 +5,13 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-
 class ViscousDrag:
     ''' Simple viscous drag
 
     '''
     def __init__(self, N, point, mu):
-
+        '''
+        '''
         self.point = point
         self.F = - mu * point.vel(N)
 

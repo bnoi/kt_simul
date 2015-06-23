@@ -12,7 +12,6 @@ from sympy.physics.mechanics import ReferenceFrame, Point, Particle
 from sympy.physics.mechanics import KanesMethod
 
 
-
 from sympy.physics.mechanics import mechanics_printing
 mechanics_printing(pretty_print=True) # Shinny
 
@@ -84,15 +83,14 @@ class SympySpindle:
         self.qd_ind = [coord.diff()
                        for coord in self.q_ind]
 
-
     def add_spbs(self):
         self.spbR = Spb(1, self)
         self.spbL = Spb(-1, self)
         F_mz = parameters['F_mz']
         V_mz = parameters['V_mz']
-        midzone = LinearFV.new(self, self.S,
-                               self.spbL.point, self.spbR.point,
-                               F_mz, V_mz, 1, e_F=self.S.x)
+        LinearFV.new(self, self.S,
+                     self.spbL.point, self.spbR.point,
+                     F_mz, V_mz, 1, e_F=self.S.x)
 
     def add_chromosome(self, n):
         ch = Chromosome(self, n)
@@ -128,10 +126,21 @@ class SympySpindle:
         astate = Matrix([[site_A.lbda, site_A.rho, site_B.lbda, site_B.rho]
                          for ch in self.chromosomes for (site_A, site_B)
                          in zip(ch.cen_A.plugsites, ch.cen_B.plugsites)
-                     ]).reshape(2 * self.N * self.Mk, 2)
+                         ]).reshape(2 * self.N * self.Mk, 2)
         return astate
 
 class Organite:
+    ''' Creates an organite
+
+    Attributes
+    ----------
+    name: str,
+        the organite's name
+    point: `:class:sympy.mechanics.Point`
+    ref: `:class:sympy.mechanics.ReferenceFrame`
+        in which the point's velocity is defined
+    '''
+
 
     def __init__(self, name, parent,
                  ref, pos, vel):
@@ -142,7 +151,8 @@ class Organite:
         self.point.set_vel(ref, vel)
 
 class Spb(Organite):
-
+    ''' A spindle pole body aka Microtubule Organizing Center aka Centrosome
+    '''
     def __init__(self, side, spindle):
 
         name = 'spbR' if side == 1 else 'spbL'
@@ -158,6 +168,9 @@ class Spb(Organite):
 
 
 class Chromosome(Organite):
+    '''
+    A pair of sister chromatids
+    '''
 
     def __init__(self, spindle, ch_id):
         name = 'ch_{}'.format(ch_id)
@@ -165,6 +178,8 @@ class Chromosome(Organite):
         self.spindle = spindle
 
         self.coord = dynamicsymbols("c_{}".format(ch_id))
+        self.theta = dynamicsymbols("theta_{}".format(ch_id))
+        self.phi = dynamicsymbols("phi_{}".format(ch_id))
         self.spindle.q_ind.append(self.coord)
         self.coord_vel = dynamicsymbols("^vc_{}".format(ch_id))
         self.spindle.u_ind.append(self.coord_vel)
@@ -173,15 +188,21 @@ class Chromosome(Organite):
         self.spindle.q_ind.append(self.strech)
         self.strech_vel = dynamicsymbols("^vl_{}".format(ch_id))
         self.spindle.u_ind.append(self.strech_vel)
+        ## Chromosome attached reference frame
+        self.C = self.spindle.S.orientnew('C_{}'.format(self.id), 'Body',
+                                          [self.theta, self.phi, 0],
+                                          'ZYX')
 
-        pos  = self.coord * spindle.S.x
-        vel  = self.coord_vel * spindle.S.x
+        pos = self.coord * spindle.S.x
+        vel = self.coord_vel * spindle.S.x
         Organite.__init__(self, name, spindle.center, spindle.S, pos, vel)
         self.spindle.points.append(self.point)
         self.add_centromeres()
 
     def add_centromeres(self):
-        self.centromeres = {}
+        '''
+        Creates the centromeres
+        '''
         kappa_c = parameters['kappa_c']
         d_0 = parameters['d_0']
         mu_c = parameters['mu_c']
