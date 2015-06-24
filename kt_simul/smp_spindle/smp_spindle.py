@@ -209,11 +209,11 @@ class Chromosome(Organite):
         self.cen_A = Centromere(self.spindle, self, 'A')
         self.cen_B = Centromere(self.spindle, self, 'B')
         cen_spring = DampedSpring.new(self.spindle,
-                                      self.spindle.S,
+                                      self.C,
                                       self.cen_A.point,
                                       self.cen_B.point,
                                       kappa_c, mu_c, d_0,
-                                      e_F=self.spindle.S.x)
+                                      e_F=self.C.x)
 
 class Centromere(Organite):
 
