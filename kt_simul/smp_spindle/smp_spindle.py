@@ -177,25 +177,37 @@ class Chromosome(Organite):
         self.id = ch_id
         self.spindle = spindle
 
-        self.coord = dynamicsymbols("c_{}".format(ch_id))
-        self.theta = dynamicsymbols("theta_{}".format(ch_id))
-        self.phi = dynamicsymbols("phi_{}".format(ch_id))
-        self.spindle.q_ind.append(self.coord)
-        self.coord_vel = dynamicsymbols("^vc_{}".format(ch_id))
-        self.spindle.u_ind.append(self.coord_vel)
+        self.coords = [dynamicsymbols("{}_{}".format(u, ch_id))
+                       for u in 'x,y,z,theta,phi'.split(',')]
+        self.x, self.y, self.z = self.coords[:3]
+        self.theta = self.coords[3]
+        self.phi = self.coords[4]
+
+        self.spindle.q_ind.extend(self.coords)
+
+        self.coords_vel = [dynamicsymbols("^v{}_{}".format(u, ch_id))
+                           for u in 'x,y,z,theta,phi'.split(',')]
+        self.spindle.u_ind.extend(self.coords_vel)
 
         self.strech = dynamicsymbols("l_{}".format(ch_id))
         self.spindle.q_ind.append(self.strech)
         self.strech_vel = dynamicsymbols("^vl_{}".format(ch_id))
         self.spindle.u_ind.append(self.strech_vel)
-        ## Chromosome attached reference frame
-        self.C = self.spindle.S.orientnew('C_{}'.format(self.id), 'Body',
-                                          [self.theta, self.phi, 0],
-                                          'ZYX')
+        S = self.spindle.S
 
-        pos = self.coord * spindle.S.x
-        vel = self.coord_vel * spindle.S.x
-        Organite.__init__(self, name, spindle.center, spindle.S, pos, vel)
+        pos = (self.x * S.x
+               + self.y * S.y
+               + self.z * S.z)
+        vel = (self.coords_vel[0] * S.x
+               + self.coords_vel[1] * S.y
+               + self.coords_vel[2] * S.z)
+        Organite.__init__(self, name, spindle.center, S, pos, vel)
+        ## Chromosome attached reference frame
+        self.C = S.orientnew('C_{}'.format(self.id), 'Body',
+                             [self.theta, self.phi, 0],
+                             'ZYX')
+        self.point.set_vel(self.C, 0)
+        #self.C.set_ang_vel(S, self.coords_vel[3]*S.z + self.coords_vel[4]*S.y )
         self.spindle.points.append(self.point)
         self.add_centromeres()
 
@@ -221,20 +233,23 @@ class Centromere(Organite):
         self.spindle = spindle
         self.tag = tag
         self.id = chromosome.id
+        self.chromosome = chromosome
         name = 'cen_{}^{}'.format(chromosome.id, tag)
         if tag == 'A':
             pos = - (chromosome.strech
-                     + parameters['d_0'])* spindle.S.x / 2
-            vel = (chromosome.point.vel(spindle.S)
-                   - chromosome.strech_vel * spindle.S.x /2)
+                     + parameters['d_0'])* chromosome.C.x / 2
+            vel = - chromosome.strech_vel * chromosome.C.x /2
         elif tag == 'B':
             pos = (chromosome.strech
-                   + parameters['d_0']) * spindle.S.x / 2
-            vel = (chromosome.point.vel(spindle.S)
-                  + chromosome.strech_vel * spindle.S.x / 2)
-        Organite.__init__(self, name, chromosome.point, spindle.S, pos, vel)
+                   + parameters['d_0']) * chromosome.C.x / 2
+            vel = chromosome.strech_vel * chromosome.C.x / 2
+
+        Organite.__init__(self, name, chromosome.point, chromosome.C, pos, vel)
         self.spindle.points.append(self.point)
         mu_ch = parameters['mu_ch']
+        abs_v = vel + self.chromosome.point.vel(spindle.S)
+        self.point.set_vel(spindle.S, abs_v)
+
         viscous = ViscousDrag.new(self.spindle,
                                   self.spindle.S,
                                   self.point, mu_ch)
@@ -248,10 +263,10 @@ class Centromere(Organite):
         self.plugsites.append(site)
         kappa_k = parameters['kappa_k']
         mu_k = parameters['mu_k']
-        S = self.spindle.S
-        spring = DampedSpring.new(self.spindle, S,
+        C = self.chromosome.C
+        spring = DampedSpring.new(self.spindle, C,
                                   self.point, site.point,
-                                  kappa_k, mu_k, e_F=S.x)
+                                  kappa_k, mu_k, e_F=C.x)
 
 class PlugSite(Organite):
 
@@ -266,15 +281,18 @@ class PlugSite(Organite):
 
         self.strech_vel = dynamicsymbols("^vd_{}{}^{}".format(*self.site_id))
         self.spindle.u_ind.append(self.strech_vel)
-        S = centromere.spindle.S
+        C = centromere.chromosome.C
+        S = self.spindle.S
         if centromere.tag == 'A':
-            pos =  - self.strech * S.x
-            vel = centromere.point.vel(S) - self.strech_vel * S.x
+            pos =  - self.strech * C.x
+            vel = centromere.point.vel(C) - self.strech_vel * C.x
 
         elif centromere.tag == 'B':
-            pos = self.strech * S.x
-            vel = centromere.point.vel(S) + self.strech_vel * S.x
-        Organite.__init__(self, name, centromere.point, S, pos, vel)
+            pos = self.strech * C.x
+            vel = centromere.point.vel(C) + self.strech_vel * C.x
+        Organite.__init__(self, name, centromere.point, C, pos, vel)
+        abs_v = vel + centromere.chromosome.point.vel(S)
+        self.point.set_vel(S, abs_v)
         ## Attachment state
         self.lbda = symbols('lambda_{}{}^{}'.format(*self.site_id))
         self.rho = symbols('rho_{}{}^{}'.format(*self.site_id))
@@ -286,8 +304,6 @@ class PlugSite(Organite):
 
         self.spindle.points.append(self.point)
         self.kt_MT_forces()
-
-
 
     def kt_MT_forces(self):
         F_k = parameters['F_k']
