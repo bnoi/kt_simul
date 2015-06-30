@@ -126,8 +126,9 @@ class LinearFV:
         self.point1 = point1
         self.point2 = point2
         self.v = point2.vel(N) - point1.vel(N)
+        self.r = point2.pos_from(point1)
         if e_F is None:
-            self.e_F = self.v.normalize()
+            self.e_F = self.r.normalize()
         else:
             self.e_F = e_F
         ### Force
