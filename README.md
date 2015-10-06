@@ -74,24 +74,25 @@ Usage
 -----
 
 ```python
-from kt_simul.io.xml_handler import ParamTree
 from kt_simul.core.simul_spindle import Metaphase
 from kt_simul.io.simuio import SimuIO
 from kt_simul.core import parameters
 
-PARAMFILE = parameters.PARAMFILE
-MEASUREFILE = parameters.MEASUREFILE
+paramtree = parameters.get_default_paramtree()
+paramtree['dt'] = 10
+paramtree['span'] = 2000
+paramtree['t_A'] = 1750
 
-# Change some parameters
-paramtree = ParamTree(PARAMFILE)
-paramtree.change_dic('dt', 10)
-paramtree.change_dic('span', 2000)
-paramtree.change_dic('t_A', 1750)
-
-measuretree = ParamTree(MEASUREFILE, adimentionalized=False)
+measuretree = parameters.get_default_measuretree()
+measuretree['mean_metaph_k_dist'] = 0.3  # 0.3
 
 # Init simu
-meta = Metaphase(verbose=True, paramtree=paramtree, measuretree=measuretree, initial_plug='random')
+meta = Metaphase(verbose=True,
+                 paramtree=paramtree,
+                 measuretree=measuretree,
+                 initial_plug='random',
+                 keep_same_random_seed=False,
+                 force_parameters=[])
 
 # Launch simu
 meta.simul()
@@ -100,7 +101,7 @@ meta.simul()
 SimuIO(meta).save("simu.h5")
 
 # Show trajectories (matplotlib needed)
-meta.show()
+fig = meta.show()
 ```
 
 ![Chromosomes trajectories](examples/trajectories.png "Chromosomes trajectories")
