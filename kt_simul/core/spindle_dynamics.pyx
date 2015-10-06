@@ -12,15 +12,15 @@ from __future__ import unicode_literals
 from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
+from cpython cimport bool
+
+from .components cimport Spindle, Spb, Chromosome, Centromere, PlugSite
+from .components import Spindle, Spb, Chromosome, Centromere, PlugSite
 
 import random
 import numpy as np
 cimport cython
 cimport numpy as np
-from cpython cimport bool
-
-from .components cimport Spindle, Spb, Chromosome, Centromere, PlugSite
-from .components import Spindle, Spb, Chromosome, Centromere, PlugSite
 
 __all__ = ["KinetoDynamics"]
 
@@ -48,6 +48,7 @@ cdef class KinetoDynamics(object):
     cdef public np.ndarray B_mat, At_mat, A0_mat
     cdef public bool anaphase
     cdef public list all_plugsites
+
     cdef public int time_point
     cdef public np.ndarray speeds
     cdef public object prng
@@ -56,7 +57,8 @@ cdef class KinetoDynamics(object):
         """
         KinetoDynamics instenciation method
 
-        :param parameters: A dictionnary of parameters as obtained from a ParamTree instance
+        :param parameters: A dictionnary of parameters as obtained from a
+         :class:`ParamTree` instance
         :type parameters: ParamTree instance
 
         :param initial_plug: Defines globally the initial attachment states.
@@ -64,9 +66,9 @@ cdef class KinetoDynamics(object):
                 * 'null': all kinetochores are detached
                 * 'amphitelic': all chromosmes are amphitelic
                 * 'random': all attachement site can be bound to
-                        either pole or deteched with equal prob.
-                * 'monotelic': right kinetochores are attached to the same pole,
-                           left ones are detached
+                    either pole or deteched with equal prob.
+                * 'monotelic': right kinetochores are attached to the same
+                    pole, left ones are detached
                 * 'syntelic' : all kinetochores are attached to the same pole
         :type initial_plug: string or None
         """
@@ -92,7 +94,7 @@ cdef class KinetoDynamics(object):
         for n in range(N):
             ch = Chromosome(self.spindle, n)
             self.chromosomes.append(ch)
-        cdef int dim = 1 + N * (1 + Mk) * 2
+        cdef int dim = 1 + 3 * N * (1 + Mk) * 2
         self.B_mat = np.zeros((dim, dim), dtype=float)
         self.calc_B()
         self.A0_mat = self.time_invariantA()
@@ -128,9 +130,9 @@ cdef class KinetoDynamics(object):
         Mk = int(self.params['Mk'])
         N = int(self.params['N'])
         if m == -1:
-            idx = (2 * n + side) * (Mk + 1) + 1
+            idx = (2 * n + side) * (Mk + 1) * 3 + 1
         else:
-            idx = (2 * n + side) * (Mk + 1) + 2 + m
+            idx = (2 * n + side) * (Mk + 1) * 3 + 2 + m
         return idx
 
     def one_step(self, int time_point):
@@ -169,8 +171,8 @@ cdef class KinetoDynamics(object):
         cdef int N, M, n, m
         N = int(self.params['N'])
         Mk = int(self.params['Mk'])
-        cdef np.ndarray[DTYPE_t, ndim=1] X
-        X = np.zeros(1 + 2*N * ( Mk + 1 ))
+        cdef np.ndarray[DTYPE_t, ndim = 1] X
+        X = np.zeros(1 + 2*N * (Mk + 1))
         X[0] = self.spbR.pos
         cdef int an, bn, anm, bnm
         cdef Chromosome ch
@@ -178,23 +180,24 @@ cdef class KinetoDynamics(object):
             an = self._idx(0, n)
             bn = self._idx(1, n)
             ch = self.chromosomes[n]
-            X[an] = ch.cen_A.pos
-            X[bn] = ch.cen_B.pos
+            X[an:an+3] = ch.cen_A.pos
+            X[bn:bn+3] = ch.cen_B.pos
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
-                X[anm] = ch.cen_A.plugsites[m].pos
-                X[bnm] = ch.cen_B.plugsites[m].pos
+                X[anm:anm+3] = ch.cen_A.plugsites[m].pos
+                X[bnm:anm+3] = ch.cen_B.plugsites[m].pos
         return X
 
     def calc_A(self):
         """
-        :return: the matrix containing the linear terms of the equation set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
+        :return: the matrix containing the linear terms of the equation
+        set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
         """
         return self._calc_A()
 
     cdef _calc_A(self):
-        cdef np.ndarray[DTYPE_t, ndim=2] A
+        cdef np.ndarray[DTYPE_t, ndim = 2] A
         self.time_dependentA()
         A = self.A0_mat + self.At_mat
         return A
@@ -208,8 +211,8 @@ cdef class KinetoDynamics(object):
         cdef float Vmz = self.params['Vmz']
         cdef float Fmz = self.params['Fmz']
         cdef float muco = self.params['muco']
-        cdef int dims = 1 + 2 * N * ( Mk + 1 )
-        cdef np.ndarray[DTYPE_t, ndim=2] A0
+        cdef int dims = 1 + 2 * N * (Mk + 1)
+        cdef np.ndarray[DTYPE_t, ndim = 2] A0
         cdef int delta2
         A0 = np.zeros((dims, dims))
         A0[0, 0] = - 2 * mus - 4 * Fmz / Vmz
@@ -239,7 +242,7 @@ cdef class KinetoDynamics(object):
         cdef float pi_nmA, pi_nmB
         cdef int pluggedA, pluggedB
         cdef int n, m, anm, bnm
-        self.At_mat[0,0] = 0
+        self.At_mat[0, 0] = 0
         cdef Chromosome ch
         cdef PlugSite plugsite_A, plugsite_B
         for n in range(N):
@@ -260,21 +263,22 @@ cdef class KinetoDynamics(object):
                     # pi_nmA *= plugsite_A.calc_attach_trans()
                     # pi_nmB *= plugsite_B.calc_attach_trans()
 
-                #spbs diag terms:
+                # spbs diag terms:
                 self.At_mat[0, 0] -= pluggedA + pluggedB
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
                 self.At_mat[anm, anm] = - pluggedA
                 self.At_mat[0, anm] = pi_nmA
                 self.At_mat[anm, 0] = pi_nmA
-                #B side
+                # B side
                 self.At_mat[bnm, bnm] = -  pluggedB
                 self.At_mat[0, bnm] = pi_nmB
                 self.At_mat[bnm, 0] = pi_nmB
 
     def calc_B(self):
         """
-        :return: the matrix containing the linear terms of the equation set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
+        :return: the matrix containing the linear terms of the equation
+        set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
         """
         return self._calc_B()
 
@@ -282,7 +286,7 @@ cdef class KinetoDynamics(object):
         cdef float kappa_c, kappa_k
         kappa_k = self.params['kappa_k']
         kappa_c = self.params['kappa_c']
-        cdef np.ndarray[DTYPE_t, ndim=2] Bk, Bc
+        cdef np.ndarray[DTYPE_t, ndim = 2] Bk, Bc
         Bk = self.kinetochore_B()
         Bc = self.cohesin_B()
         self.B_mat = kappa_k * Bk + kappa_c * Bc
@@ -330,7 +334,8 @@ cdef class KinetoDynamics(object):
 
     def calc_C(self):
         """
-        :return: the matrix containing the linear terms of the equation set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
+        :return: the matrix containing the linear terms of the
+        equation set :math:`\mathbf{A}\dot{X} + \mathbf{B}X + C = 0`
         """
         return self._calc_C()
 
@@ -389,7 +394,8 @@ cdef class KinetoDynamics(object):
 
     cdef position_update(self, int time_point):
         """
-        Given the speeds obtained by solving A\ot.x = btot and caclulated switch events
+        Given the speeds obtained by solving
+        A\ot.x = btot and caclulated switch events
         """
         cdef int Mk = int(self.params['Mk'])
         cdef int N = int(self.params['N'])
@@ -397,7 +403,7 @@ cdef class KinetoDynamics(object):
         cdef double Vk = self.params['Vk']
         cdef np.ndarray[DTYPE_t] speeds
         speeds = self.speeds
-        speeds *= Vk * dt # Back to real space
+        speeds *= Vk * dt  # Back to real space
         self.spbR.set_pos(self.spbR.pos + speeds[0], time_point)
         self.spbL.set_pos(self.spbL.pos - speeds[0], time_point)
         cdef int n, m, an, anm, bn, bnm

@@ -17,7 +17,8 @@ import numpy as np
 import collections
 
 import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=True)
+pyximport.install(setup_args={'include_dirs': np.get_include()},
+                  reload_support=True)
 
 from ..core.spindle_dynamics import KinetoDynamics
 from ..io import ParamTree
@@ -29,12 +30,12 @@ log = logging.getLogger(__name__)
 
 __all__ = ["Metaphase"]
 
+
 class SimulationAlreadyDone(Exception):
     pass
 
 
 class Metaphase(object):
-
     """
     An instance of the Metaphase class is a wrapper around
     the whole simulation.
@@ -111,7 +112,8 @@ class Metaphase(object):
         params['Fk'] = self.paramtree.absolute_dic['Fk']
         params['dt'] = self.paramtree.absolute_dic['dt']
 
-        self.KD = KinetoDynamics(params, initial_plug=initial_plug, prng=self.prng)
+        self.KD = KinetoDynamics(params, initial_plug=initial_plug,
+                                 prng=self.prng)
         dt = self.paramtree.absolute_dic['dt']
         duration = self.paramtree.absolute_dic['span']
         self.num_steps = int(duration / dt)
@@ -221,12 +223,12 @@ class Metaphase(object):
                     pprogress(-1)
                     if self.verbose:
                         log.info("Anaphase onset at %i / %i" %
-                                   (time_point, self.num_steps))
+                                 (time_point, self.num_steps))
                     log_anaphase_onset = True
 
             self.KD.one_step(time_point)
             # if time_point % 100 == 0:
-                # print self.KD.At_mat
+            #     print self.KD.At_mat
 
         if self.verbose:
             pprogress(-1)
@@ -503,10 +505,10 @@ class Metaphase(object):
         ax.plot(times, spbB, color='black')
 
         if len(self.chrom_colors) == len(kts):
-            colors = lambda x: self.chrom_colors[x]
+            def colors(x): return self.chrom_colors[x]
         else:
             cm = plt.get_cmap('gist_rainbow')
-            norm  = colors.Normalize(vmin=0, vmax=len(kts))
+            norm = colors.Normalize(vmin=0, vmax=len(kts))
             sm = cmx.ScalarMappable(norm=norm, cmap=cm)
             colors = sm.to_rgba
 
@@ -604,7 +606,8 @@ class Metaphase(object):
             # Return attachment history for all timepoints
             c_hist = ch.correct_history
             e_hist = ch.erroneous_history
-            state = [self.get_attachment(np.concatenate((c, e))) for c, e in zip(c_hist, e_hist)]
+            state = [self.get_attachment(np.concatenate((c, e)))
+                     for c, e in zip(c_hist, e_hist)]
 
             att.append(state)
 
