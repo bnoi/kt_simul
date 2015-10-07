@@ -10,7 +10,7 @@ import joblib as jb
 from ..core.simul_spindle import Metaphase
 from ..io.simuio import SimuIO
 from ..utils.progress import print_progress
-from . import analyzers
+from . import helper
 from ..io import ParamTree
 
 
