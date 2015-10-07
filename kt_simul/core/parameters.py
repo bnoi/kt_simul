@@ -132,11 +132,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         k_d_eff = k_a * d_alpha / (mean_metaph_k_dist / 2)
     else:
         k_d_eff = k_d0
-    # Compute average detachment rate
-    if d_alpha != 0:
-        k_d_eff = k_a * d_alpha / (mean_metaph_k_dist / 2)
-    else:
-        k_d_eff = k_d0
 
     ### Compute average probability to be in attached state
 
@@ -144,7 +139,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     alpha_mean = k_a / (k_a + k_d_eff)
 
     ## Three states naive version
-    alpha_mean = (k_a / (k_a + k_d_eff)) * (k_cat_max / (k_cat_max + k_res_max))
+    alpha_mean = (k_a / (k_a + k_d_eff)) #* (k_cat_max / (k_cat_max + k_res_max))
 
     # Three states markov chain version
     mean_k_cat = k_cat_max #/ (1 + np.exp((mean_kt_v - vg) / vg))
@@ -169,7 +164,7 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     v /= v.sum()
 
     # Average probability of being attached and producing a force is GA
-    alpha_mean = v[0, 0]
+    #alpha_mean = v[0, 0]
 
     log.debug("Probability of being attached and producing a force is {}".format(alpha_mean))
 
