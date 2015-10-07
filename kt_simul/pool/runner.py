@@ -200,7 +200,7 @@ def run_simu(i, n_total,
              force_parameters,
              initial_plug,
              save=False,
-             analyzer=analyzers.simu_analyzer):
+             analyzer=helper.simu_analyzer):
     """
     """
 
