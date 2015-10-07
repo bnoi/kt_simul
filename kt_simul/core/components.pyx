@@ -67,6 +67,9 @@ cdef class Organite(object):
         self.pos = init_pos
         self.traj[0] = init_pos
 
+        # Three states
+        self.speed_hist = np.zeros(self.num_steps)
+
     cdef void set_pos(self, float pos, int time_point=-1):
         """
         Sets the position. If `time_point` is provided, sets
@@ -203,6 +206,18 @@ cdef class Chromosome(Organite):
             correct_hist.append(correct)
         self.correct_history = np.array(correct_hist)
 
+    # def erroneous(self):
+    #     """
+    #     Returns the number of *erroneously* plugged MTs
+    #     """
+    #     self.cen_A.calc_plug_vector()
+    #     self.cen_B.calc_plug_vector()
+    #     if self.is_right_A():
+    #         return self.cen_A.left_plugged(), self.cen_B.right_plugged()
+    #     else:
+    #         return self.cen_A.right_plugged(), self.cen_B.left_plugged()
+
+    # Three states
     def erroneous(self):
         """
         Returns the number of *erroneously* plugged MTs
@@ -391,44 +406,97 @@ cdef class PlugSite(Organite):
     Parameters:
     -----------
     centromere: a :class:`~Centromere` instance
+
+    Attributes:
+    -----------
+    mt_state: 0 if shrinking, 1 if growing
+    plug_state: -1 if attached left, 0 if detached, 1 if attached right
+    force : plug_state * mt_state
     """
+
+    # def __init__(self, centromere, site_id):
+    #     init_pos = centromere.pos
+    #     Organite.__init__(self, centromere, init_pos)
+    #     initial_plug = self.KD.initial_plug
+    #     self.centromere = centromere
+    #     self.tag = self.centromere.tag
+    #     self.current_side = ""
+    #     self.site_id = site_id
+
+    #     if initial_plug == None:
+    #         self.plug_state = self.KD.prng.choice([-1, 0, 1])
+    #     elif initial_plug == 'null':
+    #         self.plug_state = 0
+    #     elif initial_plug == 'amphitelic':
+    #         self.plug_state = - 1 if self.tag == 'A' else 1
+    #     elif initial_plug == 'random':
+    #         self.plug_state = self.KD.prng.choice([-1, 0, 1])
+    #     elif initial_plug == 'monotelic':
+    #         self.plug_state = - 1 if self.tag == 'A' else 0
+    #     elif initial_plug == 'syntelic':
+    #         self.plug_state = 1
+    #     elif initial_plug == 'merotelic':
+    #         self.plug_state = self.KD.prng.choice([-1, 1])
+    #     else:
+    #         self.plug_state = initial_plug
+
+    #     self.set_pos(init_pos)
+    #     self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+    #     self.state_hist[:] = self.plug_state
+
+    #     self.tmp = []
 
     def __init__(self, centromere, site_id):
         init_pos = centromere.pos
         Organite.__init__(self, centromere, init_pos)
-        initial_plug = self.KD.initial_plug
+        initial_plug = initial_plug = 'null'  # self.KD.initial_plug
         self.centromere = centromere
         self.tag = self.centromere.tag
         self.current_side = ""
         self.site_id = site_id
+        self.speed = 0
+        self.mt_state = self.KD.prng.choice([0, 1])
 
-        if initial_plug == None:
+        if initial_plug in (None, 'random'):
             self.plug_state = self.KD.prng.choice([-1, 0, 1])
         elif initial_plug == 'null':
+            self.mt_state = 0
             self.plug_state = 0
         elif initial_plug == 'amphitelic':
-            self.plug_state = - 1 if self.tag == 'A' else 1
-        elif initial_plug == 'random':
-            self.plug_state = self.KD.prng.choice([-1, 0, 1])
+            self.plug_state = -1 if self.tag == 'A' else 1
         elif initial_plug == 'monotelic':
-            self.plug_state = - 1 if self.tag == 'A' else 0
+            if self.tag == 'A':
+                self.plug_state = self.KD.prng.choice([-1, 1])
+            else:
+                self.mt_state = 0
+                self.plug_state = 0
         elif initial_plug == 'syntelic':
-            self.plug_state = 1
+            self.plug_state = -1
         elif initial_plug == 'merotelic':
-            self.plug_state = self.KD.prng.choice([-1, 1])
+            self.plug_state = self.KD.prng.choice([-1, 0, 1])
         else:
-            self.plug_state = initial_plug
+            raise ValueError('Argument initial_plug not understood')
 
         self.set_pos(init_pos)
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
+        self.pcat_hist = np.zeros(self.KD.num_steps, dtype=np.float)
+        self.pres_hist = np.zeros(self.KD.num_steps, dtype=np.float)
+        self.mt_state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+        self.mt_state_hist[:] = self.mt_state
+        self.P_att = 1 - np.exp(- self.KD.params['k_a'])
 
-        self.tmp = []
+    # cdef void set_plug_state(self, int state, int time_point=-1):
+    #     self.plug_state = state
+    #     self.plugged = 0 if state == 0 else 1
+    #     self.state_hist[time_point:] = state
 
     cdef void set_plug_state(self, int state, int time_point=-1):
-        self.plug_state = state
-        self.plugged = 0 if state == 0 else 1
-        self.state_hist[time_point:] = state
+        self.pcat_hist = np.zeros(self.KD.num_steps, dtype=np.float)
+        self.pres_hist = np.zeros(self.KD.num_steps, dtype=np.float)
+        self.mt_state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+        self.mt_state_hist[:] = self.mt_state
+        self.P_att = 1 - np.exp(- self.KD.params['k_a'])
 
     cdef float calc_ldep(self):
         """
@@ -526,37 +594,91 @@ cdef class PlugSite(Organite):
 
         return factor
 
+    # cdef void plug_unplug(self, int time_point):
+    #     """
+    #     """
+    #     cdef float dice, side_dice
+    #     dice = self.KD.prng.rand()
+
+    #     side_dice = self.KD.prng.rand()
+    #     P_left = self.centromere.P_attachleft()
+
+    #     if side_dice < P_left:
+    #         # Attachment
+    #         self.current_side = "left"
+    #         k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+    #         pa = 1 - np.exp(-k_a)
+
+    #         if self.plug_state == 0 and dice < pa:
+    #             self.set_plug_state(-1, time_point)
+    #         # Detachment
+    #         elif dice < self.P_det():
+    #             self.set_plug_state(0, time_point)
+    #     else:
+    #         # Attachment
+    #         self.current_side = "right"
+    #         k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+    #         pa = 1 - np.exp(-k_a)
+
+    #         if self.plug_state == 0 and dice < pa:
+    #             self.set_plug_state(1, time_point)
+    #         # Detachment
+    #         elif dice < self.P_det():
+    #             self.set_plug_state(0, time_point)
+
     cdef void plug_unplug(self, int time_point):
-        """
-        """
         cdef float dice, side_dice
         dice = self.KD.prng.rand()
+        ## 0 : growth
+        ## 1 : shrink
+        cdef float pcat, pres
+        self.speed_hist[time_point:] = self.speed
 
-        side_dice = self.KD.prng.rand()
-        P_left = self.centromere.P_attachleft()
+        pcat = self.P_cat()
+        pres = self.P_res()
+        self.pcat_hist[time_point:] = pcat
+        self.pres_hist[time_point:] = pres
 
-        if side_dice < P_left:
-            # Attachment
-            self.current_side = "left"
-            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
-            pa = 1 - np.exp(-k_a)
+        # Attachment
+        if self.plug_state == 0 and dice < self.P_att:
+            side_dice = self.KD.prng.rand()
+            P_left = self.centromere.P_attachleft()
+            if side_dice < P_left:
+                self.set_state(mt_state=self.mt_state,
+                               plug_state=-1,
+                               time_point=time_point)
+            else:
+                self.set_state(mt_state=self.mt_state,
+                               plug_state=1,
+                               time_point=time_point)
 
-            if self.plug_state == 0 and dice < pa:
-                self.set_plug_state(-1, time_point)
+        elif self.plug_state != 0:
+            dice = self.KD.prng.rand()
+            #catastrophe : mt_state = 0 -> 1 [growth -> shrink]
+
+            if self.mt_state == 0 and (dice < pcat):
+                self.set_state(mt_state=1,
+                               plug_state=self.plug_state,
+                               time_point=time_point)
+            #rescue : mt_state = 1 -> 0 [shrink -> growth]
+            elif self.mt_state == 1 and (dice < pres):
+                self.set_state(mt_state=0,
+                               plug_state=self.plug_state,
+                               time_point=time_point)
             # Detachment
-            elif dice < self.P_det():
-                self.set_plug_state(0, time_point)
-        else:
-            # Attachment
-            self.current_side = "right"
-            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
-            pa = 1 - np.exp(-k_a)
+            dice = self.KD.prng.rand()
+            if dice < self.P_det():
+                self.set_state(mt_state=self.mt_state,
+                               plug_state=0,
+                               time_point=time_point)
 
-            if self.plug_state == 0 and dice < pa:
-                self.set_plug_state(1, time_point)
-            # Detachment
-            elif dice < self.P_det():
-                self.set_plug_state(0, time_point)
+    cdef void set_state(self, int mt_state=0, int plug_state=0,
+                        int time_point=-1):
+        self.mt_state = mt_state
+        self.plug_state = plug_state
+        self.plugged = 0 if self.plug_state == 0 else 1
+        self.mt_state_hist[time_point:] = mt_state
+        self.state_hist[time_point:] = plug_state
 
     def is_correct(self, int time_point=-1):
         """
@@ -614,6 +736,26 @@ cdef class PlugSite(Organite):
             return 1
 
         return 1 - np.exp(-k_dc)
+
+    cdef float P_res(self):
+        ''' rescue probability for a attached MT'''
+        cdef double k_res_max, vs, k_res
+        vs = self.KD.params['vs']
+        k_res_max = self.KD.params['k_res']
+        v = self.speed
+        k_res = k_res_max #/ (1 + np.exp(-self.plug_state * (v - vs) / vs))
+        return 1 - np.exp(-k_res)
+
+    cdef float P_cat(self):
+        ''' catastrophe probability for a attached MT'''
+        cdef double k_cat_max, vg, k_cat
+        cdef double ldep = self.calc_ldep()
+
+        vg = self.KD.params['vg']
+        k_cat_max = self.KD.params['k_cat']
+        v = self.speed
+        k_cat = k_cat_max #/ (1 + np.exp(self.plug_state * (v - vg) / vg))
+        return 1 - np.exp(-k_cat * ldep)
 
     cdef double calc_attach_trans(self):
         """

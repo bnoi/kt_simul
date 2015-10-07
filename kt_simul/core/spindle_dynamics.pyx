@@ -238,24 +238,61 @@ cdef class KinetoDynamics(object):
                 A0[bn, bnm] = muk
         return A0
 
+    # cdef time_dependentA(self):
+    #     cdef int N = int(self.params['N'])
+    #     cdef int Mk = int(self.params['Mk'])
+    #     cdef float pi_nmA, pi_nmB
+    #     cdef int pluggedA, pluggedB
+    #     cdef int n, m, anm, bnm
+    #     self.At_mat[0, 0] = 0
+    #     cdef Chromosome ch
+    #     cdef PlugSite plugsite_A, plugsite_B
+    #     for n in range(N):
+    #         ch = self.chromosomes[n]
+    #         for m in range(Mk):
+    #             plugsite_A = ch.cen_A.plugsites[m]
+    #             pi_nmA = plugsite_A.plug_state
+    #             pluggedA = plugsite_A.plugged
+    #             plugsite_B = ch.cen_B.plugsites[m]
+    #             pi_nmB = plugsite_B.plug_state
+    #             pluggedB = plugsite_B.plugged
+
+    #             # Lenght dependance
+    #             if not self.anaphase:
+    #                 pi_nmA *= plugsite_A.calc_ldep()
+    #                 pi_nmB *= plugsite_B.calc_ldep()
+
+    #                 # pi_nmA *= plugsite_A.calc_attach_trans()
+    #                 # pi_nmB *= plugsite_B.calc_attach_trans()
+
+    #             # spbs diag terms:
+    #             self.At_mat[0, 0] -= pluggedA + pluggedB
+    #             anm = self._idx(0, n, m)
+    #             bnm = self._idx(1, n, m)
+    #             self.At_mat[anm, anm] = - pluggedA
+    #             self.At_mat[0, anm] = pi_nmA
+    #             self.At_mat[anm, 0] = pi_nmA
+    #             # B side
+    #             self.At_mat[bnm, bnm] = -  pluggedB
+    #             self.At_mat[0, bnm] = pi_nmB
+    #             self.At_mat[bnm, 0] = pi_nmB
+
     cdef time_dependentA(self):
         cdef int N = int(self.params['N'])
         cdef int Mk = int(self.params['Mk'])
         cdef float pi_nmA, pi_nmB
         cdef int pluggedA, pluggedB
         cdef int n, m, anm, bnm
-        self.At_mat[0, 0] = 0
+        self.At_mat[0,0] = 0
         cdef Chromosome ch
         cdef PlugSite plugsite_A, plugsite_B
         for n in range(N):
             ch = self.chromosomes[n]
             for m in range(Mk):
                 plugsite_A = ch.cen_A.plugsites[m]
-                pi_nmA = plugsite_A.plug_state
-                pluggedA = plugsite_A.plugged
+                pi_nmA = plugsite_A.plug_state * plugsite_A.mt_state
                 plugsite_B = ch.cen_B.plugsites[m]
-                pi_nmB = plugsite_B.plug_state
-                pluggedB = plugsite_B.plugged
+                pi_nmB = plugsite_B.plug_state * plugsite_B.mt_state
 
                 # Lenght dependance
                 if not self.anaphase:
@@ -265,15 +302,15 @@ cdef class KinetoDynamics(object):
                     # pi_nmA *= plugsite_A.calc_attach_trans()
                     # pi_nmB *= plugsite_B.calc_attach_trans()
 
-                # spbs diag terms:
-                self.At_mat[0, 0] -= pluggedA + pluggedB
+                #spbs diag terms:
+                self.At_mat[0, 0] -= np.abs(pi_nmA) + np.abs(pi_nmB)
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
-                self.At_mat[anm, anm] = - pluggedA
+                self.At_mat[anm, anm] = - np.abs(pi_nmA)
                 self.At_mat[0, anm] = pi_nmA
                 self.At_mat[anm, 0] = pi_nmA
-                # B side
-                self.At_mat[bnm, bnm] = -  pluggedB
+                #B side
+                self.At_mat[bnm, bnm] = - np.abs(pi_nmB)
                 self.At_mat[0, bnm] = pi_nmB
                 self.At_mat[bnm, 0] = pi_nmB
 
@@ -339,6 +376,51 @@ cdef class KinetoDynamics(object):
         """
         return self._calc_C()
 
+    # cdef _calc_C(self):
+    #     cdef int N = int(self.params['N'])
+    #     cdef int Mk = int(self.params['Mk'])
+    #     cdef float Fmz = self.params['Fmz']
+    #     cdef float d0 = self.params['d0']
+    #     cdef float kappa_c = self.params['kappa_c']
+    #     cdef float pi_nmA, pi_nmB
+    #     cdef np.ndarray C
+    #     cdef PlugSite plugsite_A, plugsite_B
+
+    #     C = np.zeros(1 + N * (1 + Mk) * 2, dtype="float")
+    #     C[0] = 2 * Fmz
+    #     cdef int n, m, delta1, an, bn
+    #     cdef int pluggedA, pluggedB
+    #     cdef Chromosome ch
+    #     for n in range(N):
+    #         ch = self.chromosomes[n]
+    #         delta1 = ch.delta1()
+    #         an = self._idx(0, n)
+    #         bn = self._idx(1, n)
+    #         C[an] = - delta1 * kappa_c * d0
+    #         C[bn] = delta1 * kappa_c * d0
+    #         for m in range(Mk):
+    #             anm = self._idx(0, n, m)
+    #             bnm = self._idx(1, n, m)
+    #             plugsite_A = ch.cen_A.plugsites[m]
+    #             pi_nmA = plugsite_A.plug_state
+    #             pluggedA = plugsite_A.plugged
+    #             plugsite_B = ch.cen_B.plugsites[m]
+    #             pi_nmB = plugsite_B.plug_state
+    #             pluggedB = plugsite_B.plugged
+
+    #             if not self.anaphase:
+    #                 # Lenght dependance
+    #                 pi_nmA *= plugsite_A.calc_ldep()
+    #                 pi_nmB *= plugsite_B.calc_ldep()
+
+    #                 # pi_nmA *= plugsite_A.calc_attach_trans()
+    #                 # pi_nmB *= plugsite_B.calc_attach_trans()
+
+    #             C[0] -= pluggedA + pluggedB
+    #             C[anm] = pi_nmA
+    #             C[bnm] = pi_nmB
+    #     return C
+
     cdef _calc_C(self):
         cdef int N = int(self.params['N'])
         cdef int Mk = int(self.params['Mk'])
@@ -365,11 +447,9 @@ cdef class KinetoDynamics(object):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
                 plugsite_A = ch.cen_A.plugsites[m]
-                pi_nmA = plugsite_A.plug_state
-                pluggedA = plugsite_A.plugged
+                pi_nmA = plugsite_A.plug_state * plugsite_A.mt_state
                 plugsite_B = ch.cen_B.plugsites[m]
-                pi_nmB = plugsite_B.plug_state
-                pluggedB = plugsite_B.plugged
+                pi_nmB = plugsite_B.plug_state * plugsite_B.mt_state
 
                 if not self.anaphase:
                     # Lenght dependance
@@ -379,18 +459,30 @@ cdef class KinetoDynamics(object):
                     # pi_nmA *= plugsite_A.calc_attach_trans()
                     # pi_nmB *= plugsite_B.calc_attach_trans()
 
-                C[0] -= pluggedA + pluggedB
+                C[0] -= np.abs(pi_nmA) + np.abs(pi_nmB)
                 C[anm] = pi_nmA
                 C[bnm] = pi_nmB
         return C
+
+    # cdef plug_unplug(self, int time_point):
+    #     """
+    #     Let's play dices ...
+    #     """
+    #     cdef PlugSite plugsite
+    #     for plugsite in self.all_plugsites:
+    #         plugsite.plug_unplug(time_point)
 
     cdef plug_unplug(self, int time_point):
         """
         Let's play dices ...
         """
         cdef PlugSite plugsite
-        for plugsite in self.all_plugsites:
-            plugsite.plug_unplug(time_point)
+        if not self.anaphase:
+            for plugsite in self.all_plugsites:
+                plugsite.plug_unplug(time_point)
+        else :
+            for plugsite in self.all_plugsites:
+                plugsite.set_state(mt_state=1, plug_state=plugsite.plug_state)
 
     cdef position_update(self, int time_point):
         """
@@ -419,9 +511,13 @@ cdef class KinetoDynamics(object):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
                 plugsite = ch.cen_A.plugsites[m]
+                plugsite.speed = self.speeds[an] # not right
                 new_pos = plugsite.pos + speeds[anm]
                 plugsite.set_pos(new_pos, time_point)
+
+                bnm = self._idx(1, n, m)
                 plugsite = ch.cen_B.plugsites[m]
+                plugsite.speed = self.speeds[bn] # not right
                 new_pos = plugsite.pos + speeds[bnm]
                 plugsite.set_pos(new_pos, time_point)
 

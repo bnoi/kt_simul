@@ -36,6 +36,9 @@ cdef class Organite(object):
     cdef void set_pos(Organite, float, int time_point=*)
     cdef float get_pos(Organite, int time_point=*)
 
+    # Three states
+    cdef public np.ndarray speed_hist
+    cdef public float speed
 
 cdef class Spb(Organite):
     cdef public int side
@@ -85,3 +88,12 @@ cdef class PlugSite(Organite):
     cdef public double calc_attach_trans(PlugSite)
     cdef public float calc_ldep_for_attachment(PlugSite)
     cdef public list tmp
+
+    # Three states
+    cdef public int mt_state
+    cdef public np.ndarray mt_state_hist
+    cdef public np.ndarray pcat_hist
+    cdef public np.ndarray pres_hist
+    cdef public void set_state(PlugSite, int mt_state=*, int plug_state=*, int time_point=*)
+    cdef public float P_cat(PlugSite)
+    cdef public float P_res(PlugSite)
