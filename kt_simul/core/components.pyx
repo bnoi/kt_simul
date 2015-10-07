@@ -61,22 +61,19 @@ cdef class Organite(object):
         self.parent = parent
         self.KD = parent.KD
         self.num_steps = parent.KD.num_steps
-        self.traj = np.zeros(self.num_steps)
-        self.pos = init_pos
-        self.traj[0] = init_pos
+        self.traj_3d = np.zeros((self.num_steps, 3))
 
-    cdef void set_pos(self, float pos, int time_point=-1):
+        self.pos = init_pos
+        self.traj_3d = init_pos
+
+    cdef void set_pos(self, float x, float y, float z, int time_point=-1):
         """
         Sets the position. If `time_point` is provided, sets
         the corresponding value in `self.traj[time_point]`
         """
-        self.pos = pos
-        if pos > self.KD.spbR.pos:
-            self.pos = self.KD.spbR.pos
-        elif self.pos < self.KD.spbL.pos:
-            self.pos = self.KD.spbL.pos
+        self.pos = (x, y, z)
         if time_point >= 0:
-            self.traj[time_point] = self.pos
+            self.traj_3d[time_point] = self.pos
 
     cdef float get_pos(self, int time_point=-1):
         """Returns the position.
@@ -86,7 +83,15 @@ cdef class Organite(object):
         """
         if time_point == 0:
             return self.pos
-        return self.traj[time_point]
+        return self.traj_3d[time_point]
+
+
+    property traj:
+        """
+        Trajectory along the x axis for backward compat
+        """
+        def __get__(self):
+          return self.traj_3d[:, 0]
 
 
 cdef class Spb(Organite):
@@ -109,7 +114,7 @@ cdef class Spb(Organite):
         L0 : spindle length
         """
         self.side = side
-        init_pos = side * L0 / 2.
+        init_pos = (side * L0 / 2., 0., 0.)
         Organite.__init__(self, spindle, init_pos)
 
 cdef class Chromosome(Organite):
@@ -131,8 +136,10 @@ cdef class Chromosome(Organite):
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
 
-        Organite.__init__(self, spindle, 0)
-        center_pos = self.KD.prng.normal(0, 0.2 * (L0 - d0))
+        Organite.__init__(self, spindle, (0, 0, 0))
+        center_pos = (self.KD.prng.normal(0, 0.2 * (L0 - d0)),
+                      self.KD.prng.normal(0, 0.2 * (L0 - d0)),
+                      self.KD.prng.normal(0, 0.2 * (L0 - d0)))
 
         self.pos = center_pos
         self.traj[0] = center_pos
@@ -162,18 +169,8 @@ cdef class Chromosome(Organite):
         In case the centromeres swap (exchange side), the direction
         of the cohesin restoring force needs to be changed
         """
-        return 1 if self.cen_A.pos < self.cen_B.pos else -1
+        return 1 if self.cen_A.pos[0] < self.cen_B.pos[0] else -1
 
-    cdef int delta2(self):
-
-        """
-        Change the sense of viscous force depending on relative speeds
-        of centromeres A and B
-        """
-        speedA = (self.cen_A.traj[-2] - self.cen_A.traj[-1]) / self.KD.params['dt']
-        speedB = (self.cen_B.traj[-2] - self.cen_B.traj[-1]) / self.KD.params['dt']
-
-        return 1 if speedA > speedB else -1
 
     def correct(self):
         """
@@ -215,13 +212,15 @@ cdef class Chromosome(Organite):
             return self.cen_A.right_plugged(), self.cen_B.left_plugged()
 
     cdef float pair_dist(self):
-        return abs(self.cen_A.pos - self.cen_B.pos)
+        return distance(self.cen_A.pos, self.cen_B.pos)
 
-    cdef float plug_dist(self, float plugpos):
-        return abs(self.center() - plugpos)
+    cdef float plug_dist(self, tuple plugpos):
+        return distance(self.center() - plugpos)
 
-    cdef float center(self):
-        return (self.cen_A.pos + self.cen_B.pos) / 2
+    cdef tuple center(self):
+        return ((self.cen_A.pos[0] + self.cen_B.pos[0]) / 2,
+                (self.cen_A.pos[1] + self.cen_B.pos[1]) / 2,
+                (self.cen_A.pos[2] + self.cen_B.pos[2]) / 2)
 
     cdef np.ndarray center_traj(self):
         return (self.cen_A.traj + self.cen_B.traj) / 2
@@ -245,7 +244,7 @@ cdef class Chromosome(Organite):
         elif side == -1 and self.at_leftpole(tol):
             return True
         elif self.at_rightpole(tol) and self.at_leftpole(tol):
-                return True
+            return True
         else:
             return False
 
@@ -272,9 +271,9 @@ cdef class Centromere(Organite):
         self.chromosome = chromosome
         d0 = self.chromosome.KD.params['d0']
         if tag == 'A':
-            init_pos = chromosome.pos - d0 / 2.
+            init_pos = (chromosome.pos[0] - d0 / 2., 0., 0.)
         elif tag == 'B':
-            init_pos = chromosome.pos + d0 / 2.
+            init_pos = (chromosome.pos[0] + d0 / 2., 0., 0.)
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
         Organite.__init__(self, chromosome, init_pos)
@@ -319,8 +318,6 @@ cdef class Centromere(Organite):
         left_hist = np.array(state_hist < 0).sum(axis=0)
         return left_hist, right_hist
 
-    cdef float P_attachleft(self):
-        cdef float orientation
         orientation = self.KD.params['orientation']
         if orientation == 0:
             return 0.5
@@ -339,25 +336,11 @@ cdef class Centromere(Organite):
         cdef np.ndarray[ITYPE_t] left_plugged
         left_plugged = self.plug_vector * (self.plug_vector - 1) // 2
         lp = left_plugged.sum()
-        return lp
-
-    cdef int right_plugged(self):
-        cdef int rp
-        cdef np.ndarray[ITYPE_t] right_plugged
-        right_plugged = self.plug_vector * (1 + self.plug_vector) // 2
-        rp = right_plugged.sum()
-        return rp
-
-    cdef bool at_rightpole(self, float tol=0.01):
-        cdef float rightpole_pos
-        rightpole_pos = self.KD.spbR.pos
-        if abs(self.pos - rightpole_pos) < tol:
-            return True
-        return False
+        return lpself.cen_A.pos
 
     cdef bool at_leftpole(self, float tol=0.01):
         cdef float leftpole_pos = self.KD.spbR.pos
-        if abs(self.pos - leftpole_pos) < tol:
+        if distance(self.pos - leftpole_pos) < tol:
             return True
         return False
 
@@ -366,9 +349,9 @@ cdef class Centromere(Organite):
         Calculate time of arrivals
         """
         cdef np.ndarray dist_to_pole
-        if self.KD.spbR.traj[-1] - self.traj[-1] < tol:
+        if distance(self.KD.spbR.traj[-1], self.traj[-1]) < tol:
             dist_to_pole = self.KD.spbR.traj - self.traj
-        elif self.traj[-1] - self.KD.spbL.traj[-1] < tol:
+        elif distance(self.traj[-1], self.KD.spbL.traj[-1]) < tol:
             dist_to_pole = self.traj - self.KD.spbL.traj
         else:
             self.toa = np.nan
@@ -463,8 +446,8 @@ cdef class PlugSite(Organite):
             # We don't want lbase < 0
             return 1
 
-        pole_pos = self.KD.spbR.pos * self.plug_state
-        mt_length = abs(pole_pos - self.pos)
+        pole_pos = (self.KD.spbR.pos[0] * self.plug_state, 0, 0)
+        mt_length = distance(pole_pos, self.pos)
 
         ldep_factor = ldep * mt_length + lbase
 
@@ -560,18 +543,14 @@ cdef class PlugSite(Organite):
 
     cdef float P_det(self):
         cdef float d_alpha, k_d0
-        cdef double k_shrink
-
-        k_shrink = 1
 
         d_alpha = self.KD.params['d_alpha']
         k_d0 = self.KD.params['k_a']
         if d_alpha == 0:
             return k_d0
         cdef float dist
-        dist = abs(self.pos -
-                   (self.centromere.chromosome.cen_A.pos +
-                    self.centromere.chromosome.cen_B.pos) / 2.)
+        dist = distance(self.pos,
+                        self.centromere.center())
 
         if dist == 0:
             return 1.
@@ -579,12 +558,6 @@ cdef class PlugSite(Organite):
 
         if k_dc > 1e4:
             return 1.
-
-        if self.KD.time_point > 1:
-            cum_di = np.diff(self.traj[self.KD.time_point - 2:self.KD.time_point])[0]
-            cum_di *= self.plug_state
-            if cum_di > 0:
-                k_dc *= k_shrink
 
         return 1 - np.exp(-k_dc)
 
@@ -610,3 +583,10 @@ cdef class PlugSite(Organite):
         trans_modulation = 1 - np.exp(-dt * (1 / tau_trans))
 
         return trans_modulation
+
+
+
+cdef float distance(pos1, pos2):
+    return ((pos1[0] - pos2[0])**2 +
+            (pos1[1] - pos2[1])**2 +
+            (pos1[2] - pos2[2])**2)**0.5
