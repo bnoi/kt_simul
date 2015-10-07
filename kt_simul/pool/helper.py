@@ -1,7 +1,12 @@
+import os
+import logging
+import gc
+
 import numpy as np
 from scipy import signal
 
 from ..signal.fft import get_fft
+from . import Pool
 
 
 def simu_analyzer(simu, params):
@@ -61,26 +66,65 @@ def simu_analyzer(simu, params):
 
         # Attachment defect at anaphase
         atts = simu.get_attachment_vector()
-        atts[atts != 0] = 1
-        d['attachment_defect_ana_onset'] = atts[index_anaphase].mean()
+        d['attachment_defect_ana_onset'] = np.sum(atts[index_anaphase] != 0)
+        d['attachment_defect_ana_onset'] /= atts[index_anaphase].shape[0]
 
         results.append(d)
 
     return results
 
 
-def attach_analyzer(simu, params):
+def run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters):
     """
     """
 
-    results = []
+    simu_name = os.path.join(simu_path, 'simu_{}.h5'.format(i))
 
-    d = {}
-    d.update(params.to_dict())
+    current_paramtree = paramtree.copy()
+    current_measuretree = measuretree.copy()
 
-    d['attachments'] = simu.get_attachment_vector()
-    d['times'] = simu.time
+    for k, v in params.iteritems():
+        current_paramtree[k] = v
 
-    results.append(d)
+    pool_params = {'simu_path': simu_name,
+                   'load': False,
+                   'n_simu': pool_parameters['N'],
+                   'paramtree': current_paramtree,
+                   'measuretree': current_measuretree,
+                   'initial_plug': pool_parameters['initial_plug'],
+                   'parallel': False,
+                   'verbose': False,
+                   'erase': False}
 
-    return results
+    pool = Pool(**pool_params)
+    pool.run()
+
+    return pool
+
+
+def processor(i, params, simu_path, paramtree, measuretree, pool_parameters, n_params):
+
+    # Log
+    real_i = (i + 1) * pool_parameters["N"]
+    logging.info("Processing simulations: {}/{}".format(real_i, n_params))
+
+    # Run pool of simus
+    pool = run_simu(i, params, simu_path, paramtree, measuretree, pool_parameters)
+
+    data = []
+
+    # Load and analyze simus
+    for j, simu in enumerate(pool.load_metaphases()):
+
+        results = simu_analyzer(simu, params)
+        del simu
+        gc.collect()
+
+        data.extend(results)
+
+    os.remove(pool.simu_path)
+
+    del pool
+    gc.collect()
+
+    return data
