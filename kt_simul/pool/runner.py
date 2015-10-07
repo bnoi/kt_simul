@@ -123,7 +123,7 @@ class Runner:
 
         self.n_simus_total = len(self.params_matrix) * self.n_simus
 
-    def run(self, analyzer=analyzers.simu_analyzer, n_jobs=-1,
+    def run(self, analyzer=helper.simu_analyzer, n_jobs=-1,
             backend="multiprocessing", save=False):
         """
         """
