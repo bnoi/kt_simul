@@ -28,27 +28,28 @@ cdef class Spindle(object) :
     cdef public object KD
     cdef public object all_plugsites
 
+
 cdef class Organite(object):
     cdef public int num_steps
     cdef public np.ndarray traj
-    cdef public float pos
+    cdef public np.ndarray pos
     cdef public object parent, KD
-    cdef void set_pos(Organite, float, int time_point=*)
-    cdef float get_pos(Organite, int time_point=*)
+    cdef void set_pos(Organite, object, int time_point=*)
+    cdef np.ndarray get_pos(Organite, int time_point=*)
 
 
 cdef class Spb(Organite):
     cdef public int side
+
 
 cdef class Chromosome(Organite):
     cdef public Centromere cen_A, cen_B
     cdef public np.ndarray correct_history, erroneous_history
     cdef bool is_right_A(Chromosome)
     cdef int delta1(Chromosome)
-    cdef int delta2(Chromosome)
     cdef float pair_dist(Chromosome)
-    cdef float plug_dist(Chromosome, float)
-    cdef float center(Chromosome)
+    cdef float plug_dist(Chromosome, np.ndarray)
+    cdef np.ndarray center(Chromosome)
     cdef np.ndarray center_traj(Chromosome)
     cdef bool at_rightpole(Chromosome, float)
     cdef bool at_leftpole(Chromosome, float)

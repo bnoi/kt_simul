@@ -173,7 +173,7 @@ cdef class KinetoDynamics(object):
         Mk = int(self.params['Mk'])
         cdef np.ndarray[DTYPE_t, ndim = 1] X
         X = np.zeros(1 + 2*N * (Mk + 1))
-        X[0] = self.spbR.pos
+        X[0] = self.spbR.pos[0]
         cdef int an, bn, anm, bnm
         cdef Chromosome ch
         for n in range(N):
@@ -407,23 +407,23 @@ cdef class KinetoDynamics(object):
         self.spbR.set_pos(self.spbR.pos + speeds[0], time_point)
         self.spbL.set_pos(self.spbL.pos - speeds[0], time_point)
         cdef int n, m, an, anm, bn, bnm
-        cdef float new_pos
+        cdef np.ndarray new_pos
         cdef Chromosome ch
         cdef PlugSite plugsite
         for n in range(N):
             an = self._idx(0, n)
             bn = self._idx(1, n)
             ch = self.chromosomes[n]
-            ch.cen_A.set_pos(ch.cen_A.pos + speeds[an], time_point)
-            ch.cen_B.set_pos(ch.cen_B.pos + speeds[bn], time_point)
+            ch.cen_A.set_pos(ch.cen_A.pos + speeds[an:an+3], time_point)
+            ch.cen_B.set_pos(ch.cen_B.pos + speeds[bn:bn+3], time_point)
             for m in range(Mk):
                 anm = self._idx(0, n, m)
                 bnm = self._idx(1, n, m)
                 plugsite = ch.cen_A.plugsites[m]
-                new_pos = plugsite.pos + speeds[anm]
+                new_pos = plugsite.pos + speeds[anm:anm+3]
                 plugsite.set_pos(new_pos, time_point)
                 plugsite = ch.cen_B.plugsites[m]
-                new_pos = plugsite.pos + speeds[bnm]
+                new_pos = plugsite.pos + speeds[bnm:bnm+3]
                 plugsite.set_pos(new_pos, time_point)
 
     cdef reset_positions(self):

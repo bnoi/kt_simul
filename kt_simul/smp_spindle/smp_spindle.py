@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 from sympy import symbols, Matrix
-from sympy import sympify
+from sympy import sympify, lambdify
 from sympy.physics.vector import cross
 from sympy.physics.mechanics import dynamicsymbols
 from sympy.physics.mechanics import ReferenceFrame, Point, Particle
@@ -132,6 +132,26 @@ class SympySpindle:
                          in zip(ch.cen_A.plugsites, ch.cen_B.plugsites)
                          ]).reshape(2 * self.N * self.Mk, 2)
         return astate
+
+    def get_np_A0(self):
+        adim = {parameters['F_k']: 1, parameters['V_k']: 1}
+        passive_params = ['mu_s', 'mu_ch', 'mu_c', 'mu_k',
+                          'kappa_c', 'kappa_k', 'd_0']
+        passive_zero = {parameters[name]: 0 for name in passive_params}
+        A0 = self.A_uu.subs(passive_zero).subs(adim)
+        A0_args = [parameters[name] for name in passive_params]
+        A0_np = lambdify(A0_args, A0, 'numpy', dummify=False)
+        return A0_args, A0_np
+
+    def get_np_At(self):
+        adim = {parameters['F_k']: 1, parameters['V_k']: 1}
+        active_params = ['F_k', 'V_k', 'F_mz', 'V_mz']
+        active_zero = {parameters[name]: 0 for name in active_params}
+        At = self.A_uu.subs(active_zero).subs(adim)
+        At_args = [parameters[name]
+                   for name in active_params] + list(self.attach_state)
+        At_np = lambdify(At_args, At, 'numpy', dummify=False)
+        return At_np, At_args
 
 
 class Organite:

@@ -18,6 +18,7 @@ from cpython cimport bool
 __all__ = ["Spb", "Chromosome",
            "Centromere", "PlugSite", "Spindle"]
 
+
 cdef class Spindle(object):
     def __init__(self, KD):
         self.KD = KD
@@ -43,13 +44,13 @@ cdef class Organite(object):
     ----------
     parent : an other subclass of :class:`Organite`
         from which the parameters are inheritated.
-    init_pos : float, initial position
+    init_pos : length 3 sequence, initial position
 
     Attributes
     ----------
     KD : a :class:`~spindle_dynamics.KinetoDynamics` instance
-    pos : float, the position
-    traj : ndarrat, the trajectory
+    pos : ndarray, the position
+    traj : ndarray, the trajectory
 
     Methods
     -------
@@ -61,21 +62,21 @@ cdef class Organite(object):
         self.parent = parent
         self.KD = parent.KD
         self.num_steps = parent.KD.num_steps
-        self.traj_3d = np.zeros((self.num_steps, 3))
+        self.traj = np.zeros((self.num_steps, 3))
 
-        self.pos = init_pos
-        self.traj_3d = init_pos
+        self.pos = np.asarray(init_pos)
+        self.traj[0] = init_pos
 
-    cdef void set_pos(self, float x, float y, float z, int time_point=-1):
+    cdef void set_pos(self, object pos, int time_point=-1):
         """
         Sets the position. If `time_point` is provided, sets
         the corresponding value in `self.traj[time_point]`
         """
-        self.pos = (x, y, z)
+        self.pos = np.asarray(pos)
         if time_point >= 0:
-            self.traj_3d[time_point] = self.pos
+            self.traj[time_point, :] = self.pos
 
-    cdef float get_pos(self, int time_point=-1):
+    cdef np.ndarray get_pos(self, int time_point=-1):
         """Returns the position.
 
         If `time_point` is -1 (default), returns the current position
@@ -83,15 +84,8 @@ cdef class Organite(object):
         """
         if time_point == 0:
             return self.pos
-        return self.traj_3d[time_point]
-
-
-    property traj:
-        """
-        Trajectory along the x axis for backward compat
-        """
-        def __get__(self):
-          return self.traj_3d[:, 0]
+        return self.traj[time_point]
+            
 
 
 cdef class Spb(Organite):
@@ -136,13 +130,12 @@ cdef class Chromosome(Organite):
         d0 = spindle.KD.params['d0']
         L0 = spindle.KD.params['L0']
 
-        Organite.__init__(self, spindle, (0, 0, 0))
-        center_pos = (self.KD.prng.normal(0, 0.2 * (L0 - d0)),
+        center_pos = [self.KD.prng.normal(0, 0.2 * (L0 - d0)),
                       self.KD.prng.normal(0, 0.2 * (L0 - d0)),
-                      self.KD.prng.normal(0, 0.2 * (L0 - d0)))
+                      self.KD.prng.normal(0, 0.2 * (L0 - d0))]
+        Organite.__init__(self, spindle, center_pos)
 
-        self.pos = center_pos
-        self.traj[0] = center_pos
+        self.traj[0, :] = center_pos
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
         self.correct_history = np.zeros((self.KD.num_steps, 2))
@@ -214,13 +207,11 @@ cdef class Chromosome(Organite):
     cdef float pair_dist(self):
         return distance(self.cen_A.pos, self.cen_B.pos)
 
-    cdef float plug_dist(self, tuple plugpos):
-        return distance(self.center() - plugpos)
+    cdef float plug_dist(self, np.ndarray plugpos):
+        return distance(self.center(), plugpos)
 
-    cdef tuple center(self):
-        return ((self.cen_A.pos[0] + self.cen_B.pos[0]) / 2,
-                (self.cen_A.pos[1] + self.cen_B.pos[1]) / 2,
-                (self.cen_A.pos[2] + self.cen_B.pos[2]) / 2)
+    cdef np.ndarray center(self):
+        return (self.cen_A.pos + self.cen_B.pos) / 2
 
     cdef np.ndarray center_traj(self):
         return (self.cen_A.traj + self.cen_B.traj) / 2
@@ -271,9 +262,9 @@ cdef class Centromere(Organite):
         self.chromosome = chromosome
         d0 = self.chromosome.KD.params['d0']
         if tag == 'A':
-            init_pos = (chromosome.pos[0] - d0 / 2., 0., 0.)
+            init_pos = [chromosome.pos[0] - d0 / 2., 0., 0.]
         elif tag == 'B':
-            init_pos = (chromosome.pos[0] + d0 / 2., 0., 0.)
+            init_pos = [chromosome.pos[0] + d0 / 2., 0., 0.]
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
         Organite.__init__(self, chromosome, init_pos)
@@ -318,6 +309,9 @@ cdef class Centromere(Organite):
         left_hist = np.array(state_hist < 0).sum(axis=0)
         return left_hist, right_hist
 
+
+    cdef float P_attachleft(self):
+        cdef float orientation
         orientation = self.KD.params['orientation']
         if orientation == 0:
             return 0.5
@@ -336,11 +330,24 @@ cdef class Centromere(Organite):
         cdef np.ndarray[ITYPE_t] left_plugged
         left_plugged = self.plug_vector * (self.plug_vector - 1) // 2
         lp = left_plugged.sum()
-        return lpself.cen_A.pos
+        return lp
+
+    cdef int right_plugged(self):
+        cdef int rp
+        cdef np.ndarray[ITYPE_t] right_plugged
+        right_plugged = self.plug_vector * (1 + self.plug_vector) // 2
+        rp = right_plugged.sum()
+        return rp
+
+    cdef bool at_rightpole(self, float tol=0.01):
+
+        if distance(self.pos, self.KD.spbR.pos) < tol:
+            return True
+        return False
 
     cdef bool at_leftpole(self, float tol=0.01):
-        cdef float leftpole_pos = self.KD.spbR.pos
-        if distance(self.pos - leftpole_pos) < tol:
+
+        if distance(self.pos, self.KD.spbR.pos) < tol:
             return True
         return False
 
@@ -402,7 +409,6 @@ cdef class PlugSite(Organite):
         else:
             self.plug_state = initial_plug
 
-        self.set_pos(init_pos)
         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
         self.state_hist[:] = self.plug_state
         # self.P_att = 1 - np.exp(- self.KD.params['k_a'])
@@ -429,7 +435,7 @@ cdef class PlugSite(Organite):
         cdef double ldep_balance
         cdef double lbase
         cdef double mt_length
-        cdef double pole_pos
+        cdef np.ndarray pole_pos
         cdef double force_term
 
         ldep = self.KD.params['ldep']
@@ -446,7 +452,7 @@ cdef class PlugSite(Organite):
             # We don't want lbase < 0
             return 1
 
-        pole_pos = (self.KD.spbR.pos[0] * self.plug_state, 0, 0)
+        pole_pos = np.array([self.KD.spbR.pos[0] * self.plug_state, 0, 0])
         mt_length = distance(pole_pos, self.pos)
 
         ldep_factor = ldep * mt_length + lbase

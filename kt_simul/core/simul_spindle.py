@@ -333,7 +333,7 @@ class Metaphase(object):
 
         """
         if pos is None:
-            pos = self.KD.spbR.pos
+            pos = self.KD.spbR.pos[0]
         if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
             log.warning('Missed shot, same player play again!')
             return
@@ -343,9 +343,9 @@ class Metaphase(object):
         self.KD.A0_mat = self.KD.time_invariantA()
 
         for plugsite in self.KD.spindle.all_plugsites:
-            if pos < plugsite.pos and plugsite.plug_state == - 1:
+            if pos < plugsite.pos[0] and plugsite.plug_state == - 1:
                 plugsite.set_plug_state(0, time_point)
-            elif pos > plugsite.pos and plugsite.plug_state == 1:
+            elif pos > plugsite.pos[0] and plugsite.plug_state == 1:
                 plugsite.set_plug_state(0, time_point)
 
     def _plug_checkpoint(self):
@@ -387,8 +387,8 @@ class Metaphase(object):
             of the spindle
         """
         for ch in self.KD.chromosomes:
-            ktR = ch.cen_A.pos
-            ktL = ch.cen_B.pos
+            ktR = ch.cen_A.pos[0]
+            ktL = ch.cen_B.pos[0]
             if min(ktR, ktL) <= 0 and max(ktR, ktL) >= 0:
                 return True
         return True
