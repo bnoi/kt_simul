@@ -133,25 +133,27 @@ class SympySpindle:
                          ]).reshape(2 * self.N * self.Mk, 2)
         return astate
 
-    def get_np_A0(self):
+    def get_A0(self):
         adim = {parameters['F_k']: 1, parameters['V_k']: 1}
         passive_params = ['mu_s', 'mu_ch', 'mu_c', 'mu_k',
                           'kappa_c', 'kappa_k', 'd_0']
         passive_zero = {parameters[name]: 0 for name in passive_params}
         A0 = self.A_uu.subs(passive_zero).subs(adim)
         A0_args = [parameters[name] for name in passive_params]
-        A0_np = lambdify(A0_args, A0, 'numpy', dummify=False)
-        return A0_args, A0_np
+        return A0, A0_args
 
-    def get_np_At(self):
+    def get_At(self):
         adim = {parameters['F_k']: 1, parameters['V_k']: 1}
         active_params = ['F_k', 'V_k', 'F_mz', 'V_mz']
         active_zero = {parameters[name]: 0 for name in active_params}
         At = self.A_uu.subs(active_zero).subs(adim)
         At_args = [parameters[name]
                    for name in active_params] + list(self.attach_state)
-        At_np = lambdify(At_args, At, 'numpy', dummify=False)
-        return At_np, At_args
+        # At_np = lambdify(At_args, At, 'numpy', dummify=False)
+        return At, At_args
+
+    def get_B0(self):
+        pass
 
 
 class Organite:
