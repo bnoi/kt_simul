@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
+
 class ViscousDrag:
     ''' Simple viscous drag
 
@@ -32,6 +33,7 @@ class ViscousDrag:
                                viscous.F))
         return viscous
 
+
 class DampedSpring:
     '''
     A Damped spring
@@ -55,7 +57,7 @@ class DampedSpring:
             self.e_F = self.r.normalize()
         else:
             self.e_F = e_F
-        self.F_k = - kappa *  (self.r - d_eq * self.e_F)
+        self.F_k = - kappa * (self.r - d_eq * self.e_F)
         self.F_v = - mu * (point2.vel(N) - point1.vel(N))
         self.point1 = point1
         self.point2 = point2
@@ -82,6 +84,7 @@ class DampedSpring:
                                (spring.point1, -spring.F_v),
                                (spring.point2, spring.F_v)])
         return spring
+
 
 class LinearFV:
     '''
@@ -125,14 +128,11 @@ class LinearFV:
         '''
         self.point1 = point1
         self.point2 = point2
-        self.v = point2.vel(N) - point1.vel(N)
-        self.r = point2.pos_from(point1)
+        #  self.p_vect = self.point2.pos_from(self.point1)
+        self.v = self.point2.vel(N) - self.point1.vel(N)
         if e_F is None:
-            self.e_F = self.r.normalize()
-        else:
-            self.e_F = e_F
-        ### Force
-        self.F = gamma * F_max * (self.e_F - gamma * self.v / V_max)
+            e_F = self.point2.pos_from(self.point1).normalize()
+        self.F = F_max * (1 - gamma * self.v.dot(e_F)/V_max) * e_F
 
     @classmethod
     def new(cls, spindle, *args, **kwargs):
@@ -153,7 +153,7 @@ class LinearFV:
         '''
 
         lfv = cls(*args, **kwargs)
-        ## Register
+        # # Register
         # if extending, force goes outward the segment,
         # thus is negative for point1
         spindle.forces.extend([(lfv.point1, -lfv.F),

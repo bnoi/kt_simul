@@ -300,6 +300,13 @@ class PlugSite(Organite):
                          self.rho: self.pi * (self.pi + 1)/2}
 
         self.spindle.points.append(self.point)
+        # Unit vectors btw site and spindle poles
+        self.uLx, self.uLy, self.uLz = symbols(
+            'uL_x{0}{1}{2} uL_y{0}{1}{2} uL_z{0}{1}{2}'.format(*self.site_id))
+        self.uL = self.uLx * S.x + self.uLy * S.y + self.uLz * S.z
+        self.uRx, self.uRy, self.uRz = symbols(
+            'uR_x{0}{1}{2} uR_y{0}{1}{2} uR_z{0}{1}{2}'.format(*self.site_id))
+        self.uR = self.uRx * S.x + self.uRy * S.y + self.uRz * S.z
         self.kt_MT_forces()
 
     def kt_MT_forces(self):
@@ -307,7 +314,7 @@ class PlugSite(Organite):
         V_k = parameters['V_k']
         kt_pull_L = LinearFV.new(self.spindle, self.spindle.S,
                                  self.spindle.spbL.point, self.point,
-                                 self.lbda * F_k, V_k, -1)
+                                 self.lbda * F_k, V_k, -1, self.uL)
         kt_pull_R = LinearFV.new(self.spindle, self.spindle.S,
                                  self.point, self.spindle.spbR.point,
-                                 self.rho * F_k, V_k, -1)
+                                 self.rho * F_k, V_k, -1, self.uR)
