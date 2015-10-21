@@ -49,16 +49,13 @@ class DampedSpring:
     TODO
     '''
 
-    def __init__(self, N, point1, point2,
-                 kappa, mu, d_eq=0, e_F=None):
+    def __init__(self, N, point1, point2, d_12, e_F,
+                 kappa, mu, d_eq=0):
 
         self.r = point2.pos_from(point1)
-        if e_F is None:
-            self.e_F = self.r.normalize()
-        else:
-            self.e_F = e_F
-        self.F_k = - kappa * (self.r - d_eq * self.e_F)
-        self.F_v = - mu * (point2.vel(N) - point1.vel(N))
+        self.F_k = - kappa * (d_12 - d_eq) * e_F
+        self.v = point2.vel(N) - point1.vel(N)
+        self.F_v = - mu * (self.v.dot(e_F)) * e_F
         self.point1 = point1
         self.point2 = point2
 
@@ -112,8 +109,8 @@ class LinearFV:
 
     '''
 
-    def __init__(self, N, point1, point2,
-                 F_max, V_max, gamma, e_F=None):
+    def __init__(self, N, point1, point2, e_F,
+                 F_max, V_max, gamma):
 
         '''
         point1, point2: points
@@ -130,8 +127,6 @@ class LinearFV:
         self.point2 = point2
         #  self.p_vect = self.point2.pos_from(self.point1)
         self.v = self.point2.vel(N) - self.point1.vel(N)
-        if e_F is None:
-            e_F = self.point2.pos_from(self.point1).normalize()
         self.F = F_max * (1 - gamma * self.v.dot(e_F)/V_max) * e_F
 
     @classmethod

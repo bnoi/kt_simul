@@ -93,8 +93,8 @@ class SympySpindle:
         F_mz = parameters['F_mz']
         V_mz = parameters['V_mz']
         LinearFV.new(self, self.S,
-                     self.spbL.point, self.spbR.point,
-                     F_mz, V_mz, 1, e_F=self.S.x)
+                     self.spbL.point, self.spbR.point, self.S.x,
+                     F_mz, V_mz, 1)
 
     def add_chromosome(self, n):
         ch = Chromosome(self, n)
@@ -108,7 +108,7 @@ class SympySpindle:
         self.KM = KanesMethod(self.S, self.q_ind, self.u_ind, self.kd)
         particles = [Particle('p{}'.format(point.name), point, 0)
                      for point in self.points]
-        self.eoms, frstar = self.KM.kanes_equations(self.forces+self.torques,
+        self.eoms, frstar = self.KM.kanes_equations(self.forces,
                                                     particles)
 
     @property
@@ -233,10 +233,15 @@ class Chromosome(Organite):
         mu_c = parameters['mu_c']
         self.cen_A = Centromere(self.spindle, self, 'A')
         self.cen_B = Centromere(self.spindle, self, 'B')
+        d_i = symbols('d_{}'.format(self.id))
+        u_xi, u_yi, u_zi = symbols('u_x{0} u_y{0} u_z{0}'.format(self.id))
+        S = self.spindle.S
+        u_i = u_xi * S.x + u_yi * S.y + u_zi * S.z
         cen_spring = DampedSpring.new(self.spindle,
                                       self.spindle.S,
                                       self.cen_A.point,
                                       self.cen_B.point,
+                                      d_i, u_i,
                                       kappa_c, mu_c, d_0)
 
 
@@ -271,8 +276,16 @@ class Centromere(Organite):
         self.plugsites.append(site)
         kappa_k = parameters['kappa_k']
         mu_k = parameters['mu_k']
-        spring = DampedSpring.new(self.spindle, self.spindle.S,
-                                  self.point, site.point,
+        d_i = symbols('d_{}{}{}'.format(*site.site_id))
+        u_xi, u_yi, u_zi = symbols(
+            'u_x{0}{1}{2} u_y{0}{1}{2} u_z{0}{1}{2}'.format(*site.site_id))
+        S = self.spindle.S
+        u_i = u_xi * S.x + u_yi * S.y + u_zi * S.z
+        spring = DampedSpring.new(self.spindle,
+                                  self.spindle.S,
+                                  self.point,
+                                  site.point,
+                                  d_i, u_i,
                                   kappa_k, mu_k)
 
 
@@ -313,8 +326,8 @@ class PlugSite(Organite):
         F_k = parameters['F_k']
         V_k = parameters['V_k']
         kt_pull_L = LinearFV.new(self.spindle, self.spindle.S,
-                                 self.spindle.spbL.point, self.point,
-                                 self.lbda * F_k, V_k, -1, self.uL)
+                                 self.spindle.spbL.point, self.point, self.uL,
+                                 self.lbda * F_k, V_k, -1)
         kt_pull_R = LinearFV.new(self.spindle, self.spindle.S,
-                                 self.point, self.spindle.spbR.point,
-                                 self.rho * F_k, V_k, -1, self.uR)
+                                 self.point, self.spindle.spbR.point, self.uR,
+                                 self.rho * F_k, V_k, -1)
