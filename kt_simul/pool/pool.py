@@ -96,7 +96,8 @@ class Pool:
         else:
             store = pd.HDFStore(self.simu_full_path)
             self.paramtree = ParamTree(df=store['params'])
-            self.measuretree = ParamTree(df=store['measures'], adimentionalized=False)
+            self.measuretree = ParamTree(df=store['measures'],
+                                         adimentionalized=False)
 
             metadata = guess_number_dict(store['metadata'].to_dict())
             self.n_simu = metadata['n_simu']
@@ -128,7 +129,8 @@ class Pool:
                 signal.signal(signal.SIGINT, signal.SIG_IGN)
 
             ncore = multiprocessing.cpu_count() + 1
-            mess = 'Parallel mode enabled: {} cores will be used to run {} simulations'
+            mess = ('Parallel mode enabled: {} cores will be'
+                    'used to run {} simulations')
             log.info(mess.format(ncore, self.n_simu))
             pool = multiprocessing.Pool(
                 processes=ncore, initializer=init_worker)
@@ -168,7 +170,7 @@ class Pool:
                 next(results)
                 if self.verbose:
                     print_progress((i + 1) / self.n_simu * 100, "(%i / %i)" %
-                              (i + 1, self.n_simu))
+                                   (i + 1, self.n_simu))
 
             if self.verbose:
                 print_progress(-1)
@@ -215,13 +217,16 @@ class Pool:
     def load_metaphase_parallel(self, pre_processing_func=None, verbose=True):
         """
         """
-        all_fpath = [os.path.join(self.simu_path, fname) for i, fname in enumerate(self.metaphases_path)]
-        args = zip(all_fpath, itertools.repeat(self.paramtree), itertools.repeat(self.measuretree))
+        all_fpath = [os.path.join(self.simu_path, fname)
+                     for i, fname in enumerate(self.metaphases_path)]
+        args = zip(all_fpath, itertools.repeat(self.paramtree),
+                   itertools.repeat(self.measuretree))
 
         proc_pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
 
         results = []
-        for i, meta in enumerate(proc_pool.imap_unordered(_load_metaphase_single, args)):
+        for i, meta in enumerate(
+            proc_pool.imap_unordered(_load_metaphase_single, args)):
             if verbose:
                 print_progress(int(i * 100 / self.n_simu))
             print(meta.KD.chromosomes)
@@ -253,8 +258,6 @@ def _run_one_simulation(args):
 def _load_metaphase_single(args):
     fpath, paramtree, measuretree = args
     meta = SimuIO().read(fpath)
-                         # paramtree=paramtree,
-                         # measuretree=measuretree)
     return meta
 
 
