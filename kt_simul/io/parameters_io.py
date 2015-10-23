@@ -53,7 +53,8 @@ class ParamTree(object):
         """
         """
         self.absolute_dic = self.params.loc[:, ['name', 'value']]
-        self.absolute_dic = self.absolute_dic.set_index('name').to_dict()['value']
+        self.absolute_dic = self.absolute_dic.set_index(
+            'name').to_dict()['value']
         self.relative_dic = self.absolute_dic.copy()
 
         if self.adimentionalized:
@@ -109,4 +110,5 @@ class ParamTree(object):
     def copy(self):
         """
         """
-        return ParamTree(df=self.params.copy(), adimentionalized=self.adimentionalized)
+        return ParamTree(df=self.params.copy(),
+                         adimentionalized=self.adimentionalized)

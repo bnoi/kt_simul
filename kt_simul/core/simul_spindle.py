@@ -112,7 +112,8 @@ class Metaphase(object):
         params['Fk'] = self.paramtree.absolute_dic['Fk']
         params['dt'] = self.paramtree.absolute_dic['dt']
 
-        self.KD = KinetoDynamics(params, initial_plug=initial_plug, prng=self.prng)
+        self.KD = KinetoDynamics(params, initial_plug=initial_plug,
+                                 prng=self.prng)
 
         dt = self.paramtree.absolute_dic['dt']
         duration = self.paramtree.absolute_dic['span']
@@ -224,12 +225,12 @@ class Metaphase(object):
                     print_progress(-1)
                     if self.verbose:
                         log.info("Anaphase onset at %i / %i" %
-                                   (time_point, self.num_steps))
+                                 (time_point, self.num_steps))
                     log_anaphase_onset = True
 
             self.KD.one_step(time_point)
             # if time_point % 100 == 0:
-                # print self.KD.At_mat
+            #     print self.KD.At_mat
 
         if self.verbose:
             print_progress(-1)
@@ -322,7 +323,7 @@ class Metaphase(object):
             return True
         return False
 
-    def _ablation(self, time_point, pos=None):
+    def _ablation(self, time_point, pos=None, radius=0.2):
         """
         Simulates a laser ablation: detaches all the kinetochores
         and sets the midzone stall force Fmz to 0
