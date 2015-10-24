@@ -1,11 +1,12 @@
 import random
 import numpy as np
+import pandas as pd
 import logging
 
 __all__ = ["Spb", "Chromosome",
            "Centromere", "PlugSite", "Spindle"]
 
-log = logging.get_logger(__name__)
+log = logging.getLogger(__name__)
 
 coords = ['x', 'y', 'z']
 speed_coords = ['v'+c for c in coords]
@@ -50,7 +51,7 @@ class Structure:
         self.point_df = self.point_df.append(pd.DataFrame(index=[point.idx, ],
                                                           data=state,
                                                           columns=point_cols))
-        self.points[point.idx] = p
+        self.points[point.idx] = point
 
     def add_link(self, point_i, point_j):
 
@@ -170,20 +171,21 @@ class Spindle(Structure):
             self.prng = np.random.RandomState()
         else:
             self.prng = prng
+        self.initial_plug = initial_plug
         L = self.params['L0']
         N = int(self.params['N'])
         Mk = int(self.params['Mk'])
         self.duration = self.params['span']
         self.dt = self.params['dt']
-        self.spbL = Point(idx=0)
-        self.spbR = Point(idx=1)
+        self.spbL = Point(idx=0, structure=self)
+        self.spbR = Point(idx=1, structure=self)
         self.add_point(self.spbL, pos0=[-L/2, 0, 0])
         self.add_point(self.spbR, pos0=[L/2, 0, 0])
-        self.point_df['plug_state'] = 0
+        self.point_df['plug_state'] = np.nan
         self.initial_plug = initial_plug
         self.chromosomes = []
         for n in range(N):
-            ch = Chromosome(n, self.spindle)
+            ch = Chromosome(n, self)
             self.chromosomes.append(ch)
 
     def set_pos(self, position):
@@ -191,24 +193,21 @@ class Spindle(Structure):
         self.pos = position
 
 
-class Chromosome(Point):
+class Chromosome():
 
     def __init__(self, idx, spindle):
-        d0 = spindle.spindle.params['d0']
-        L0 = spindle.spindle.params['L0']
-
-        self.center_pos = [self.spindle.prng(0, 0.2 * (L0 - d0)),
-                           self.spindle.prng(0, d0),
-                           self.spindle.prng(0, d0)]
+        self.id = idx
+        d0 = spindle.params['d0']
+        L0 = spindle.params['L0']
         self.spindle = spindle
+
+        self.center_pos = np.array([self.spindle.prng.normal(0, 0.2*(L0 - d0)),
+                                    self.spindle.prng.normal(0, d0),
+                                    self.spindle.prng.normal(0, d0)])
         # spindle.add_point(idx=idx, center_pos)
 
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
-        self.correct_history = np.zeros((self.spindle.num_steps, 2))
-        self.correct_history[0] = self.correct()
-        self.erroneous_history = np.zeros((self.spindle.num_steps, 2))
-        self.erroneous_history[0] = self.erroneous()
 
     def is_right_A(self):
         """
@@ -217,7 +216,6 @@ class Chromosome(Point):
         to the left.
         """
 
-        cdef int right_A, right_B
         right_A = self.cen_A.right_plugged() + self.cen_B.left_plugged()
         left_A = self.cen_A.left_plugged() + self.cen_B.right_plugged()
         if right_A >= left_A:
@@ -305,15 +303,19 @@ class Centromere(Point):
         self.tag = tag
         self.chromosome = chromosome
         self.spindle = chromosome.spindle
-        d0 = self.chromosome.spindle.params['d0']
+        Mk = int(self.spindle.params['Mk'])
+        d0 = self.spindle.params['d0']
+        n = self.chromosome.id
         if tag == 'A':
-            init_pos = chromosome.pos - d0 / 2.
+            init_pos = chromosome.center_pos - d0 / 2.
+            idx = (2 * n) * (Mk + 1) + 2
         elif tag == 'B':
-            init_pos = chromosome.pos + d0 / 2.
+            init_pos = chromosome.center_pos + d0 / 2.
+            idx = (2 * n + 1) * (Mk + 1) + 2
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
-        Point.__init__(self, None, self.spindle)
-        Mk = int(self.spindle.params['Mk'])
+
+        Point.__init__(self, idx, self.spindle)
         self.spindle.add_point(self, pos0=init_pos)
         self.toa = 0  # time of arrival at pole
         self.plug_vector = np.zeros(Mk, dtype=np.int)
@@ -328,7 +330,6 @@ class Centromere(Point):
         Returns True if at least one plugsite is attached
         to at least one SPB
         """
-        cdef PlugSite plugsite
         for plugsite in self.plugsites:
             if plugsite.plug_state != 0:
                 return True
@@ -381,7 +382,7 @@ class Centromere(Point):
             return True
         return False
 
-    def calc_toa(self, float tol=0.01):
+    def calc_toa(self, tol=0.01):
         """
         Calculate time of arrivals
         """
@@ -405,16 +406,21 @@ class Centromere(Point):
 
 class PlugSite(Point):
 
-    def __init__(self, centromere):
+    def __init__(self, centromere, site_id):
         init_pos = centromere.pos
         self.spindle = centromere.spindle
+        self.centromere = centromere
+        idx = self.centromere.idx + site_id + 1
 
-        Point.__init__(self, None, self.spindle)
-        self.spindle.add_point(idx=None, init_pos)
+        Point.__init__(self, idx, self.spindle)
+        self.spindle.add_point(self, pos0=init_pos)
         self.tag = self.centromere.tag
         self.current_side = ""
         self.site_id = site_id
+        self._initial_plug()
 
+    def _initial_plug(self):
+        initial_plug = self.spindle.initial_plug
         if initial_plug is None:
             plug_state = self.spindle.prng.choice([-1, 0, 1])
         elif initial_plug == 'null':
@@ -431,6 +437,7 @@ class PlugSite(Point):
             plug_state = self.spindle.prng.choice([-1, 1])
         else:
             plug_state = initial_plug
+        self.plug_state = plug_state
 
     @property
     def plug_state(self):
@@ -496,35 +503,142 @@ class PlugSite(Point):
         return ldep_factor
 
     def calc_ldep_for_attachment(self):
-        raise NotImplementedError
+        """Using Cauchy distribution
+        """
+        # Disable ldep if current time point lower than time_ldep
+        if ('time_ldep' in self.spindle.params.keys() and
+                'time_ldep_inject' in self.spindle.params.keys()):
+            if (self.spindle.params['time_ldep_inject'] and
+                self.spindle.time_point < self.spindle.params['time_ldep']):
+                return 1
+            if (not self.spindle.params['time_ldep_inject'] and
+                self.spindle.time_point > self.spindle.params['time_ldep']):
+                return 1
+
+        gamma = float(self.spindle.params['ldep_for_attachment_gamma'])
+        mu = float(self.spindle.params['ldep_for_attachment_mu'])
+        N_mt = int(self.spindle.params['ldep_for_attachment_N_mt'])
+
+        if gamma == 0:
+            return 1
+
+        if self.current_side == 'right':
+            spb = self.spindle.spbR
+        elif self.current_side == 'left':
+            spb = self.spindle.spbL
+        else:
+            raise Exception('Wrong side idiot !')
+
+        mt_size = self.dist(spb)
+        spb_size = self.spindle.spbR.dist(self.spindle.spbL)
+
+        # Get vector of spindle asize
+        x = np.linspace(0, spb_size, 20)
+
+        # Get Cauchy/Lorentz distribution according to current spindle size
+        cauchy_cdf = cauchy.pdf(x, loc=mu, scale=gamma)
+
+        # Now compute a k_a prefactor for a given MT size
+        # Then we normalize this pre factor to 1
+        factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / cauchy_cdf.mean()
+        return factor
 
     def plug_unplug(self, time_point):
         """
         """
-        dice = self.KD.prng.rand()
+        dice = self.spindle.prng.rand()
 
-        side_dice = self.KD.prng.rand()
+        side_dice = self.spindle.prng.rand()
         P_left = self.centromere.P_attachleft()
 
         if side_dice < P_left:
             # Attachment
             self.current_side = "left"
-            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+            k_a = self.spindle.params['k_a'] * self.calc_ldep_for_attachment()
             pa = 1 - np.exp(-k_a)
 
             if self.plug_state == 0 and dice < pa:
-                self.set_plug_state(-1, time_point)
+                self.plug_state = -1
             # Detachment
             elif dice < self.P_det():
-                self.set_plug_state(0, time_point)
+                self.plug_state = 0
         else:
             # Attachment
             self.current_side = "right"
-            k_a = self.KD.params['k_a'] * self.calc_ldep_for_attachment()
+            k_a = self.spindle.params['k_a'] * self.calc_ldep_for_attachment()
             pa = 1 - np.exp(-k_a)
 
             if self.plug_state == 0 and dice < pa:
-                self.set_plug_state(1, time_point)
+                self.plug_state = 1
             # Detachment
             elif dice < self.P_det():
-                self.set_plug_state(0, time_point)
+                self.plug_state = 0
+
+    def is_correct(self, time_point=-1):
+        """
+        Returns True if the plugsite is plugged
+        correctly, i.e. doesn't contribute to an
+        attachment error
+        """
+
+        if time_point < 0:
+            plug_state = self.plug_state
+        else:
+            plug_state = self.state_hist.loc[time_point]
+
+        if plug_state == 0:
+            return False
+        if self.tag == 'A':
+            if self.centromere.chromosome.is_right_A():
+                return True if plug_state == 1 else False
+            else:
+                return True if plug_state == -1 else False
+        else:
+            if self.centromere.chromosome.is_right_A():
+                return True if plug_state == -1 else False
+            else:
+                return True if plug_state == 1 else False
+
+    def P_det(self):
+        """
+        """
+
+        d_alpha = self.spindle.params['d_alpha']
+        k_d0 = self.spindle.params['k_d0']
+
+        if d_alpha == 0:
+            return k_d0
+
+        ch_center = self.centromere.chromosome.center()
+        dist = np.linalg.norm(self.pos - ch_center)
+
+        if dist == 0:
+            return 1
+
+        # Cauchy distribution
+        # x0 = 0
+        # k_dc = k_d0 * (2 / (np.pi * d_alpha)) / (1 + ((dist - x0)
+        #      / (d_alpha / 2)) ** 2)
+
+        # Inverse distribution
+        k_dc = k_d0 * d_alpha / dist
+
+        if k_dc > 1e4:
+            return 1
+
+        return 1 - np.exp(-k_dc)
+
+    def calc_attach_trans(self):
+        """
+        """
+
+        tau_trans = 10
+
+        state = self.state_hist
+        try:
+            index_t0 = np.where(state != self.plug_state)[0][-1]
+        except IndexError:
+            index_t0 = 0
+        dt = (current_t_index - index_t0) * self.spindle.dt
+        trans_modulation = 1 - np.exp(-dt * (1 / tau_trans))
+        return trans_modulation
