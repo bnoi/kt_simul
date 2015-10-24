@@ -70,7 +70,7 @@ class Structure:
 
     @property
     def trgt_idx(self):
-        return spindle.link_df.index.get_level_values('trgt')
+        return self.link_df.index.get_level_values('trgt')
 
     def update_geometry(self):
 
@@ -181,12 +181,15 @@ class Spindle(Structure):
         self.spbR = Point(idx=1, structure=self)
         self.add_point(self.spbL, pos0=[-L/2, 0, 0])
         self.add_point(self.spbR, pos0=[L/2, 0, 0])
+        self.add_link(self.spbL, self.spbR)
         self.point_df['plug_state'] = np.nan
         self.initial_plug = initial_plug
         self.chromosomes = []
         for n in range(N):
             ch = Chromosome(n, self)
             self.chromosomes.append(ch)
+
+        self.update_geometry()
 
     def set_pos(self, position):
         log.DEBUG('Deprecated, directly set the `pos` attribute instead')
@@ -208,6 +211,7 @@ class Chromosome():
 
         self.cen_A = Centromere(self, 'A')
         self.cen_B = Centromere(self, 'B')
+        self.spindle.add_link(self.cen_A, self.cen_B)
 
     def is_right_A(self):
         """
@@ -414,6 +418,9 @@ class PlugSite(Point):
 
         Point.__init__(self, idx, self.spindle)
         self.spindle.add_point(self, pos0=init_pos)
+        self.spindle.add_link(self.centromere, self)
+        self.spindle.add_link(self.spindle.spbL, self)
+        self.spindle.add_link(self.spindle.spbR, self)
         self.tag = self.centromere.tag
         self.current_side = ""
         self.site_id = site_id
