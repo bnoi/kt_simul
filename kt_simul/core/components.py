@@ -198,6 +198,12 @@ class Spindle(Structure):
         log.DEBUG('Deprecated, directly set the `pos` attribute instead')
         self.pos = position
 
+    def all_plugsites(self):
+        for ch in self.chromosomes:
+            for cen in (ch.cen_A, ch.cen_B):
+                for ps in cen.plugsites:
+                    yield ps
+
 
 class Chromosome():
 
@@ -275,7 +281,7 @@ class Chromosome():
         return np.linalg.norm(self.center() - plugpos)
 
     def center(self):
-        return (self.cenA.pos + self.cenB.pos) / 2
+        return (self.cen_A.pos + self.cen_B.pos) / 2
 
     def center_traj(self):
         return (self.cen_A.traj + self.cen_B.traj) / 2
@@ -553,7 +559,7 @@ class PlugSite(Point):
         factor = cauchy.pdf(mt_size, loc=mu, scale=gamma) / cauchy_cdf.mean()
         return factor
 
-    def plug_unplug(self, time_point):
+    def plug_unplug(self):
         """
         """
         dice = self.spindle.prng.rand()

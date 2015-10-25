@@ -81,24 +81,24 @@ class SpindleModel(Model):
 
     def time_invariantA(self):
 
-        viscous(self.spindle.spbL, self.params['mus'])
-        viscous(self.spindle.spbR, self.params['mus'])
+        viscous(self, self.spindle.spbL, self.params['mus'])
+        viscous(self, self.spindle.spbR, self.params['mus'])
 
-        for ch in spindle.chromosomes:
-            viscous(ch.cen_A, self.params['muco'])
-            viscous(ch.cen_A, self.params['muco'])
+        for ch in self.spindle.chromosomes:
+            viscous(self, ch.cen_A, self.params['muco'])
+            viscous(self, ch.cen_A, self.params['muco'])
             for ps in ch.cen_A.plugsites:
-                viscous(ps, self.params['muco']/100)  # to avoid singluar mat.
+                viscous(self, ps, self.params['muco']/100)
             for ps in ch.cen_B.plugsites:
-                viscous(ps, self.params['muco']/100)  # to avoid singluar mat.
+                viscous(self, ps, self.params['muco']/100)
         self.A0mat = self.Amat.copy()
 
     def update_AB(self):
         self.Amat = self.A0mat
         self.Bmat = np.zeros(self.n_points)
-        mz = self.spindle.links[(self.spbR.idx, self.spbL.idx)]
+        mz = self.spindle.links[(self.spindle.spbL.idx, self.spindle.spbR.idx)]
         linear_fv(self, mz, self.params['Fmz'], self.params['Vmz'], gamma=1)
-        for ch in spindle.chromosomes:
+        for ch in self.spindle.chromosomes:
             chromatin = self.spindle.links[(ch.cen_A.idx, ch.cen_B.idx)]
             dampedspring(self, chromatin,
                          self.params['muc'],
@@ -110,22 +110,22 @@ class SpindleModel(Model):
                 self.plugsite_forces(ps)
 
     def plugsite_forces(self, ps):
-        kt = self.spindle.links[(ps.centromere, ps)]
+        kt = self.spindle.links[(ps.centromere.idx, ps.idx)]
         dampedspring(self, kt,
                      self.params['muk'],
                      self.params['kappa_k'], 0)
         if ps.plug_state == 0:
             return
         if ps.plug_state == -1:
-            ktMT = self.spindle.links[(self.spindle.spbL, ps)]
+            ktMT = self.spindle.links[(self.spindle.spbL.idx, ps.idx)]
         elif ps.plug_state == 1:
-            ktMT = self.spindle.links[(self.spindle.spbR, ps)]
+            ktMT = self.spindle.links[(self.spindle.spbR.idx, ps.idx)]
         linear_fv(self, ktMT, 1, 1, -1)
 
     def one_step(self, step):
         if not self.anaphase:
-            for plugsite in self.all_plugsites:
+            for plugsite in self.spindle.all_plugsites():
                 plugsite.plug_unplug()
-        self.upate_AB()
+        self.update_AB()
         self.solve()
         self.spindle.register_history()

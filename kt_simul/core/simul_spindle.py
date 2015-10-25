@@ -16,10 +16,8 @@ import logging
 import numpy as np
 import collections
 
-import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=True)
-
-from ..core.spindle_dynamics import KinetoDynamics
+from ..core.components import Spindle
+from ..core.dynamics import SpindleModel
 from ..core import parameters
 from ..utils.progress import print_progress
 from ..utils.format import pretty_dict
@@ -75,7 +73,7 @@ class Metaphase(object):
     def __init__(self,  paramtree=None, measuretree=None,
                  initial_plug='random', verbose=False,
                  keep_same_random_seed=False,
-                 force_parameters=[]):
+                 force_parameters=[], name='sim'):
 
         # Enable or disable log console
         self.verbose = verbose
@@ -112,14 +110,16 @@ class Metaphase(object):
         params['Fk'] = self.paramtree.absolute_dic['Fk']
         params['dt'] = self.paramtree.absolute_dic['dt']
 
-        self.KD = KinetoDynamics(params, initial_plug=initial_plug,
-                                 prng=self.prng)
+        self.spindle = Spindle(name, params,
+                               initial_plug=initial_plug,
+                               prng=self.prng)
+        self.model = SpindleModel(self.spindle)
 
         dt = self.paramtree.absolute_dic['dt']
         duration = self.paramtree.absolute_dic['span']
 
         self.num_steps = int(duration / dt)
-        self.KD.anaphase = False
+        self.model.anaphase = False
         self.timelapse = np.arange(0, duration, dt)
         self.report = []
         self.delay = -1
@@ -164,7 +164,7 @@ class Metaphase(object):
 
     @property
     def time(self):
-        return np.arange(0, self.paramtree['span'], self.KD.dt)
+        return np.arange(0, self.paramtree['span'], self.model.dt)
 
     @property
     def time_anaphase(self):
@@ -191,19 +191,19 @@ class Metaphase(object):
         """
 
         # Check is simulation has already be done
-        if self.KD.simulation_done:
+        if self.model.simulation_done:
             raise SimulationAlreadyDone("""A simulation is already done on this
                 instance. Please create another Metaphase instance
                 to launch a new simulation.""")
 
-        kappa_c = self.KD.params['kappa_c']
+        kappa_c = self.model.params['kappa_c']
 
         if self.verbose:
             log.info('Running simulation')
         bef = 0
         log_anaphase_onset = False
 
-        self.analysis['real_t_A'] = self.KD.params['t_A']
+        self.analysis['real_t_A'] = self.model.params['t_A']
 
         for time_point in range(1, self.num_steps):
 
@@ -227,21 +227,17 @@ class Metaphase(object):
                         log.info("Anaphase onset at %i / %i" %
                                  (time_point, self.num_steps))
                     log_anaphase_onset = True
-
-            self.KD.one_step(time_point)
-            # if time_point % 100 == 0:
-            #     print self.KD.At_mat
+            self.model.one_step(time_point)
 
         if self.verbose:
             print_progress(-1)
-
         if self.verbose:
             log.info('Simulation done')
-        self.KD.params['kappa_c'] = kappa_c
+        self.model.params['kappa_c'] = kappa_c
         delay_str = "delay = %2d seconds" % self.delay
         self.report.append(delay_str)
 
-        for ch in self.KD.chromosomes:
+        for ch in self.spindle.chromosomes:
             ch.calc_correct_history()
             ch.calc_erroneous_history()
             ch.cen_A.calc_toa()
@@ -263,20 +259,20 @@ class Metaphase(object):
         report["Current time"] = "%i\n" % ((time + 1) * float(params["dt"]))
 
         report["separate"] = ""
-        report["spbR pos"] = round(self.KD.spbR.traj[time], 3)
-        report["spbL pos"] = round(self.KD.spbL.traj[time], 3)
+        report["spbR pos"] = np.round(self.spindle.spbR.traj[time], 3)
+        report["spbL pos"] = np.round(self.spindle.spbL.traj[time], 3)
         report["separate"] = ""
 
-        for ch in self.KD.chromosomes:
+        for ch in self.spindle.chromosomes:
             chdict = collections.OrderedDict()
             chdict["correct"] = ch.correct_history[time]
             chdict["erroneous"] = ch.erroneous_history[time]
             for cent in [ch.cen_A, ch.cen_B]:
                 cen_dict = collections.OrderedDict()
-                cen_dict["position"] = round(cent.traj[time], 3)
+                cen_dict["position"] = np.round(cent.traj[time], 3)
                 for site in cent.plugsites:
                     site_dict = collections.OrderedDict()
-                    site_dict['position'] = round(site.traj[time], 3)
+                    site_dict['position'] = np.round(site.traj[time], 3)
                     site_dict['Plug state'] = site.state_hist[time]
 
                     cen_dict["PlugSite %i" % site.site_id] = site_dict
@@ -291,7 +287,7 @@ class Metaphase(object):
     def _anaphase_test(self, time_point):
         """
         At anaphase onset, set the cohesin spring constant to 0 and
-        self.KD.anaphase to True.
+        self.model.anaphase to True.
 
         Returns
         -------
@@ -300,11 +296,11 @@ class Metaphase(object):
 
         """
 
-        t_A = int(self.KD.params['t_A'])
-        dt = self.KD.params['dt']
+        t_A = int(self.model.params['t_A'])
+        dt = self.model.params['dt']
         t = time_point * dt
 
-        if self.KD.anaphase:
+        if self.model.anaphase:
             return True
 
         if t >= t_A and self._plug_checkpoint():
@@ -312,14 +308,13 @@ class Metaphase(object):
             self.analysis['real_t_A'] = t
 
             # Then we just get rid of cohesin
-            self.KD.params['kappa_c'] = 0
-            self.KD.calc_B()
+            self.model.params['kappa_c'] = 0
             nb_mero = self._mero_checkpoint()
             if nb_mero:
                 s = ("There were %d merotelic MT at anaphase onset"
                      % nb_mero)
                 self.report.append(s)
-            self.KD.anaphase = True
+            self.model.anaphase = True
             return True
         return False
 
@@ -336,31 +331,31 @@ class Metaphase(object):
 
         """
         if pos is None:
-            pos = self.KD.spbR.pos
-        if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
+            pos = self.spindle.spbR.pos
+        if not self.spindle.spbL.pos.x <= pos[0] <= self.spindle.spbR.pos.x:
             log.warning('Missed shot, same player play again!')
             return
-        self.KD.params['Fmz'] = 0.
-        self.KD.params['k_a'] = 0.
-        self.KD.params['k_d0'] = 0.
-        self.KD.A0_mat = self.KD.time_invariantA()
+        self.model.params['Fmz'] = 0.
+        self.model.params['k_a'] = 0.
+        self.model.params['k_d0'] = 0.
+        self.model.A0_mat = self.model.time_invariantA()
 
-        for plugsite in self.KD.spindle.all_plugsites:
-            if pos < plugsite.pos and plugsite.plug_state == - 1:
-                plugsite.set_plug_state(0, time_point)
+        for plugsite in self.spindle.all_plugsites():
+            if pos < plugsite.pos.x and plugsite.plug_state == - 1:
+                plugsite.plug_state = 0
             elif pos > plugsite.pos and plugsite.plug_state == 1:
-                plugsite.set_plug_state(0, time_point)
+                plugsite.plug_state = 0
 
     def _plug_checkpoint(self):
         """If the spindle assembly checkpoint is active, returns True
         if all chromosomes are plugged by at least one kMT, False
         otherwise.
         """
-        sac = self.KD.params['sac']
+        sac = self.model.params['sac']
         if sac == 0:
             return True
 
-        for ch in self.KD.chromosomes:
+        for ch in self.spindle.chromosomes:
             if not ch.cen_A.is_attached() or not ch.cen_B.is_attached():
                 return False
         return True
@@ -374,10 +369,9 @@ class Metaphase(object):
             The total number of merotellic kT
         """
         nb_mero = 0
-        for ch in self.KD.chromosomes:
+        for ch in self.spindle.chromosomes:
             if np.any(ch.erroneous()):
                 nb_mero += sum(ch.erroneous())
-                # print "active checkpoint"
         return nb_mero
 
     def _mplate_checkpoint(self):
@@ -388,9 +382,9 @@ class Metaphase(object):
             Returns True if each kinetochore is in the proper half
             of the spindle
         """
-        for ch in self.KD.chromosomes:
-            ktR = ch.cen_A.pos
-            ktL = ch.cen_B.pos
+        for ch in self.spindle.chromosomes:
+            ktR = ch.cen_A.pos.x
+            ktL = ch.cen_B.pos.x
             if min(ktR, ktL) <= 0 and max(ktR, ktL) >= 0:
                 return True
         return True
@@ -404,17 +398,20 @@ class Metaphase(object):
         import matplotlib.pyplot as plt
         import matplotlib
 
-        duration = self.KD.duration
-        dt = self.KD.dt
+        duration = self.model.duration
+        dt = self.model.dt
         times = np.arange(0, duration, dt)
-        kts = self.KD.chromosomes
-        spbA = self.KD.spbL.traj
-        spbB = self.KD.spbR.traj
+        kts = self.spindle.chromosomes
+        spbA = self.spindle.spbL.traj.x
+        spbB = self.spindle.spbR.traj.x
         anaphase = self.analysis['real_t_A']
 
         total_subplots = len(kts) * 2 + 1
-        height_ratios = [1 for _ in range(len(kts))] + [len(kts) * 2] + [1 for _ in range(len(kts))]
-        gs = matplotlib.gridspec.GridSpec(total_subplots, 1, height_ratios=height_ratios)
+        height_ratios = ([1 for _ in range(len(kts))] +
+                         [len(kts) * 2] +
+                         [1 for _ in range(len(kts))])
+        gs = matplotlib.gridspec.GridSpec(total_subplots, 1,
+                                          height_ratios=height_ratios)
 
         h = len(kts) * 2 + 4
         fig = plt.figure(figsize=(12, h))
@@ -430,8 +427,10 @@ class Metaphase(object):
         cm = matplotlib.cm.get_cmap('Set1')
         colors = [cm(1 * i / len(kts)) for i in range(len(kts))]
         for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8, lw=2, label='ch n°{}'.format(i))
-            ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8, lw=2)
+            ax.plot(times, kt.cen_A.traj.x,
+                    color=color, alpha=0.8,
+                    lw=2, label='ch n°{}'.format(i))
+            ax.plot(times, kt.cen_B.traj.x, color=color, alpha=0.8, lw=2)
 
         ax.legend()
         if ylim:
@@ -443,7 +442,8 @@ class Metaphase(object):
         # ax.xaxis.set_ticklabels([])
         ax.xaxis.set_ticks_position('none')
         ax.yaxis.set_ticks_position('none')
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.grid(b=True, which='major', color='#555555',
+                linestyle='-', alpha=0.8)
 
         # Plot defects
         kwargs = dict(alpha=0.8, lw=2)
@@ -469,13 +469,15 @@ class Metaphase(object):
             # ax1.yaxis.set_ticklabels([])
             ax1.xaxis.set_ticks_position('none')
             ax1.yaxis.set_ticks_position('none')
-            ax1.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
+            ax1.grid(b=True, which='major', color='#555555',
+                     linestyle='-', alpha=0.6)
 
             # ax2.xaxis.set_ticklabels([])
             # ax2.yaxis.set_ticklabels([])
             ax2.xaxis.set_ticks_position('none')
             ax2.yaxis.set_ticks_position('none')
-            ax2.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
+            ax2.grid(b=True, which='major', color='#555555',
+                     linestyle='-', alpha=0.6)
 
             for s in ax1.spines.values():
                 s.set_linewidth(0)
@@ -495,20 +497,20 @@ class Metaphase(object):
         import matplotlib.pyplot as plt
         import matplotlib
 
-        duration = self.KD.duration
-        dt = self.KD.dt
+        duration = self.model.duration
+        dt = self.model.dt
         times = np.arange(0, duration, dt) / 60
-        kts = self.KD.chromosomes
-        spbA = self.KD.spbL.traj
-        spbB = self.KD.spbR.traj
+        kts = self.spindle.chromosomes
+        spbA = self.spindle.spbL.traj.x
+        spbB = self.spindle.spbR.traj.x
 
         fig, ax = plt.subplots(figsize=(14, 12))
 
         # Plot kymo
         colors = ['red', 'blue', 'green']
         for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax.plot(times, kt.cen_A.traj, color=color, alpha=1, lw=8)
-            ax.plot(times, kt.cen_B.traj, color=color, alpha=1, lw=8)
+            ax.plot(times, kt.cen_A.traj.x, color=color, alpha=1, lw=8)
+            ax.plot(times, kt.cen_B.traj.x, color=color, alpha=1, lw=8)
 
         ax.plot(times, spbA, color='black', lw=8)
         ax.plot(times, spbB, color='black', lw=8)
@@ -529,7 +531,8 @@ class Metaphase(object):
             i.set_linewidth(8)
             i.set_color('black')
 
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.grid(b=True, which='major', color='#555555',
+                linestyle='-', alpha=0.8)
         ax.set_axisbelow(True)
 
         plt.tight_layout()
@@ -543,14 +546,15 @@ class Metaphase(object):
 
         att = []
 
-        for ch in self.KD.chromosomes:
+        for ch in self.spindle.chromosomes:
             ch.calc_correct_history()
             ch.calc_erroneous_history()
 
             # Return attachment history for all timepoints
             c_hist = ch.correct_history
             e_hist = ch.erroneous_history
-            state = [self.get_attachment(np.concatenate((c, e))) for c, e in zip(c_hist, e_hist)]
+            state = [self.get_attachment(np.concatenate((c, e)))
+                     for c, e in zip(c_hist, e_hist)]
 
             att.append(state)
 
@@ -612,8 +616,10 @@ class Metaphase(object):
     def __del__(self):
         """
         """
-        if hasattr(self, 'KD'):
-            del self.KD
+        if hasattr(self, 'spindle'):
+            del self.spindle
+        if hasattr(self, 'model'):
+            del self.model
         if hasattr(self, 'analysis'):
             del self.analysis
         if hasattr(self, 'measuretree'):
