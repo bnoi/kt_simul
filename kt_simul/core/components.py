@@ -74,15 +74,18 @@ class Structure:
 
     def update_geometry(self):
 
-        for c in coords:
-            self.link_df['d'+c] = (self.point_df[c].loc[self.trgt_idx].values -
-                                   self.point_df[c].loc[self.srce_idx].values)
+        self.link_df[dcoords] = (
+            self.point_df[coords].loc[self.trgt_idx].values -
+            self.point_df[coords].loc[self.srce_idx].values)
 
         self.link_df['length'] = (self.link_df[dcoords]**2).sum(axis=1)**0.5
         self.link_df[ucoords] = (self.link_df[dcoords] /
                                  _to_3d(self.link_df['length']))
         for link in self.links.values():
             link.update_outer()
+
+    def register_history(self, step):
+        self.point_hist[step] = self.point_df
 
 
 class Point:
