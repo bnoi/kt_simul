@@ -3,15 +3,12 @@ import numpy as np
 import pandas as pd
 import logging
 
+from ..core import coords, dcoords, ucoords, speed_coords
+
 __all__ = ["Spb", "Chromosome",
            "Centromere", "PlugSite", "Spindle"]
 
 log = logging.getLogger(__name__)
-
-coords = ['x', 'y', 'z']
-speed_coords = ['v'+c for c in coords]
-dcoords = ['d'+c for c in coords]
-ucoords = ['u'+c for c in coords]
 
 
 point_cols = coords + speed_coords
@@ -114,7 +111,7 @@ class Point:
 
     @property
     def traj(self):
-        self.spindle.point_hist.xs(self.idx, axis='major').T[coords]
+        return self.structure.point_hist.xs(self.idx, axis='major').T[coords]
 
     def dist(self, other):
         return np.linalg.norm(self.pos - other.pos)
@@ -193,6 +190,7 @@ class Spindle(Structure):
             self.chromosomes.append(ch)
 
         self.update_geometry()
+        self.point_hist = pd.Panel({0: self.point_df})
 
     def set_pos(self, position):
         log.DEBUG('Deprecated, directly set the `pos` attribute instead')
@@ -399,10 +397,10 @@ class Centromere(Point):
         """
         Calculate time of arrivals
         """
-        if np.linalg.norm(self.spindle.spbR.traj[-1] - self.traj[-1]) < tol:
+        if self.spindle.spbR.dist(self) < tol:
             dist_to_pole = np.linalg.norm(self.spindle.spbR.traj -
                                           self.traj, axis=1)
-        elif np.linalg.norm(self.spindle.spbL.traj[-1] - self.traj[-1]) < tol:
+        elif self.spindle.spbL.dist(self) < tol:
             dist_to_pole = np.linalg.norm(self.spindle.spbL.traj -
                                           self.traj, axis=1)
         else:
@@ -420,10 +418,11 @@ class Centromere(Point):
 class PlugSite(Point):
 
     def __init__(self, centromere, site_id):
-        init_pos = centromere.pos
         self.spindle = centromere.spindle
         self.centromere = centromere
         idx = self.centromere.idx + site_id + 1
+        d0 = self.spindle.params['d0']
+        init_pos = centromere.pos + self.spindle.prng.normal(0, 0.1*d0, 3)
 
         Point.__init__(self, idx, self.spindle)
         self.spindle.add_point(self, pos0=init_pos)
@@ -457,16 +456,16 @@ class PlugSite(Point):
 
     @property
     def plug_state(self):
-        return self.spindle.point_df.loc[self.idx, 'plug_state']
+        return self.structure.point_df.loc[self.idx, 'plug_state']
 
     @plug_state.setter
     def plug_state(self, state):
         self.plugged = 0 if state == 0 else 1
-        self.spindle.point_df.loc[self.idx, 'plug_state'] = state
+        self.structure.point_df.loc[self.idx, 'plug_state'] = state
 
     @property
     def state_hist(self):
-        return self.spindle.point_hist.xs(
+        return self.structure.point_hist.xs(
             self.idx, axis='major').T['plug_state']
 
     def calc_ldep(self):

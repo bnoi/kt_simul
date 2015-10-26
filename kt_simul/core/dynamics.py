@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from ..core import coords, dcoords, ucoords, speed_coords
 
 
 class Model:
@@ -30,8 +31,8 @@ def dashpot(model, link, mu):
     block = mu * link.outer
     model.Amat[link.idxs_ii] += block
     model.Amat[link.idxs_ij] -= block
-    model.Amat[link.idxs_jj] -= block
-    model.Amat[link.idxs_ji] += block
+    model.Amat[link.idxs_jj] += block
+    model.Amat[link.idxs_ji] -= block
 
 
 def spring(model, link, kappa, d_eq=0):
@@ -84,13 +85,15 @@ class SpindleModel(Model):
         viscous(self, self.spindle.spbL, self.params['mus'])
         viscous(self, self.spindle.spbR, self.params['mus'])
 
+        # Here friction with nucleoplasm is shared btw all objects
+
         for ch in self.spindle.chromosomes:
             viscous(self, ch.cen_A, self.params['muco'])
             viscous(self, ch.cen_A, self.params['muco'])
             for ps in ch.cen_A.plugsites:
-                viscous(self, ps, self.params['muco']/100)
+                viscous(self, ps, self.params['muco'])
             for ps in ch.cen_B.plugsites:
-                viscous(self, ps, self.params['muco']/100)
+                viscous(self, ps, self.params['muco'])
         self.A0mat = self.Amat.copy()
 
     def update_AB(self):
@@ -113,7 +116,7 @@ class SpindleModel(Model):
         kt = self.spindle.links[(ps.centromere.idx, ps.idx)]
         dampedspring(self, kt,
                      self.params['muk'],
-                     self.params['kappa_k'], 0)
+                     self.params['kappa_k'], 0.1)
         if ps.plug_state == 0:
             return
         if ps.plug_state == -1:
@@ -128,4 +131,4 @@ class SpindleModel(Model):
                 plugsite.plug_unplug()
         self.update_AB()
         self.solve()
-        self.spindle.register_history()
+        self.spindle.register_history(step)
