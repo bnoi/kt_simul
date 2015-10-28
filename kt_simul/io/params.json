@@ -60,7 +60,7 @@
         "name": "k_a",
         "step": "0.001",
         "unit": "Hz",
-        "value": "0.0001"
+        "value": "0.06"
     },
     {
         "description": "MT free detachement frequency",
@@ -250,7 +250,7 @@
         "name": "muco",
         "step": "1",
         "unit": "pN.s/µm",
-        "value": "0.1"
+        "value": "100"
     },
     {
         "description": "Length dependence for attachment (gamma)",

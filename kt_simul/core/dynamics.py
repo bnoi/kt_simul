@@ -23,16 +23,16 @@ class Model:
 
 def viscous(model, point, mu):
     ''' Viscous drag with coeff mu on point '''
-    model.Amat[point.idxs, point.idxs] -= np.eye(3) * mu
+    model.Amat[point.idxs, point.idxs] = -np.eye(3) * mu
 
 
 def dashpot(model, link, mu):
 
     block = mu * link.outer
-    model.Amat[link.idxs_ii] += block
-    model.Amat[link.idxs_ij] -= block
-    model.Amat[link.idxs_jj] += block
-    model.Amat[link.idxs_ji] -= block
+    model.Amat[link.idxs_ii] -= block
+    model.Amat[link.idxs_ij] += block
+    model.Amat[link.idxs_jj] -= block
+    model.Amat[link.idxs_ji] += block
 
 
 def spring(model, link, kappa, d_eq=0):
@@ -41,7 +41,7 @@ def spring(model, link, kappa, d_eq=0):
     idxs_i = slice(idx_i*3, idx_i*3 + 3)
     idxs_j = slice(idx_j*3, idx_j*3 + 3)
 
-    F = -kappa * (link.length - d_eq) * link.unit
+    F = kappa * (link.length - d_eq) * link.unit
     model.Bvect[link.idxs_i] += F
     model.Bvect[link.idxs_j] -= F
 
@@ -61,7 +61,7 @@ def contraction(model, link, F):
 def linear_fv(model, link, F_stall, v_max, gamma=-1):
 
     dashpot(model, link, F_stall / v_max)
-    contraction(model, link, gamma * F_stall)
+    contraction(model, link, -gamma * F_stall)
 
 
 class SpindleModel(Model):
@@ -89,7 +89,7 @@ class SpindleModel(Model):
 
         for ch in self.spindle.chromosomes:
             viscous(self, ch.cen_A, self.params['muco'])
-            viscous(self, ch.cen_A, self.params['muco'])
+            viscous(self, ch.cen_B, self.params['muco'])
             for ps in ch.cen_A.plugsites:
                 viscous(self, ps, self.params['muco'])
             for ps in ch.cen_B.plugsites:

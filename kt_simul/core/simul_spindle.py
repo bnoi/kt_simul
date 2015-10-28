@@ -113,6 +113,7 @@ class Metaphase(object):
         self.spindle = Spindle(name, params,
                                initial_plug=initial_plug,
                                prng=self.prng)
+        self.spindle.update_geometry()
         self.model = SpindleModel(self.spindle)
 
         dt = self.paramtree.absolute_dic['dt']

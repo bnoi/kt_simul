@@ -5,8 +5,6 @@ import logging
 
 from ..core import coords, dcoords, ucoords, speed_coords
 
-__all__ = ["Spb", "Chromosome",
-           "Centromere", "PlugSite", "Spindle"]
 
 log = logging.getLogger(__name__)
 
