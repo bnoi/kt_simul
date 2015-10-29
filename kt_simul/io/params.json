@@ -6,7 +6,7 @@
         "name": "span",
         "step": "10.",
         "unit": "s",
-        "value": "100"
+        "value": "1000"
     },
     {
         "description": "Time step",
