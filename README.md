@@ -11,7 +11,7 @@ If you're interested in this work, please contact :
 
 - Sylvie Tournier (sylvie.tournier-gachet@univ-tlse3.fr) for
   all aspects related to the biology and for academical collaboration purposes.
-- Guillaume Gay (gllm.gay@gmail.com) for all aspects related to the code
+- Guillaume Gay (guillaume@damcb.com) for all aspects related to the code
 
 The underlying model is fully described in:
 

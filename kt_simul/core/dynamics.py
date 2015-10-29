@@ -116,7 +116,7 @@ class SpindleModel(Model):
         kt = self.spindle.links[(ps.centromere.idx, ps.idx)]
         dampedspring(self, kt,
                      self.params['muk'],
-                     self.params['kappa_k'], 0.1)
+                     self.params['kappa_k'], 0.01)
         if ps.plug_state == 0:
             return
         if ps.plug_state == -1:
