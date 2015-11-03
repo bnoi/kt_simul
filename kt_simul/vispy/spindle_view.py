@@ -2,12 +2,13 @@
 Simple demonstration of Box visual.
 """
 
-from vispy import app, gloo, visuals
-from vispy.geometry import create_box
+from vispy import app, gloo, visuals, scene
+from vispy.color import Color
 from vispy.visuals.transforms import MatrixTransform
 
 
 def setup(spindle):
+
     spindle.point_df['radius'] = 0.1
     spindle.point_df['color'] = '#a1a1a1'
 
@@ -26,59 +27,54 @@ def setup(spindle):
         spindle.point_df.loc[ch.cen_B.idx, 'radius'] = 0.2
         spindle.point_df.loc[ch.cen_B.idx, 'color'] = color
 
+
 class VispyOrganite():
 
     def __init__(self, point, spindle):
         self.point = point
         radius, color = spindle.point_df.loc[point.idx, ['radius', 'color']]
-        self.sphere = visuals.SphereVisual(radius=radius, method='ico',
-                                           subdivisions=4, color=color)
+        self.sphere = scene.visuals.Sphere(radius=radius, method='ico',
+                                           subdivisions=4, color=color, parent=view.scene)
 
         self.transform = MatrixTransform()
         self.sphere.transform = self.transform
+        self.traj = point.traj * 0.1
 
 
-class Canvas(app.Canvas):
+class VispyLink():
 
-    def __init__(self, spindle):
-        self.sphere = visuals.SphereVisual(radius=1, method='ico',
-                                           subdivisions=4, color=color)
-        app.Canvas.__init__(self, keys='interactive', size=(800, 800))
-        self.spindle = spindle
-        self.objects = []
-        for point in spindle.points.values():
-            self.objects.append(VispyOrganite(point, spindle))
+    def __init__(self, link, spindle):
+        visuals.LineVisual()
 
-        self.show()
-        self.t = 0
+def make_anim(spindle):
 
-        self.timer = app.Timer(connect=self.move)
-        self.timer.start(0.016)
+    setup(spindle)
 
-    def move(self, event):
-        if self.t >= spindle.point_hist.shape[0]:
-            self.t = 0
-        for obj in self.objects:
-            x, y, z = self.spindle.point_hist.loc[self.t, obj.point.idx, ['x', 'y', 'z']]*10 + [400, 400, 0]
+    canvas = scene.SceneCanvas(keys='interactive', size=(800, 600), show=True)
+
+    # Set up a viewbox to display the cube with interactive arcball
+    view = canvas.central_widget.add_view()
+    view.bgcolor = '#efefef'
+    view.camera = 'turntable'
+    view.padding = 100
+
+    color = Color("#3f51b5")
+    objects = []
+    for point in spindle.points.values():
+        objects.append(VispyOrganite(point, spindle))
+    t = 0
+
+    def move(app):
+        global t
+        if t >= spindle.point_hist.shape[0]:
+            t = 0
+        for obj in objects:
             obj.sphere.transform.reset()
-            obj.sphere.transform.scale((50, 50, 0.001))
-            obj.sphere.transform.translate((x, y))#, z))
-        self.t += 1
-        self.update()
+            x, y, z = obj.traj.loc[t]
+            obj.sphere.transform.translate([x, y, z])#, z))
+        img = canvas.render()
+        vp_io.write_png('movie/spindle_{0:03d}.png'.format(t), img)
+        t += 1
 
-    def on_resize(self, event):
-        # Set canvas viewport and reconfigure visual transforms to match.
-        vp = (0, 0, self.physical_size[0], self.physical_size[1])
-        self.context.set_viewport(*vp)
-        for obj in self.objects:
-            obj.sphere.transforms.configure(canvas=self, viewport=vp)
-
-    def on_draw(self, ev):
-        gloo.clear(color='white', depth=True)
-        for obj in self.objects:
-            obj.sphere.draw()
-        #self.sphere.draw()
-
-if __name__ == 'main':
-    win = Canvas(spindle)
-    app.run()
+    timer = app.Timer(connect=move)
+    timer.start(0.1)

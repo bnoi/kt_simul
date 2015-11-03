@@ -100,7 +100,7 @@ class SpindleModel(Model):
         self.Amat = self.A0mat
         self.Bmat = np.zeros(self.n_points)
         mz = self.spindle.links[(self.spindle.spbL.idx, self.spindle.spbR.idx)]
-        linear_fv(self, mz, self.params['Fmz'], self.params['Vmz'], gamma=1)
+        linear_fv(self, mz, self.params['Fmz'], self.params['Vmz']/5., gamma=1)
         for ch in self.spindle.chromosomes:
             chromatin = self.spindle.links[(ch.cen_A.idx, ch.cen_B.idx)]
             dampedspring(self, chromatin,

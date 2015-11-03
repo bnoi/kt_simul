@@ -159,7 +159,7 @@
         "name": "kappa_c",
         "step": "0",
         "unit": "pN/µm",
-        "value": "40.0"
+        "value": "10.0"
     },
     {
         "description": "Chromatid spring constant",
@@ -168,7 +168,7 @@
         "name": "kappa_k",
         "step": "0",
         "unit": "pN/µm",
-        "value": "50.0"
+        "value": "60.0"
     },
     {
         "description": "Chromatid drag coefficient",
@@ -177,7 +177,7 @@
         "name": "muc",
         "step": "0",
         "unit": "pN.s/µm",
-        "value": "400.0"
+        "value": "100.0"
     },
     {
         "description": "Kt structural friction coef.",
@@ -186,7 +186,7 @@
         "name": "muk",
         "step": "0",
         "unit": "pN.s/µm",
-        "value": "500.0"
+        "value": "100.0"
     },
     {
         "description": "Kinetochore - kinetochore rest length",
