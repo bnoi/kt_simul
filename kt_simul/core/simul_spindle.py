@@ -16,6 +16,9 @@ import logging
 import numpy as np
 import collections
 
+import matplotlib
+import matplotlib.pyplot as plt
+
 import tqdm
 
 from ..core.components import Spindle
@@ -385,154 +388,39 @@ class Metaphase(object):
                 return True
         return True
 
-    def show(self, ylim=[-3, 3]):
+    def show(self):
         """
         Quickly show kymograph of current simulation.
         Matplotlib is required.
         """
 
-        import matplotlib.pyplot as plt
-        import matplotlib
-
-        duration = self.model.duration
-        dt = self.model.dt
-        times = np.arange(0, duration, dt)
-        kts = self.spindle.chromosomes
-        spbA = self.spindle.spbL.traj.x
-        spbB = self.spindle.spbR.traj.x
-        anaphase = self.analysis['real_t_A']
-
-        total_subplots = len(kts) * 2 + 1
-        height_ratios = ([1 for _ in range(len(kts))] +
-                         [len(kts) * 2] +
-                         [1 for _ in range(len(kts))])
-        gs = matplotlib.gridspec.GridSpec(total_subplots, 1,
-                                          height_ratios=height_ratios)
-
-        h = len(kts) * 2 + 4
-        fig = plt.figure(figsize=(12, h))
-
-        # Plot kymo
-        ax = plt.subplot(gs[len(kts)])
-
-        ax.plot(times, spbA, color='black', lw=2)
-        ax.plot(times, spbB, color='black', lw=2)
-
-        ax.axvline(anaphase, color='black')
+        fig = plt.figure(figsize=(20, 15))
 
         cm = matplotlib.cm.get_cmap('Set1')
-        colors = [cm(1 * i / len(kts)) for i in range(len(kts))]
-        for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax.plot(times, kt.cen_A.traj.x,
-                    color=color, alpha=0.8,
-                    lw=2, label='ch n°{}'.format(i))
-            ax.plot(times, kt.cen_B.traj.x, color=color, alpha=0.8, lw=2)
+        colors = [cm(1 * i / len(self.spindle.chromosomes)) for i in range(len(self.spindle.chromosomes))]
 
-        ax.legend()
-        if ylim:
-            ax.set_ylim(ylim)
+        max_pos = max(self.spindle.spbL.traj.values.flatten().max(),
+                      self.spindle.spbR.traj.values.flatten().max())
 
-        for i in ax.spines.values():
-            i.set_linewidth(0)
+        for i, coord in enumerate(['x', 'y', 'z']):
 
-        # ax.xaxis.set_ticklabels([])
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
-        ax.grid(b=True, which='major', color='#555555',
-                linestyle='-', alpha=0.8)
+            ax = fig.add_subplot(2, 2, i+1)
+            ax.plot(self.time, self.spindle.spbL.traj[coord], color="black", lw=2)
+            ax.plot(self.time, self.spindle.spbR.traj[coord], color="black", lw=2)
 
-        # Plot defects
-        kwargs = dict(alpha=0.8, lw=2)
-        for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax1 = plt.subplot(gs[i], sharex=ax)
-            ax2 = plt.subplot(gs[i + len(kts) + 1], sharex=ax)
+            ax.set_xlabel("Time (s)", fontsize=18)
+            ax.set_ylabel("{} (um)".format(coord), fontsize=18)
 
-            correctA = kt.correct_history.T[0]
-            correctB = kt.correct_history.T[1]
-            errA = kt.erroneous_history.T[0]
-            errB = kt.erroneous_history.T[1]
+            for ch, color in zip(self.spindle.chromosomes, colors):
+                ax.plot(self.time, ch.cen_A.traj[coord], color=color, lw=2)
+                ax.plot(self.time, ch.cen_B.traj[coord], color=color, lw=2)
 
-            ax1.plot(times, correctA, color=color, **kwargs)
-            ax1.plot(times, errA, color=color, ls='--', **kwargs)
+            ax.set_ylim(-max_pos, max_pos)
+            ax.set_xlim(0, self.time[-1])
 
-            ax2.plot(times, correctB, color=color, **kwargs)
-            ax2.plot(times, errB, color=color, ls='--', **kwargs)
+            ax.axvline(self.time_anaphase, lw=1, alpha=0.8, color="black")
 
-            ax1.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
-            ax2.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
-
-            # ax1.xaxis.set_ticklabels([])
-            # ax1.yaxis.set_ticklabels([])
-            ax1.xaxis.set_ticks_position('none')
-            ax1.yaxis.set_ticks_position('none')
-            ax1.grid(b=True, which='major', color='#555555',
-                     linestyle='-', alpha=0.6)
-
-            # ax2.xaxis.set_ticklabels([])
-            # ax2.yaxis.set_ticklabels([])
-            ax2.xaxis.set_ticks_position('none')
-            ax2.yaxis.set_ticks_position('none')
-            ax2.grid(b=True, which='major', color='#555555',
-                     linestyle='-', alpha=0.6)
-
-            for s in ax1.spines.values():
-                s.set_linewidth(0)
-
-            for s in ax2.spines.values():
-                s.set_linewidth(0)
-
-        plt.tight_layout()
-        fig.subplots_adjust(hspace=0)
-
-        return fig
-
-    def kymo_figure(self):
-        """
-        """
-
-        import matplotlib.pyplot as plt
-        import matplotlib
-
-        duration = self.model.duration
-        dt = self.model.dt
-        times = np.arange(0, duration, dt) / 60
-        kts = self.spindle.chromosomes
-        spbA = self.spindle.spbL.traj.x
-        spbB = self.spindle.spbR.traj.x
-
-        fig, ax = plt.subplots(figsize=(14, 12))
-
-        # Plot kymo
-        colors = ['red', 'blue', 'green']
-        for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax.plot(times, kt.cen_A.traj.x, color=color, alpha=1, lw=8)
-            ax.plot(times, kt.cen_B.traj.x, color=color, alpha=1, lw=8)
-
-        ax.plot(times, spbA, color='black', lw=8)
-        ax.plot(times, spbB, color='black', lw=8)
-
-        ax.set_yticks(np.arange(-4, 4, 2))
-        ax.set_xticks(np.arange(0, 20, 5))
-        ax.set_ylim(-4, 4)
-        ax.set_xlim(times[0], times[-1])
-
-        nullform = matplotlib.ticker.FuncFormatter(lambda x, y: "")
-        ax.xaxis.set_major_formatter(nullform)
-        ax.yaxis.set_major_formatter(nullform)
-
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
-
-        for i in ax.spines.values():
-            i.set_linewidth(8)
-            i.set_color('black')
-
-        ax.grid(b=True, which='major', color='#555555',
-                linestyle='-', alpha=0.8)
-        ax.set_axisbelow(True)
-
-        plt.tight_layout()
-        fig.subplots_adjust(hspace=0)
+        fig.tight_layout()
 
         return fig
 
