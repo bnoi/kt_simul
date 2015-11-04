@@ -16,6 +16,8 @@ import logging
 import numpy as np
 import collections
 
+import tqdm
+
 from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
@@ -178,7 +180,7 @@ class Metaphase(object):
     def index_anaphase_before(self, t_shift):
         return np.argwhere(self.time == (self.time_anaphase - t_shift))[0][0]
 
-    def simul(self, ablat=None, ablat_pos=0.):
+    def simul(self, ablat=None, ablat_pos=0., progress=False):
         """
         The simulation main loop.
 
@@ -201,18 +203,12 @@ class Metaphase(object):
 
         if self.verbose:
             log.info('Running simulation')
-        bef = 0
         log_anaphase_onset = False
 
         self.analysis['real_t_A'] = self.model.params['t_A']
 
-        for time_point in range(1, self.num_steps):
-
-            progress = int((time_point * 100.0) / self.num_steps)
-
-            if self.verbose and progress != bef:
-                print_progress(int(progress))
-                bef = progress
+        for time_point in tqdm.tqdm(range(1, self.num_steps), total=self.num_steps,
+                                    disable=not progress):
 
             # Ablation test
             if ablat == time_point:
@@ -231,9 +227,8 @@ class Metaphase(object):
             self.model.one_step(time_point)
 
         if self.verbose:
-            print_progress(-1)
-        if self.verbose:
             log.info('Simulation done')
+
         self.model.params['kappa_c'] = kappa_c
         delay_str = "delay = %2d seconds" % self.delay
         self.report.append(delay_str)

@@ -53,3 +53,10 @@ handler.setFormatter(formatter)
 log.addHandler(handler)
 log.setLevel(logging.DEBUG)
 log.propagate = False
+
+log = logging.getLogger(__name__)
+
+try:
+    import tqdm
+except:
+    log.warning("For progress bar you need to pip install tqdm")
