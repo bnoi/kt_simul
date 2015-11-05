@@ -24,7 +24,6 @@ import tqdm
 from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
-from ..io import ParamTree
 from ..utils.transformations import transformations_matrix
 
 log = logging.getLogger(__name__)
@@ -221,8 +220,8 @@ class Metaphase(object):
             store["analysis"] = pd.Series(self.analysis)
 
             if save_params:
-                store['params'] = self.params
-                store['measures'] = self.measures
+                store['params'] = pd.Series(self.params)
+                store['measures'] = pd.Series(self.measures)
 
         log.info("Simu saved to {}".format(fname))
 

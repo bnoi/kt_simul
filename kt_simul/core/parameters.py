@@ -11,8 +11,6 @@ from __future__ import print_function
 import logging
 import os
 
-from ..io import ParamTree
-
 import pandas as pd
 
 # Those strings should be respected in the xml file
