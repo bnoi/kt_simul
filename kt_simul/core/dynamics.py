@@ -129,6 +129,7 @@ class SpindleModel(Model):
         if not self.anaphase:
             for plugsite in self.spindle.all_plugsites():
                 plugsite.plug_unplug()
+
         self.update_AB()
         self.solve()
         self.spindle.register_history(step)
