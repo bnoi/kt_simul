@@ -81,6 +81,7 @@ class Structure:
             link.outer = np.outer(link_values, link_values)
 
         self.link_df.sortlevel(inplace=True)
+        self.point_df.sortlevel(inplace=True)
 
     def register_history(self, step):
         self.point_hist[step] = self.point_df
@@ -96,7 +97,7 @@ class Point:
 
     @property
     def pos(self):
-        return self.structure.point_df.loc[self.idx, coords]
+        return self.structure.point_df[coords].values[self.idx]
 
     @pos.setter
     def pos(self, position):
