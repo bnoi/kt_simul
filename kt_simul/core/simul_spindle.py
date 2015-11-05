@@ -96,8 +96,15 @@ class Metaphase(object):
         else:
             self.measures = measures
 
-        parameters.reduce_params(self.params, self.measures,
-                                 force_parameters=force_parameters)
+        self.original_params = self.params.copy()
+        self.original_measures = self.measures.copy()
+
+        self.measures = self.measures['value'].to_dict()
+        self.params = self.params['value'].to_dict()
+
+        # Parameters reduction
+        parameters.reduce_params(self.params, self.measures, force_parameters=force_parameters)
+        parameters.adimentionalize(self.params, self.original_params)
 
         log.info('Parameters loaded')
 
@@ -222,6 +229,8 @@ class Metaphase(object):
             if save_params:
                 store['params'] = pd.Series(self.params)
                 store['measures'] = pd.Series(self.measures)
+                store['original_params'] = self.original_params
+                store['original_measures'] = self.original_measures
 
         log.info("Simu saved to {}".format(fname))
 
@@ -510,8 +519,8 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
             raise Exception("Can't load simulation without params and measures")
 
         if no_params:
-            params = store['params']
-            measures = store['measures']
+            params = store['original_params']
+            measures = store['original_measures']
 
         point_hist = store["point_hist"]
         link_df = store["link_df"]

@@ -29,18 +29,18 @@ MEASUREFILE = os.path.join(ROOT_DIR, 'io', 'measures.json')
 log = logging.getLogger(__name__)
 
 
-def adimentionalize(data):
+def adimentionalize(data, metadata):
     """This function scales everything taking dt as unit time, Vk as
     unit speed, and Fk as unit force. It relies on a correct
     definition of the units of the elements of the param tree,
     thus a correct spelling in the json file, so please beware.
     """
-    Vk = data.loc["Vk", 'value']
-    Fk = data.loc["Fk", 'value']
-    dt = data.loc["dt", 'value']
+    Vk = data["Vk"]
+    Fk = data["Fk"]
+    dt = data["dt"]
 
-    for name, values in data.iterrows():
-        value = values['value']
+    for name, values in metadata.iterrows():
+        value = data[name]
 
         if values['unit'] == SPRING_UNIT:
             value /= Fk
@@ -53,21 +53,19 @@ def adimentionalize(data):
         elif values['unit'] == FORCE_UNIT:
             value /= Fk
 
-        data.loc[name, 'value'] = value
-
-    return data
+        data[name] = value
 
 
 def get_default_params():
     """
     """
-    return adimentionalize(pd.read_json(PARAMFILE).set_index('name'))['value'].to_dict()
+    return pd.read_json(PARAMFILE).set_index('name')
 
 
 def get_default_measures():
     """
     """
-    return pd.read_json(MEASUREFILE).set_index('name')['value'].to_dict()
+    return pd.read_json(MEASUREFILE).set_index('name')
 
 
 def reduce_params(params, measures, force_parameters=[]):
