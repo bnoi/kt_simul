@@ -14,10 +14,10 @@ from __future__ import print_function
 
 import logging
 import numpy as np
-import collections
 
 import matplotlib
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import tqdm
 
@@ -25,8 +25,6 @@ from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
 from ..utils.progress import print_progress
-from ..utils.format import pretty_dict
-
 
 log = logging.getLogger(__name__)
 
@@ -82,7 +80,7 @@ class Metaphase(object):
 
         # Enable or disable log console
         self.verbose = verbose
-        log = logging.getLogger(__name__)
+
         if not self.verbose:
             log.disabled = True
         else:
@@ -133,11 +131,6 @@ class Metaphase(object):
         self.analysis = {}
 
         log.info('Simulation initialized')
-        log.disabled = False
-
-        self.chrom_colors = ["red",
-                             "green",
-                             "blue"]
 
     @classmethod
     def get_random_state(cls):
@@ -149,24 +142,6 @@ class Metaphase(object):
         else:
             prng.set_state(cls.RANDOM_STATE)
         return prng
-
-    def __str__(self):
-        lines = []
-        lines.append('Metaphase class')
-        try:
-            lines.append('Parameters:')
-            for line in str(self.paramtree.relative_dic).split(','):
-                lines.append(line)
-        except AttributeError:
-            pass
-        try:
-            lines.append('Measures:')
-            for line in str(self.measuretree.absolute_dic).split(','):
-                lines.append(line)
-        except AttributeError:
-            pass
-
-        return '\n'.join(lines)
 
     @property
     def time(self):
@@ -204,37 +179,29 @@ class Metaphase(object):
 
         kappa_c = self.model.params['kappa_c']
 
-        if self.verbose:
-            log.info('Running simulation')
-        log_anaphase_onset = False
+        log.info('Running simulation')
 
         self.analysis['real_t_A'] = self.model.params['t_A']
 
-        for time_point in tqdm.tqdm(range(1, self.num_steps), total=self.num_steps,
+        for time_point in tqdm.tqdm(range(1, self.num_steps),
+                                    total=self.num_steps,
                                     disable=not progress):
 
             # Ablation test
             if ablat == time_point:
-                if self.verbose:
-                    log.info("Performing ablation")
+                log.info("Performing ablation")
                 self._ablation(time_point, pos=ablat_pos)
 
             # Anaphase transition ?
             if self._anaphase_test(time_point):
-                if not log_anaphase_onset:
-                    print_progress(-1)
-                    if self.verbose:
-                        log.info("Anaphase onset at %i / %i" %
-                                 (time_point, self.num_steps))
-                    log_anaphase_onset = True
+                log.info("Anaphase onset at {} / {}".format(time_point, self.num_steps))
+
             self.model.one_step(time_point)
 
-        if self.verbose:
-            log.info('Simulation done')
+        log.info('Simulation done')
+        self.model.simulation_done = True
 
         self.model.params['kappa_c'] = kappa_c
-        delay_str = "delay = %2d seconds" % self.delay
-        self.report.append(delay_str)
 
         for ch in self.spindle.chromosomes:
             ch.calc_correct_history()
@@ -242,46 +209,27 @@ class Metaphase(object):
             ch.cen_A.calc_toa()
             ch.cen_B.calc_toa()
 
-    def get_report(self, time=0):
-        """Print simulation state about a specific time point
+    def save(self, fname, save_tree=True):
         """
-        params = self.paramtree.relative_dic
+        """
 
-        report = collections.OrderedDict()
+        if not self.model.simulation_done:
+            log.info("test")
+            raise Exception("Please run the simulation before saving.")
 
-        report["Total time (span)"] = params["span"]
-        report["Time precision (dt)"] = params["dt"]
-        report["Chromosomes (N)"] = params["N"]
-        report["Kinetochores (Mk)"] = params["Mk"]
-        report["separate"] = ""
+        save_params = True
 
-        report["Current time"] = "%i\n" % ((time + 1) * float(params["dt"]))
+        with pd.HDFStore(fname) as store:
+            store["points_hist"] = self.spindle.point_hist
+            store["link_df"] = self.spindle.link_df
 
-        report["separate"] = ""
-        report["spbR pos"] = np.round(self.spindle.spbR.traj[time], 3)
-        report["spbL pos"] = np.round(self.spindle.spbL.traj[time], 3)
-        report["separate"] = ""
+            if save_params:
+                params = self.paramtree.params
+                measures = self.measuretree.params
+                store['params'] = params
+                store['measures'] = measures
 
-        for ch in self.spindle.chromosomes:
-            chdict = collections.OrderedDict()
-            chdict["correct"] = ch.correct_history[time]
-            chdict["erroneous"] = ch.erroneous_history[time]
-            for cent in [ch.cen_A, ch.cen_B]:
-                cen_dict = collections.OrderedDict()
-                cen_dict["position"] = np.round(cent.traj[time], 3)
-                for site in cent.plugsites:
-                    site_dict = collections.OrderedDict()
-                    site_dict['position'] = np.round(site.traj[time], 3)
-                    site_dict['Plug state'] = site.state_hist[time]
-
-                    cen_dict["PlugSite %i" % site.site_id] = site_dict
-
-                chdict["Centromere %s" % cent.tag] = cen_dict
-
-            report["Chromosome %i" % ch.ch_id] = chdict
-            report["separate"] = ""
-
-        return pretty_dict(report)
+        log.info("Simu saved to {}".format(fname))
 
     def _anaphase_test(self, time_point):
         """

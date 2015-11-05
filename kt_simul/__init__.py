@@ -21,6 +21,7 @@ import sys
 
 from .utils.color_system import color
 
+
 def in_ipython():
     try:
         __IPYTHON__
@@ -32,13 +33,13 @@ def in_ipython():
 if in_ipython():
     logformat = '%(asctime)s' + ':'
     logformat += '%(levelname)s' + ':'
-    logformat += '%(name)s' + ':'
+    # logformat += '%(name)s' + ':'
     # logformat += '%(funcName)s' + ': '
     logformat += ' %(message)s'
 else:
     logformat = color('%(asctime)s', 'BLUE') + ':'
     logformat += color('%(levelname)s', 'RED') + ':'
-    logformat += color('%(name)s', 'YELLOW') + ':'
+    # logformat += color('%(name)s', 'YELLOW') + ':'
     # logformat += color('%(funcName)s', 'GREEN') + ': '
     logformat += color(' %(message)s', 'ENDC')
 
