@@ -76,8 +76,10 @@ class Structure:
         self.link_df['length'] = (self.link_df[dcoords]**2).sum(axis=1)**0.5
         self.link_df[ucoords] = (self.link_df[dcoords] /
                                  _to_3d(self.link_df['length']))
-        for link in self.links.values():
-            link.update_outer()
+
+        for idxs, link_values in self.link_df[ucoords].iterrows():
+            link = self.links[idxs]
+            link.outer = np.outer(link_values, link_values)
 
         self.link_df.sortlevel(inplace=True)
 
@@ -156,9 +158,6 @@ class Link:
     def unit(self):
         return self.structure.link_df.loc[self.idx][ucoords]
 
-    def update_outer(self):
-        self.outer = np.outer(self.unit, self.unit)
-
 
 class Spindle(Structure):
 
@@ -174,7 +173,6 @@ class Spindle(Structure):
         self.initial_plug = initial_plug
         L = self.params['L0']
         N = int(self.params['N'])
-        Mk = int(self.params['Mk'])
         self.duration = self.params['span']
         self.dt = self.params['dt']
         self.spbL = Point(idx=0, structure=self)

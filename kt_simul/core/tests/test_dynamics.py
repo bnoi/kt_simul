@@ -2,9 +2,12 @@ from kt_simul.core.components import Structure, Point, Link
 from kt_simul.core.dynamics import Model, dampedspring, viscous
 from kt_simul.core.dynamics import spring, dashpot, linear_fv, contraction
 
+import pandas as pd
+
 from numpy.testing import assert_almost_equal
 # This is an example test, not functional yet, should
 # put some effort in implementing for all forces
+
 
 def test_spring():
 
