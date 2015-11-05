@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import logging
-import functools
 
 from ..core import coords, dcoords, ucoords, speed_coords
 
@@ -96,7 +95,6 @@ class Point:
         self.structure = structure
 
     @property
-    @functools.lru_cache(maxsize=100)
     def pos(self):
         return self.structure.point_df.loc[self.idx, coords]
 
