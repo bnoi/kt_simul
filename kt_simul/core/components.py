@@ -109,7 +109,7 @@ class Point:
 
     @property
     def traj(self):
-        return self.structure.point_hist.xs(self.idx, axis='major').T[coords]
+        return self.structure.point_hist.xs(self.idx, axis='major').T
 
     def dist(self, other):
         return np.linalg.norm(self.pos - other.pos)

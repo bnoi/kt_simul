@@ -25,6 +25,7 @@ from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
 from ..io import ParamTree
+from ..utils.transformations import transformations_matrix
 
 log = logging.getLogger(__name__)
 
@@ -234,6 +235,43 @@ class Metaphase(object):
 
         log.info("Simu saved to {}".format(fname))
 
+    def project(self):
+        """Project all points coordinates on pole-pole axes
+        """
+
+        coords = ['x', 'y', 'z']
+        progress = True
+
+        # Reorder Panel in DataFrame
+        trajs = self.spindle.point_hist.to_frame()
+        trajs = trajs.stack().unstack('minor')
+        trajs = trajs.reorder_levels([1, 0]).sortlevel()
+        trajs.index.names = ['times', 'points']
+
+        for coord in coords:
+            trajs['{}_proj'.format(coord)] = np.nan
+
+        iterator = tqdm.tqdm(enumerate(trajs.groupby(level='times')),
+                             disable=not progress, total=self.spindle.duration)
+
+        for i, (t, points) in iterator:
+
+            p1 = points.loc[t, self.spindle.spbL.idx][coords]
+            p2 = points.loc[t, self.spindle.spbR.idx][coords]
+
+            ref = (p1 + p2) / 2
+            vec = p1 - ref
+
+            A = transformations_matrix(ref, vec)
+
+            projected_points = np.dot(points[coords], A)[:, :]
+
+            for i, coord in enumerate(coords):
+                trajs.loc[t, '{}_proj'.format(coord)] = projected_points[:, i]
+
+        trajs = trajs.stack().unstack('times')
+        self.spindle.point_hist = trajs.to_panel()
+
     def _anaphase_test(self, time_point):
         """
         At anaphase onset, set the cohesin spring constant to 0 and
@@ -345,17 +383,23 @@ class Metaphase(object):
         Matplotlib is required.
         """
 
-        fig = plt.figure(figsize=(20, 15))
+        fig = plt.figure(figsize=(18, 12))
 
         cm = matplotlib.cm.get_cmap('Set1')
         colors = [cm(1 * i / len(self.spindle.chromosomes)) for i in range(len(self.spindle.chromosomes))]
 
-        max_pos = max(self.spindle.spbL.traj.values.flatten().max(),
-                      self.spindle.spbR.traj.values.flatten().max())
+        coords = ['x', 'y', 'z']
+        if 'x_proj' in self.spindle.point_hist.axes[2]:
+            coords.append('x_proj')
 
-        for i, coord in enumerate(['x', 'y', 'z']):
+        max_pos = max(self.spindle.spbL.traj[coords].values.flatten().max(),
+                      self.spindle.spbR.traj[coords].values.flatten().max())
 
-            ax = fig.add_subplot(2, 2, i+1)
+        ax = fig.add_subplot(2, 2, 1)
+        for i, coord in enumerate(coords):
+
+            ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
+
             ax.plot(self.time, self.spindle.spbL.traj[coord], color="black", lw=2)
             ax.plot(self.time, self.spindle.spbR.traj[coord], color="black", lw=2)
 
