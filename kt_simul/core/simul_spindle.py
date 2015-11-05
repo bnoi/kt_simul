@@ -24,7 +24,7 @@ import tqdm
 from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
-from ..utils.progress import print_progress
+from ..io import ParamTree
 
 log = logging.getLogger(__name__)
 
@@ -220,8 +220,11 @@ class Metaphase(object):
         save_params = True
 
         with pd.HDFStore(fname) as store:
-            store["points_hist"] = self.spindle.point_hist
+            store["point_hist"] = self.spindle.point_hist
             store["link_df"] = self.spindle.link_df
+
+            store["general_params"] = pd.Series(dict(initial_plug=self.spindle.initial_plug))
+            store["analysis"] = pd.Series(self.analysis)
 
             if save_params:
                 params = self.paramtree.params
@@ -458,3 +461,40 @@ class Metaphase(object):
             del self.measuretree
         if hasattr(self, 'paramtree'):
             del self.paramtree
+
+
+def load_metaphase(fname, paramtree=None, measuretree=None, verbose=True):
+    """
+    """
+
+    no_params = False
+    if not paramtree or not measuretree:
+        no_params = True
+
+    with pd.HDFStore(fname) as store:
+        if ('params' not in store) or ('measures' not in store) and no_params:
+            raise Exception("Can't load simulation without params and measures")
+
+        if no_params:
+            paramtree = ParamTree(df=store['params'])
+            measuretree = ParamTree(df=store['measures'], adimentionalized=False)
+
+        point_hist = store["point_hist"]
+        link_df = store["link_df"]
+
+        general_params = store["general_params"]
+        analysis = store["analysis"]
+
+    meta = Metaphase(verbose=verbose,
+                     paramtree=paramtree,
+                     measuretree=measuretree,
+                     initial_plug=general_params["initial_plug"])
+
+    meta.model.simulation_done = True
+
+    meta.spindle.link_df = link_df
+    meta.spindle.point_hist = point_hist
+
+    meta.analysis = analysis
+
+    return meta
