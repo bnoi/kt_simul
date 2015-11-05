@@ -13,6 +13,16 @@ import os
 
 from ..io import ParamTree
 
+import pandas as pd
+
+# Those strings should be respected in the xml file
+SPRING_UNIT = u'pN/µm'
+DRAG_UNIT = u'pN.s/µm'
+LENGTH_UNIT = u'µm'
+FREQ_UNIT = u'Hz'
+FORCE_UNIT = u'pN'
+SPEED_UNIT = u'µm/s'
+
 CURRENT_DIR = os.path.abspath(os.path.dirname(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
 PARAMFILE = os.path.join(ROOT_DIR, 'io', 'params.json')
@@ -21,19 +31,48 @@ MEASUREFILE = os.path.join(ROOT_DIR, 'io', 'measures.json')
 log = logging.getLogger(__name__)
 
 
-def get_default_paramtree():
+def adimentionalize(data):
+    """This function scales everything taking dt as unit time, Vk as
+    unit speed, and Fk as unit force. It relies on a correct
+    definition of the units of the elements of the param tree,
+    thus a correct spelling in the json file, so please beware.
     """
-    """
-    return ParamTree(PARAMFILE)
+    Vk = data.loc["Vk", 'value']
+    Fk = data.loc["Fk", 'value']
+    dt = data.loc["dt", 'value']
+
+    for name, values in data.iterrows():
+        value = values['value']
+
+        if values['unit'] == SPRING_UNIT:
+            value /= Fk
+        elif values['unit'] == DRAG_UNIT:
+            value *= Vk / Fk
+        elif values['unit'] == SPEED_UNIT:
+            value /= Vk
+        elif values['unit'] == FREQ_UNIT:
+            value *= dt
+        elif values['unit'] == FORCE_UNIT:
+            value /= Fk
+
+        data.loc[name, 'value'] = value
+
+    return data
 
 
-def get_default_measuretree():
+def get_default_params():
     """
     """
-    return ParamTree(MEASUREFILE, adimentionalized=False)
+    return adimentionalize(pd.read_json(PARAMFILE).set_index('name'))['value'].to_dict()
 
 
-def reduce_params(paramtree, measuretree, force_parameters=[]):
+def get_default_measures():
+    """
+    """
+    return pd.read_json(MEASUREFILE).set_index('name')['value'].to_dict()
+
+
+def reduce_params(params, measures, force_parameters=[]):
     """
     This functions changes the parameters so that
     the dynamical characteristics complies with the measures [1]_.
@@ -41,9 +80,9 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
     Parameters
     ----------
 
-    paramtree : :class:`~kt_simul.io.ParamTree` instance
+    paramtree :
         Modified in place.
-    measuretree : :class:`~kt_simul.io.MeasureTree` instance
+    measuretree :
 
     References
     ----------
@@ -51,8 +90,6 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
            J. Cell Biol 2012 http://dx.doi.org/10.1083/jcb.201107124
 
     """
-    params = paramtree.absolute_dic
-    measures = measuretree.absolute_dic
 
     try:
         poleward_speed = measures['poleward_speed']
@@ -138,7 +175,3 @@ def reduce_params(paramtree, measuretree, force_parameters=[]):
         Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk)) + mus * metaph_rate / 2.)
         Fmz /= (1 - metaph_rate / Vmz)
         params['Fmz'] = Fmz
-
-    for key, val in list(params.items()):
-        if key not in force_parameters:
-            paramtree[key] = val

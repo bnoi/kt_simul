@@ -45,15 +45,15 @@ class Metaphase(object):
     Parameters
     ----------
 
-    paramtree : :class:`~kt_simul.io.ParamTree` instance or None
-        The paramtree contains the parameters for the simulation
-        if paramtree is None, the parameters are read
+    params : dict
+        The params contains the parameters for the simulation
+        if params is None, the parameters are read
         from the file paramfile. Defaults to None.
 
-    measuretree : :class:`~kt_simul.io.MeasureTree` instance or None
-        The measuretree contains the observed characteristics
+    measures : dict
+        The measures contains the observed characteristics
         of the mitosis e.g. metaphase spindle elongation rate, etc.
-        if measuretree is None, the measures are read from the file
+        if measures is None, the measures are read from the file
         indicated by the measurefile argument. Defaults to None.
 
     initial_plug : string or None
@@ -74,7 +74,7 @@ class Metaphase(object):
 
     RANDOM_STATE = None
 
-    def __init__(self,  paramtree=None, measuretree=None,
+    def __init__(self,  params=None, measures=None,
                  initial_plug='random', verbose=False,
                  keep_same_random_seed=False,
                  force_parameters=[], name='sim'):
@@ -87,17 +87,17 @@ class Metaphase(object):
         else:
             log.disabled = False
 
-        if paramtree is None:
-            self.paramtree = parameters.get_default_paramtree()
+        if params is None:
+            self.params = parameters.get_default_params()
         else:
-            self.paramtree = paramtree
+            self.params = params
 
-        if measuretree is None:
-            self.measuretree = parameters.get_default_measuretree()
+        if measures is None:
+            self.measures = parameters.get_default_measures()
         else:
-            self.measuretree = measuretree
+            self.measures = measures
 
-        parameters.reduce_params(self.paramtree, self.measuretree,
+        parameters.reduce_params(self.params, self.measures,
                                  force_parameters=force_parameters)
 
         log.info('Parameters loaded')
@@ -107,21 +107,14 @@ class Metaphase(object):
         else:
             self.prng = np.random.RandomState()
 
-        params = self.paramtree.relative_dic
-        # Reset explicitely the unit parameters to their
-        # dimentionalized value
-        params['Vk'] = self.paramtree.absolute_dic['Vk']
-        params['Fk'] = self.paramtree.absolute_dic['Fk']
-        params['dt'] = self.paramtree.absolute_dic['dt']
-
-        self.spindle = Spindle(name, params,
+        self.spindle = Spindle(name, self.params,
                                initial_plug=initial_plug,
                                prng=self.prng)
 
         self.model = SpindleModel(self.spindle)
 
-        dt = self.paramtree.absolute_dic['dt']
-        duration = self.paramtree.absolute_dic['span']
+        dt = self.params['dt']
+        duration = self.params['span']
 
         self.num_steps = int(duration / dt)
         self.model.anaphase = False
@@ -146,7 +139,7 @@ class Metaphase(object):
 
     @property
     def time(self):
-        return np.arange(0, self.paramtree['span'], self.model.dt)
+        return np.arange(0, self.params['span'], self.model.dt)
 
     @property
     def time_anaphase(self):
@@ -228,10 +221,8 @@ class Metaphase(object):
             store["analysis"] = pd.Series(self.analysis)
 
             if save_params:
-                params = self.paramtree.params
-                measures = self.measuretree.params
-                store['params'] = params
-                store['measures'] = measures
+                store['params'] = self.params
+                store['measures'] = self.measures
 
         log.info("Simu saved to {}".format(fname))
 
@@ -501,18 +492,18 @@ class Metaphase(object):
             del self.model
         if hasattr(self, 'analysis'):
             del self.analysis
-        if hasattr(self, 'measuretree'):
-            del self.measuretree
-        if hasattr(self, 'paramtree'):
-            del self.paramtree
+        if hasattr(self, 'measures'):
+            del self.measures
+        if hasattr(self, 'params'):
+            del self.params
 
 
-def load_metaphase(fname, paramtree=None, measuretree=None, verbose=True):
+def load_metaphase(fname, params=None, measures=None, verbose=True):
     """
     """
 
     no_params = False
-    if not paramtree or not measuretree:
+    if not params or not measures:
         no_params = True
 
     with pd.HDFStore(fname) as store:
@@ -520,8 +511,8 @@ def load_metaphase(fname, paramtree=None, measuretree=None, verbose=True):
             raise Exception("Can't load simulation without params and measures")
 
         if no_params:
-            paramtree = ParamTree(df=store['params'])
-            measuretree = ParamTree(df=store['measures'], adimentionalized=False)
+            params = store['params']
+            measures = store['measures']
 
         point_hist = store["point_hist"]
         link_df = store["link_df"]
@@ -530,8 +521,8 @@ def load_metaphase(fname, paramtree=None, measuretree=None, verbose=True):
         analysis = store["analysis"]
 
     meta = Metaphase(verbose=verbose,
-                     paramtree=paramtree,
-                     measuretree=measuretree,
+                     params=params,
+                     measures=measures,
                      initial_plug=general_params["initial_plug"])
 
     meta.model.simulation_done = True
