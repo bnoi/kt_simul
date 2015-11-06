@@ -73,6 +73,7 @@ class Structure:
             self.point_df[coords].loc[self.srce_idx].values)
 
         self.link_df['length'] = (self.link_df[dcoords]**2).sum(axis=1)**0.5
+
         self.link_df[ucoords] = (self.link_df[dcoords] /
                                  _to_3d(self.link_df['length']))
 
