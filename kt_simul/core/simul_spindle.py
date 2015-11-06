@@ -24,7 +24,6 @@ import tqdm
 from ..core.components import Spindle
 from ..core.dynamics import SpindleModel
 from ..core import parameters
-from ..utils.transformations import transformations_matrix
 
 log = logging.getLogger(__name__)
 
@@ -224,37 +223,9 @@ class Metaphase(object):
         """Project all points coordinates on pole-pole axes
         """
 
-        coords = ['x', 'y', 'z']
-
-        # Reorder Panel in DataFrame
-        trajs = self.spindle.point_hist.to_frame()
-        trajs = trajs.stack().unstack('minor')
-        trajs = trajs.reorder_levels([1, 0]).sortlevel()
-        trajs.index.names = ['times', 'points']
-
-        for coord in coords:
-            trajs['{}_proj'.format(coord)] = np.nan
-
-        iterator = tqdm.tqdm(enumerate(trajs.groupby(level='times')),
-                             disable=not progress, total=self.spindle.duration)
-
-        for i, (t, points) in iterator:
-
-            p1 = points.loc[t, self.spindle.spbL.idx][coords]
-            p2 = points.loc[t, self.spindle.spbR.idx][coords]
-
-            ref = (p1 + p2) / 2
-            vec = p1 - ref
-
-            A = transformations_matrix(ref, vec)
-
-            projected_points = np.dot(points[coords], A)[:, :]
-
-            for i, coord in enumerate(coords):
-                trajs.loc[t, '{}_proj'.format(coord)] = projected_points[:, i]
-
-        trajs = trajs.stack().unstack('times')
-        self.spindle.point_hist = trajs.to_panel()
+        self.spindle.project(self.spindle.spbL.idx,
+                             self.spindle.spbR.idx,
+                             progress=progress)
 
     def _anaphase_test(self, time_point):
         """
