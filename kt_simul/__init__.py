@@ -7,12 +7,6 @@ modules provided:
     - io: input/output functions
 """
 
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from __future__ import print_function
-
-__all__ = ["core", "gui", "io"]
 __version__ = "2.0"
 
 import logging
@@ -42,10 +36,6 @@ else:
     # logformat += color('%(name)s', 'YELLOW') + ':'
     # logformat += color('%(funcName)s', 'GREEN') + ': '
     logformat += color(' %(message)s', 'ENDC')
-
-thisdir = os.path.abspath(os.path.dirname(__file__))
-pkgdir = os.path.dirname(thisdir)
-samplesdir = os.path.join(pkgdir, 'samples')
 
 log = logging.getLogger(__name__)
 handler = logging.StreamHandler()
