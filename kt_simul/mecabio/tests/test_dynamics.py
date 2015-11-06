@@ -1,12 +1,18 @@
-from kt_simul.core.components import Structure, Point, Link
-from kt_simul.core.dynamics import Model, dampedspring, viscous
-from kt_simul.core.dynamics import spring, dashpot, linear_fv, contraction
+from kt_simul.mecabio import Structure
+from kt_simul.mecabio import Point
+
+from kt_simul.mecabio import Model
+
+from kt_simul.mecabio import dampedspring
+from kt_simul.mecabio import viscous
+from kt_simul.mecabio import spring
+from kt_simul.mecabio import dashpot
+from kt_simul.mecabio import linear_fv
+from kt_simul.mecabio import contraction
 
 import pandas as pd
 
 from numpy.testing import assert_almost_equal
-# This is an example test, not functional yet, should
-# put some effort in implementing for all forces
 
 
 def test_spring():

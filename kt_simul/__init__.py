@@ -1,19 +1,12 @@
 """
 This packages contains the kinetochore dynamics simulation
-
-modules provided:
-    - core : main simulation
-    - gui: a subpackage with a GUI of the simulation
-    - io: input/output functions
 """
 
-__version__ = "2.0"
-
 import logging
-import os
-import sys
 
 from .utils.color_system import color
+
+__version__ = "2.0"
 
 
 def in_ipython():
