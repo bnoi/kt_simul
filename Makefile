@@ -8,3 +8,7 @@ test:
 
 coverage:
 	nosetests kt_simul/mecabio --with-coverage --cover-package=kt_simul.mecabio -v
+
+clean:
+	find . -name "*.pyc" -exec rm -rf {} \;
+	find . -name "__pycache__" -exec rm -rf {} \;
