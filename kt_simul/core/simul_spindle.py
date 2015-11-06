@@ -174,7 +174,7 @@ class Metaphase(object):
 
         self.analysis['real_t_A'] = self.model.params['t_A']
 
-        for time_point in tqdm.tqdm(range(1, self.num_steps),
+        for time_point in tqdm.tqdm(range(0, self.num_steps),
                                     total=self.num_steps,
                                     disable=not progress):
 

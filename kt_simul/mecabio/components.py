@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
+
 import logging
+import matplotlib.pylab as plt
 
 from . import coords, dcoords, ucoords, speed_coords
 
@@ -16,9 +18,9 @@ def _to_3d(df):
 
 
 class Structure:
-    '''
-    A collection of points and links between them
-    '''
+    """A collection of points and links between them
+    """
+
     def __init__(self, name):
         self.name = name
         self.points = {}
@@ -28,9 +30,11 @@ class Structure:
                                   labels=[[], []],
                                   names=['srce', 'trgt'])
         self.link_df = pd.DataFrame(columns=link_cols, index=_link_idx)
-        self.point_hist = pd.Panel()
+        self.point_hist = None
 
     def add_point(self, point, pos0=None, speed0=None):
+        """Add a point to the structure
+        """
 
         if point.idx is None:
             point.idx = self.point_df.shape[0]
@@ -46,6 +50,8 @@ class Structure:
         self.points[point.idx] = point
 
     def add_link(self, point_i, point_j):
+        """Add a link between two point to the structure
+        """
 
         state = np.zeros((1, self.link_df.shape[1]))
         self.link_df = self.link_df.append(
@@ -65,6 +71,8 @@ class Structure:
         return self.link_df.index.get_level_values('trgt')
 
     def update_geometry(self):
+        """Update link vectors according to new positions and speeds of points
+        """
 
         self.link_df[dcoords] = (
             self.point_df[coords].loc[self.trgt_idx].values -
@@ -79,11 +87,31 @@ class Structure:
             link = self.links[idxs]
             link.outer = np.outer(link_values, link_values)
 
-        self.link_df.sortlevel(inplace=True)
-        self.point_df.sortlevel(inplace=True)
-
     def register_history(self, step):
-        self.point_hist[step] = self.point_df
+        """Save points history for re-use after the simulation
+        """
+
+        if isinstance(self.point_hist, type(None)):
+            self.point_hist = pd.Panel({step: self.point_df})
+        else:
+            self.point_hist[step] = self.point_df
+
+    def show(self):
+        """Basic plot for points trajectories over time
+        """
+
+        fig = plt.figure(figsize=(18, 12))
+
+        ax = fig.add_subplot(len(coords)//2+1, 2, 1)
+        for i, coord in enumerate(coords):
+            ax = fig.add_subplot(len(coords)//2+1, 2, i+1, sharex=ax, sharey=ax)
+
+            for n, p in self.points.items():
+                ax.plot(p.traj[coord], 'o-')
+
+            ax.set_ylabel(coord)
+
+        return fig
 
 
 class Point:

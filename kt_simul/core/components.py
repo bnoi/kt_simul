@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import pandas as pd
 from scipy import stats
 
 from ..mecabio import Structure
@@ -47,11 +46,6 @@ class Spindle(Structure):
             self.chromosomes.append(ch)
 
         self.update_geometry()
-        self.point_hist = pd.Panel({0: self.point_df})
-
-    def set_pos(self, position):
-        log.DEBUG('Deprecated, directly set the `pos` attribute instead')
-        self.pos = position
 
     def all_plugsites(self):
         for ch in self.chromosomes:

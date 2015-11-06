@@ -27,7 +27,6 @@ def test_spring():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
@@ -54,7 +53,6 @@ def test_dampedspring():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
@@ -81,7 +79,6 @@ def test_viscous():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
@@ -110,7 +107,6 @@ def test_dashpot():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
@@ -137,7 +133,6 @@ def test_linear_fv():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
@@ -163,7 +158,6 @@ def test_contraction():
     m = Model(sprg)
     viscous(m, p0, 1)
     viscous(m, p1, 1)
-    sprg.point_hist = pd.Panel({0: sprg.point_df})
 
     def model_update(step):
 
