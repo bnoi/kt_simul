@@ -1,10 +1,14 @@
+import matplotlib.pylab as plt
+
 import numpy as np
 import pandas as pd
 
 import logging
-import matplotlib.pylab as plt
+
+import tqdm
 
 from . import coords, dcoords, ucoords, speed_coords
+from ..utils.transformations import transformations_matrix
 
 log = logging.getLogger(__name__)
 
@@ -103,8 +107,13 @@ class Structure:
         fig = plt.figure(figsize=(18, 12))
 
         ax = fig.add_subplot(len(coords)//2+1, 2, 1)
-        for i, coord in enumerate(coords):
-            ax = fig.add_subplot(len(coords)//2+1, 2, i+1, sharex=ax, sharey=ax)
+
+        used_coords = coords.copy()
+        if 'x_proj' in self.point_hist.axes[2]:
+            used_coords.append('x_proj')
+
+        for i, coord in enumerate(used_coords):
+            ax = fig.add_subplot(len(used_coords)//2+1, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
                 ax.plot(p.traj[coord], 'o-', color=p.color)
@@ -112,6 +121,43 @@ class Structure:
             ax.set_ylabel(coord)
 
         return fig
+
+    def project(self, idx_point1, idx_point2, progress=False):
+        """Create a _proj column in point_hist and project all points according to an axis defined
+        by two points
+        """
+
+        # Reorder Panel in DataFrame
+        trajs = self.point_hist.to_frame()
+        trajs = trajs.stack().unstack('minor')
+        trajs = trajs.reorder_levels([1, 0]).sortlevel()
+        trajs.index.names = ['times', 'points']
+
+        for coord in coords:
+            trajs['{}_proj'.format(coord)] = np.nan
+
+        duration = trajs.index.get_level_values('times').max()
+
+        iterator = tqdm.tqdm(enumerate(trajs.groupby(level='times')),
+                             disable=not progress, total=duration)
+
+        for i, (t, points) in iterator:
+
+            p1 = points.loc[t, idx_point1][coords]
+            p2 = points.loc[t, idx_point2][coords]
+
+            ref = (p1 + p2) / 2
+            vec = p1 - ref
+
+            A = transformations_matrix(ref, vec)
+
+            projected_points = np.dot(points[coords], A)[:, :]
+
+            for i, coord in enumerate(coords):
+                trajs.loc[t, '{}_proj'.format(coord)] = projected_points[:, i]
+
+        trajs = trajs.stack().unstack('times')
+        self.point_hist = trajs.to_panel()
 
 
 class Point:

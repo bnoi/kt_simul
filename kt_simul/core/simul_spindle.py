@@ -220,12 +220,11 @@ class Metaphase(object):
 
         log.info("Simu saved to {}".format(fname))
 
-    def project(self):
+    def project(self, progress=False):
         """Project all points coordinates on pole-pole axes
         """
 
         coords = ['x', 'y', 'z']
-        progress = True
 
         # Reorder Panel in DataFrame
         trajs = self.spindle.point_hist.to_frame()
