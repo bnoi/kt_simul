@@ -104,7 +104,7 @@ class Structure:
         """Basic plot for points trajectories over time
         """
 
-        fig = plt.figure(figsize=(18, 12))
+        fig = plt.figure(figsize=(14, 8))
 
         ax = fig.add_subplot(len(coords)//2+1, 2, 1)
 
@@ -113,12 +113,14 @@ class Structure:
             used_coords.append('x_proj')
 
         for i, coord in enumerate(used_coords):
-            ax = fig.add_subplot(len(used_coords)//2+1, 2, i+1, sharex=ax, sharey=ax)
+            ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
                 ax.plot(p.traj[coord], 'o-', color=p.color)
 
             ax.set_ylabel(coord)
+
+        fig.tight_layout()
 
         return fig
 
