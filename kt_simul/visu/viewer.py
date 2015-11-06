@@ -1,9 +1,12 @@
 from collections import OrderedDict
+import tempfile
+import os
 
 from vispy import geometry
 from vispy import scene
 from vispy import app
 from vispy import visuals
+import vispy.io as vp_io
 
 qtapp = app.use_app('pyqt4')
 
@@ -37,6 +40,8 @@ class StructureViewer():
         self.points = []
         self.time_point = 0
         self.coords = ['x', 'y', 'z']
+        self.save = None
+        self._has_been_saved = False
 
         self.create_axes()
         self.switch_axes()
@@ -105,6 +110,7 @@ class StructureViewer():
     def move(self, time_point):
 
         if time_point == self.duration:
+            self._save_video()
             time_point = 0
 
         mess = "Time point : {:.0f}/{:.0f}".format(time_point, self.duration)
@@ -115,6 +121,11 @@ class StructureViewer():
             sphere.transform.translate(point.traj.loc[time_point, self.coords].values)
 
         self.time_point = time_point
+
+        if self.save:
+            img = self.canvas.render()
+            fpath = os.path.join(self.tmp_save, 'simu{0:08d}.png'.format(time_point))
+            vp_io.write_png(fpath, img)
 
     def add_structure(self, structure):
 
@@ -131,14 +142,30 @@ class StructureViewer():
 
         app.run()
 
-    def play(self):
+    def play(self, save=None):
 
+        self.save = save
+        if self.save:
+            self.tmp_save = tempfile.mkdtemp()
+
+        self.move(time_point=0)
         self.timer = app.Timer(connect=self.update)
         self.timer.start(0.1)
 
     def update(self, event):
 
         self.move(self.time_point + 1)
+
+    def _save_video(self):
+
+        if not self.save or self._has_been_saved:
+            return
+
+        files = [os.path.join(self.tmp_save, f) for f in sorted(os.listdir(self.tmp_save))]
+        from moviepy.editor import ImageSequenceClip
+        clip = ImageSequenceClip(files, fps=10)
+        clip.write_videofile(self.save)
+        self._has_been_saved = True
 
 
 class StructureWidget(StructureViewer, QtGui.QWidget):
