@@ -10,8 +10,6 @@ from kt_simul.mecabio import dashpot
 from kt_simul.mecabio import linear_fv
 from kt_simul.mecabio import contraction
 
-import pandas as pd
-
 from numpy.testing import assert_almost_equal
 
 
@@ -25,8 +23,6 @@ def test_spring():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -51,8 +47,6 @@ def test_dampedspring():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -77,8 +71,6 @@ def test_viscous():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -105,8 +97,6 @@ def test_dashpot():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -131,8 +121,6 @@ def test_linear_fv():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -156,8 +144,6 @@ def test_contraction():
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
-    viscous(m, p0, 1)
-    viscous(m, p1, 1)
 
     def model_update(step):
 

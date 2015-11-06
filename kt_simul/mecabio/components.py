@@ -107,7 +107,7 @@ class Structure:
             ax = fig.add_subplot(len(coords)//2+1, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
-                ax.plot(p.traj[coord], 'o-')
+                ax.plot(p.traj[coord], 'o-', color=p.color)
 
             ax.set_ylabel(coord)
 
@@ -116,11 +116,12 @@ class Structure:
 
 class Point:
 
-    def __init__(self, idx, structure):
+    def __init__(self, idx, structure, color=None):
 
         self.idx = idx
         self.idxs = slice(idx*3, idx*3 + 3)
         self.structure = structure
+        self._color = color
 
     @property
     def pos(self):
@@ -144,6 +145,14 @@ class Point:
 
     def dist(self, other):
         return np.linalg.norm(self.pos - other.pos)
+
+    @property
+    def color(self):
+        return self._color
+
+    @color.setter
+    def color(self, color):
+        self._color = color
 
 
 class Link:

@@ -1,4 +1,5 @@
 import numpy as np
+
 from . import coords
 
 
@@ -11,6 +12,9 @@ class Model:
         self.n_points = len(self.structure.points)
         self.Amat = np.zeros((self.n_points * 3, self.n_points * 3))
         self.Bvect = np.zeros(self.n_points * 3)
+
+        for point in self.structure.points.values():
+            viscous(self, point, 1)
 
     def solve(self):
         speeds = np.linalg.solve(self.Amat, -self.Bvect)

@@ -363,9 +363,7 @@ class Metaphase(object):
         return True
 
     def show(self):
-        """
-        Quickly show kymograph of current simulation.
-        Matplotlib is required.
+        """Quickly show kymograph of current simulation.
         """
 
         fig = plt.figure(figsize=(18, 12))
