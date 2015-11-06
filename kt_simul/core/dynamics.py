@@ -15,7 +15,6 @@ class SpindleModel(Model):
         self.dt = self.params['dt']
         self.num_steps = int(self.duration / self.dt)
         self.time_invariantA()
-        self.simulation_done = False
         self.anaphase = False
 
     def time_invariantA(self):

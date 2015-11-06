@@ -31,10 +31,6 @@ log = logging.getLogger(__name__)
 __all__ = ["Metaphase"]
 
 
-class SimulationAlreadyDone(Exception):
-    pass
-
-
 class Metaphase(object):
 
     """
@@ -172,12 +168,6 @@ class Metaphase(object):
 
         """
 
-        # Check is simulation has already be done
-        if self.model.simulation_done:
-            raise SimulationAlreadyDone("""A simulation is already done on this
-                instance. Please create another Metaphase instance
-                to launch a new simulation.""")
-
         kappa_c = self.model.params['kappa_c']
 
         log.info('Running simulation')
@@ -200,7 +190,6 @@ class Metaphase(object):
             self.model.one_step(time_point)
 
         log.info('Simulation done')
-        self.model.simulation_done = True
 
         self.model.params['kappa_c'] = kappa_c
 
@@ -213,10 +202,6 @@ class Metaphase(object):
     def save(self, fname, save_tree=True):
         """
         """
-
-        if not self.model.simulation_done:
-            log.info("test")
-            raise Exception("Please run the simulation before saving.")
 
         save_params = True
 
@@ -533,8 +518,6 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
                      params=params,
                      measures=measures,
                      initial_plug=general_params["initial_plug"])
-
-    meta.model.simulation_done = True
 
     meta.spindle.link_df = link_df
     meta.spindle.point_hist = point_hist
