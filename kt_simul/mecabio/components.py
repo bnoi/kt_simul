@@ -106,7 +106,7 @@ class Structure:
 
         fig = plt.figure(figsize=(14, 8))
 
-        ax = fig.add_subplot(len(coords)//2+1, 2, 1)
+        ax = fig.add_subplot(2, 2, 1)
 
         used_coords = coords.copy()
         if 'x_proj' in self.point_hist.axes[2]:
