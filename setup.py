@@ -8,30 +8,9 @@ from setuptools import setup, find_packages
 
 import kt_simul
 
-install_requires = ['cython', 'numpy', 'numexpr',
-                    'tables', 'pandas', 'matplotlib']
-
-def install_requirements(install_requires):
-    """
-    Install third party libs in right order.
-    """
-    import subprocess
-    import pip
-
-    for package in install_requires:
-        try:
-            __import__(package)
-        except:
-            pip.main(['install', package])
-
-install_requirements(install_requires)
-
-from Cython.Distutils import build_ext
-from Cython.Build import cythonize
-
 setup(
     name='kt_simul',
-    version=kt_simul.__version__,
+    version="2.0",
     packages=find_packages(),
     author="BNOI Project",
     author_email="bnoi.project@gmail.com",
@@ -55,7 +34,5 @@ setup(
         'console_scripts': [
             #'proclame-sm = sm_lib.core:proclamer',
         ],
-    },
-    cmdclass={'build_ext': build_ext},
-    ext_modules=cythonize(["kt_simul/core/*.pyx"]),
+    }
 )

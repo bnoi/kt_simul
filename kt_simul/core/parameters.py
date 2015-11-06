@@ -55,6 +55,8 @@ def adimentionalize(data, metadata):
 
         data[name] = value
 
+    return data
+
 
 def get_default_params():
     """
@@ -171,3 +173,5 @@ def reduce_params(params, measures, force_parameters=[]):
         Fmz = (Fk * N * Mk * alpha_mean * (1 + metaph_rate / (2 * Vk)) + mus * metaph_rate / 2.)
         Fmz /= (1 - metaph_rate / Vmz)
         params['Fmz'] = Fmz
+
+    return params

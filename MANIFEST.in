@@ -1,6 +1,0 @@
-include *.md
-recursive-include kt_simul *.xml
-recursive-include kt_simul *.png
-recursive-include kt_simul *.svg
-recursive-include kt_simul *.pyx
-recursive-include kt_simul *.pxd

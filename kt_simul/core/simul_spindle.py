@@ -103,8 +103,9 @@ class Metaphase(object):
         self.params = self.params['value'].to_dict()
 
         # Parameters reduction
-        parameters.reduce_params(self.params, self.measures, force_parameters=force_parameters)
-        parameters.adimentionalize(self.params, self.original_params)
+        self.params = parameters.reduce_params(self.params, self.measures,
+                                               force_parameters=force_parameters)
+        self.params = parameters.adimentionalize(self.params, self.original_params)
 
         log.info('Parameters loaded')
 
