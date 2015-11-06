@@ -1,7 +1,6 @@
 # `kt_simul` - Python model of chromosome mouvements during mitosis
 
-Python model of chromosome mouvements during mitosis in Fission Yeast
-(http://mitotic-machine.org).
+Python model of chromosome mouvements during mitosis in Fission Yeast (http://damcb.org).
 
 This python module provides the simulation of mitotic spindle elements (for now,
 the kinetochore and the spindle pole bodies), during cell division in fission
@@ -45,30 +44,20 @@ LICENCE for full details).
 Dependencies
 ------------
 
-- Python 2.7 and Python 3.4
-- numpy >= 1.8
-- scipy >= 0.12
-- cython >= 0.19
-- pandas >= 0.15.2
-- matplotlib (optional) >= 1.2
+- Python 3.4
+- numpy
+- scipy
+- pandas
+- matplotlib
 - PyQt4 (optional)
+- vispy (optional)
 
 Installation
 ------------
 
-You can directly clone this repo, then install with setuptools:
-
-    git clone https://github.com/bnoi/kt_simul.git
-    cd kt_simul/
-    python setup.py build
-    python setup.py install
-
-Or you can install `kt_simul` via pip (dependencies will be automatically
-installed):
+You can install `kt_simul` via pip :
 
     pip install -e git+https://github.com/bnoi/kt_simul.git#egg=master
-
-You will need a C compiler for the cython part.
 
 Usage
 -----
