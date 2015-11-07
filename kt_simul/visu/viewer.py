@@ -16,6 +16,17 @@ QtGui = qtapp.backend_module.QtGui
 __class__ = ["StructureWidget", "StructureViewer"]
 
 
+class StructureCanvas(scene.SceneCanvas):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def on_close(self, event):
+        app.quit()
+        print("tetst")
+        super().on_close(event)
+
+
 class StructureViewer():
     """This viewer only use Vispy and automatic backend associated.
 
@@ -29,8 +40,8 @@ class StructureViewer():
 
     def __init__(self):
 
-        self.canvas = scene.SceneCanvas(keys='interactive', resizable=True,
-                                        fullscreen=False, bgcolor="#fffaf0", show=True)
+        self.canvas = StructureCanvas(keys='interactive', resizable=True,
+                                      fullscreen=False, bgcolor="#fffaf0", show=True)
 
         self.canvas.measure_fps(0.1, self.show_fps)
 
@@ -135,12 +146,19 @@ class StructureViewer():
         for idx, point in self.structure.points.items():
             self.create_sphere(point, 0, 0.8)
 
+        # Set a confortable zoom level
+        self.view.camera.scale_factor = 10
+
         # Setup time
         self.move(time_point=0)
 
     def show(self):
 
         app.run()
+
+    def quit(self):
+
+        app.quit()
 
     def play(self, save=None):
 
