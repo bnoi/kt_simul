@@ -1,3 +1,9 @@
+import numpy as np
+
+import vispy
+from vispy import geometry
+from vispy import scene
+
 from . import StructureViewer
 from . import StructureWidget
 
@@ -8,120 +14,70 @@ class SpindleViewer(StructureViewer):
     """This viewer only use Vispy and automatic backend associated.
     """
 
-    def __init__(self):
+    def __init__(self, metaphase=None):
 
-        StructureWidget.__init__(self)
+        super().__init__()
 
-        self.canvas = scene.SceneCanvas(keys='interactive', resizable=True,
-                                        fullscreen=False, bgcolor="#fffaf0", show=True)
-
-        self.canvas.measure_fps(0.1, self.show_fps)
-
-        self.view = self.canvas.central_widget.add_view()
-        self.view.camera = scene.cameras.TurntableCamera()
-
-        self.points = []
-        self.time_point = 0
-        self.coords = ['x', 'y', 'z']
-
-        self.create_axes()
-        self.switch_axes()
-
-        # Setup status
-        self.status = scene.visuals.Text('', anchor_x='left', anchor_y='top',
-                                         color='black', parent=self.view)
-        self.status.pos = self.canvas.size[0] - self.canvas.size[0] * 0.98, \
-                          self.canvas.size[1] - self.canvas.size[1] * 0.98
-
-        self.status_messages = OrderedDict([('FPS', ''), ('Time', '')])
-
-    def set_status(self, message, status_type):
-
-        self.status_messages[status_type] = message
-        self.status.text = ' | '.join(['{}'.format(v) for k, v in self.status_messages.items()])
-
-    def show_fps(self, fps):
-
-        mess = "FPS : {:.1f}".format(fps)
-        self.set_status(mess, 'FPS')
-
-    def create_axes(self):
-
-        self.axes = {}
-        coords = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
-        names = ["x", "y", "z"]
-        colors = ["red", "green", "blue"]
-
-        for coord, color, name in zip(coords, colors, names):
-
-            mdata = geometry.create_cylinder(128, 128, radius=[0.1, 0.1],
-                                             length=5, offset=False)
-            axis = scene.visuals.Mesh(meshdata=mdata, shading='flat', color=color)
-            t = visuals.transforms.MatrixTransform()
-            t.rotate(90, coord)
-            axis.transform = t
-
-            self.view.add(axis)
-            self.axes[name] = axis
-            axis.visible = False
-
-    def switch_axes(self):
-
-        for name, axis in self.axes.items():
-            axis.visible = not axis.visible
-
-    def create_points(self, position, color, radius):
-
-        mdata = geometry.create_sphere(64, 64,  radius=radius)
-        point = scene.visuals.Mesh(meshdata=mdata, shading='flat', color=color)
-
-        t = visuals.transforms.MatrixTransform()
-        point.transform = t
-        point.transform.translate(position)
-
-        self.points.append(point)
-        self.view.add(point)
-        return point
+        if metaphase:
+            self.add_structure(metaphase)
 
     def move(self, time_point):
 
-        mess = "Time : {:.0f}s/{:.0f}s".format(time_point * self.spindle.dt, self.max_t)
+        if time_point == self.duration:
+            time_point = 0
+
+        dt = self.metaphase.params['dt']
+        mess = "Time : {:.0f}/{:.0f} ({:.0f}s/{:.0f}s)".format(time_point + 1, self.duration + 1,
+                                                               time_point * dt, self.duration * dt)
         self.set_status(mess, 'Time')
 
+        def _move(sphere, point):
+            sphere.transform.reset()
+            sphere.transform.translate(point.traj.loc[time_point, self.coords].values)
+
         # Move poles
-        self.points[0].transform.reset()
-        self.points[0].transform.translate(self.meta.spindle.spbL.traj.loc[time_point, self.coords].values)
+        _move(*self.points[self.spbL_idx])
+        _move(*self.points[self.spbR_idx])
 
-        self.points[1].transform.reset()
-        self.points[1].transform.translate(self.meta.spindle.spbR.traj.loc[time_point, self.coords].values)
-
-        # Move kinetochores
-        for i, ch in enumerate(self.spindle.chromosomes):
-
-            self.points[i*2+2].transform.reset()
-            self.points[i*2+2].transform.translate(ch.cen_A.traj.loc[time_point, self.coords].values)
-
-            self.points[i*2+3].transform.reset()
-            self.points[i*2+3].transform.translate(ch.cen_B.traj.loc[time_point, self.coords].values)
+        # Move centromeres
+        for cen_A_idx, cen_B_idx in self.ch_idxs:
+            _move(*self.points[cen_A_idx])
+            _move(*self.points[cen_B_idx])
 
         self.time_point = time_point
 
-    def add_spindle(self, metaphase):
+    def add_structure(self, metaphase):
 
-        self.meta = metaphase
-        self.spindle = self.meta.spindle
-        self.max_t = self.spindle.duration / self.spindle.dt
+        self.metaphase = metaphase
+        self.structure = self.metaphase.spindle
+        self.duration = self.structure.point_hist.keys()[-1]
 
-        # Setup poles
-        self.create_points(self.meta.spindle.spbL.traj.loc[0, self.coords].values, "gray", 0.8)
-        self.create_points(self.meta.spindle.spbR.traj.loc[0, self.coords].values, "gray", 0.8)
+        # Get points indexes
+        self.spbL_idx = self.metaphase.spindle.spbL.idx
+        self.spbR_idx = self.metaphase.spindle.spbR.idx
+        self.ch_idxs = []
+        for ch in self.structure.chromosomes:
+            self.ch_idxs.append((ch.cen_A.idx, ch.cen_B.idx))
 
-        # Setup kinetochores
+        # Create spheres
+        self.structure.points[self.spbL_idx].color = "gray"
+        self.structure.points[self.spbR_idx].color = "gray"
+        self.create_sphere(self.structure.points[self.spbL_idx], time_point=0, radius=0.8)
+        self.create_sphere(self.structure.points[self.spbR_idx], time_point=0, radius=0.8)
+
         cmap = vispy.color.get_colormap('husl', value=0.5)
-        self.colors = cmap.map(np.linspace(0, 1, 3))
-        for ch, color in zip(self.spindle.chromosomes, self.colors):
-            self.create_points(ch.cen_A.traj.loc[0, self.coords].values, color, 0.5)
-            self.create_points(ch.cen_B.traj.loc[0, self.coords].values, color, 0.5)
+        colors = cmap.map(np.linspace(0, 1, len(self.ch_idxs)))
+        for color, (cen_A_idx, cen_B_idx) in zip(colors, self.ch_idxs):
+
+            self.structure.points[cen_A_idx].color = color
+            self.structure.points[cen_B_idx].color = color
+
+            self.create_sphere(self.structure.points[cen_A_idx], time_point=0, radius=0.8)
+            self.create_sphere(self.structure.points[cen_B_idx], time_point=0, radius=0.8)
+
+        # Set a confortable zoom level
+        # TODO: automatic scale factor calculation
+        self.view.camera.scale_factor = 10
 
         # Create border cell
         self.create_border_cell()
@@ -133,21 +89,7 @@ class SpindleViewer(StructureViewer):
 
         mdata = geometry.create_sphere(64, 64,  radius=15)
         borders = scene.visuals.Mesh(meshdata=mdata, shading='flat', color="#33333333")
-
         self.view.add(borders)
-
-    def show(self):
-
-        app.run()
-
-    def play_simu(self):
-
-        self.timer = app.Timer(connect=self.update_simu)
-        self.timer.start(0.1)
-
-    def update_simu(self, event):
-
-        self.move(self.time_point + 1)
 
 
 class SpindleWidget(StructureWidget):

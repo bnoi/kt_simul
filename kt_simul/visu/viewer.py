@@ -38,7 +38,7 @@ class StructureViewer():
     >>> v.play()
     """
 
-    def __init__(self):
+    def __init__(self, structure=None):
 
         self.canvas = StructureCanvas(keys='interactive', resizable=True,
                                       fullscreen=False, bgcolor="#fffaf0", show=True)
@@ -64,6 +64,9 @@ class StructureViewer():
                           self.canvas.size[1] - self.canvas.size[1] * 0.98
 
         self.status_messages = OrderedDict([('FPS', ''), ('Time', '')])
+
+        if structure:
+            self.add_structure(structure)
 
     def set_status(self, message, status_type):
 
@@ -105,7 +108,7 @@ class StructureViewer():
         mdata = geometry.create_sphere(64, 64,  radius=radius)
 
         color = point.color
-        if not color:
+        if isinstance(color, type(None)):
             color = "gray"
 
         sphere = scene.visuals.Mesh(meshdata=mdata, shading='flat', color=color)
@@ -121,7 +124,6 @@ class StructureViewer():
     def move(self, time_point):
 
         if time_point == self.duration:
-            self._save_video()
             time_point = 0
 
         mess = "Time point : {:.0f}/{:.0f}".format(time_point, self.duration)
@@ -133,20 +135,16 @@ class StructureViewer():
 
         self.time_point = time_point
 
-        if self.save:
-            img = self.canvas.render()
-            fpath = os.path.join(self.tmp_save, 'simu{0:08d}.png'.format(time_point))
-            vp_io.write_png(fpath, img)
-
     def add_structure(self, structure):
 
         self.structure = structure
         self.duration = self.structure.point_hist.keys()[-1]
 
         for idx, point in self.structure.points.items():
-            self.create_sphere(point, 0, 0.8)
+            self.create_sphere(point, time_point=0, radius=0.8)
 
         # Set a confortable zoom level
+        # TODO: automatic scale factor calculation
         self.view.camera.scale_factor = 10
 
         # Setup time
@@ -160,11 +158,7 @@ class StructureViewer():
 
         app.quit()
 
-    def play(self, save=None):
-
-        self.save = save
-        if self.save:
-            self.tmp_save = tempfile.mkdtemp()
+    def play(self):
 
         self.move(time_point=0)
         self.timer = app.Timer(connect=self.update)
@@ -173,17 +167,6 @@ class StructureViewer():
     def update(self, event):
 
         self.move(self.time_point + 1)
-
-    def _save_video(self):
-
-        if not self.save or self._has_been_saved:
-            return
-
-        files = [os.path.join(self.tmp_save, f) for f in sorted(os.listdir(self.tmp_save))]
-        from moviepy.editor import ImageSequenceClip
-        clip = ImageSequenceClip(files, fps=10)
-        clip.write_videofile(self.save)
-        self._has_been_saved = True
 
 
 class StructureWidget(StructureViewer, QtGui.QWidget):
