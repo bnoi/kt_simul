@@ -13,13 +13,32 @@ from kt_simul.mecabio import contraction
 from numpy.testing import assert_almost_equal
 
 
+def test_datastructure():
+    """Test points, links and attributes data structure
+    """
+
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[2, 0, 0], color="black")
+
+    assert_almost_equal(struct.point_df.values[0], [2., 0., 0., 0., 0., 0.])
+    assert struct.attributes_df.loc[0, 'color'] == 'black'
+
+    struct = Structure('')
+    p0 = Point(struct, 0, init_pos=[2, 0, 0], color="black")
+    p1 = Point(struct, init_pos=[-2, 0, 0], color="red")
+
+    struct.add_link(p0, p1)
+
+    assert struct.point_df.index[0] == 0
+    assert struct.link_df.index[0] == (0, 1)
+    assert struct.link_df.shape == (1, 7)
+
+
 def test_spring():
 
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[0, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -40,10 +59,8 @@ def test_spring():
 def test_dampedspring():
 
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[2, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[-2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -58,16 +75,14 @@ def test_dampedspring():
         m.solve()
         model_update(i)
 
-    assert_almost_equal(p0.dist(p1), 1.44, decimal=2)
+    assert_almost_equal(p0.dist(p1), 1.15, decimal=2)
 
 
 def test_viscous():
 
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[2, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[-2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -84,16 +99,14 @@ def test_viscous():
         m.solve()
         model_update(i)
 
-    assert_almost_equal(p0.dist(p1), 3.42, decimal=2)
+    assert_almost_equal(p0.dist(p1), 1.42, decimal=2)
 
 
 def test_dashpot():
 
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[2, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[-2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -109,15 +122,13 @@ def test_dashpot():
         m.solve()
         model_update(i)
 
-    assert_almost_equal(p0.dist(p1), 0.64, decimal=2)
+    assert_almost_equal(p0.dist(p1), 0.00, decimal=2)
 
 
 def test_linear_fv():
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[2, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[-2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -132,15 +143,13 @@ def test_linear_fv():
         m.solve()
         model_update(i)
 
-    assert_almost_equal(p0.dist(p1), 7.36, decimal=2)
+    assert_almost_equal(p0.dist(p1), 5.36, decimal=2)
 
 
 def test_contraction():
     sprg = Structure('')
-    p0 = Point(0, sprg)
-    sprg.add_point(p0, pos0=[2, 0, 0])
-    p1 = Point(1, sprg)
-    sprg.add_point(p1, pos0=[-2, 0, 0])
+    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
+    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
     lnk = sprg.add_link(p0, p1)
     sprg.update_geometry()
     m = Model(sprg)
@@ -155,4 +164,4 @@ def test_contraction():
         m.solve()
         model_update(i)
 
-    assert_almost_equal(p0.dist(p1), 1.10, decimal=2)
+    assert_almost_equal(p0.dist(p1), 0.10, decimal=2)

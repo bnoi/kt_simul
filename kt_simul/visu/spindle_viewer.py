@@ -62,17 +62,10 @@ class SpindleViewer(StructureViewer):
         radius = 0.5
 
         # Create spheres
-        self.structure.points[self.spbL_idx].color = "gray"
-        self.structure.points[self.spbR_idx].color = "gray"
         self.create_sphere(self.structure.points[self.spbL_idx], time_point=0, radius=radius)
         self.create_sphere(self.structure.points[self.spbR_idx], time_point=0, radius=radius)
 
-        cmap = vispy.color.get_colormap('husl', value=0.5)
-        colors = cmap.map(np.linspace(0, 1, len(self.ch_idxs)))
-        for color, (cen_A_idx, cen_B_idx) in zip(colors, self.ch_idxs):
-
-            self.structure.points[cen_A_idx].color = color
-            self.structure.points[cen_B_idx].color = color
+        for cen_A_idx, cen_B_idx in self.ch_idxs:
 
             self.create_sphere(self.structure.points[cen_A_idx], time_point=0, radius=radius)
             self.create_sphere(self.structure.points[cen_B_idx], time_point=0, radius=radius)

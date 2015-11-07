@@ -1,12 +1,9 @@
 from collections import OrderedDict
-import tempfile
-import os
 
 from vispy import geometry
 from vispy import scene
 from vispy import app
 from vispy import visuals
-import vispy.io as vp_io
 
 qtapp = app.use_app('pyqt4')
 
@@ -23,7 +20,6 @@ class StructureCanvas(scene.SceneCanvas):
 
     def on_close(self, event):
         app.quit()
-        print("tetst")
         super().on_close(event)
 
 

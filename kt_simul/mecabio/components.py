@@ -30,28 +30,21 @@ class Structure:
         self.points = {}
         self.links = {}
         self.point_df = pd.DataFrame(columns=point_cols)
+
+        self.attributes_df = pd.DataFrame(columns=['color'])
+
         _link_idx = pd.MultiIndex(levels=[[], []],
                                   labels=[[], []],
                                   names=['srce', 'trgt'])
         self.link_df = pd.DataFrame(columns=link_cols, index=_link_idx)
         self.point_hist = None
 
-    def add_point(self, point, pos0=None, speed0=None):
+    def add_point(self, idx=None, init_pos=None, init_speed=None, color=None):
         """Add a point to the structure
         """
 
-        if point.idx is None:
-            point.idx = self.point_df.shape[0]
-        if pos0 is None:
-            pos0 = np.zeros(len(coords))
-        if speed0 is None:
-            speed0 = np.zeros(len(coords))
-
-        state = np.concatenate((pos0, speed0)).reshape((1, len(coords)*2))
-        self.point_df = self.point_df.append(pd.DataFrame(index=[point.idx, ],
-                                                          data=state,
-                                                          columns=point_cols))
-        self.points[point.idx] = point
+        point = Point(self, idx=idx, init_pos=init_pos, init_speed=init_speed, color=color)
+        return point
 
     def add_link(self, point_i, point_j):
         """Add a link between two point to the structure
@@ -116,7 +109,10 @@ class Structure:
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
-                ax.plot(p.traj[coord], 'o-', color=p.color)
+                if isinstance(p.color, str):
+                    ax.plot(p.traj[coord], 'o-', color=p.color)
+                else:
+                    ax.plot(p.traj[coord], 'o-')
 
             ax.set_ylabel(coord)
 
@@ -164,12 +160,32 @@ class Structure:
 
 class Point:
 
-    def __init__(self, idx, structure, color=None):
+    def __init__(self, structure, idx=None, init_pos=None, init_speed=None, color=None):
 
-        self.idx = idx
-        self.idxs = slice(idx*3, idx*3 + 3)
         self.structure = structure
-        self._color = color
+
+        if idx is None:
+            self.idx = self.structure.point_df.shape[0]
+        else:
+            self.idx = idx
+        self.idxs = slice(self.idx*3, self.idx*3 + 3)
+
+        if init_pos is None:
+            init_pos = np.zeros(len(coords))
+        if init_speed is None:
+            init_speed = np.zeros(len(coords))
+        if isinstance(color, type(None)):
+            color = np.nan
+
+        state = np.concatenate((init_pos, init_speed)).reshape((1, len(coords)*2))
+        point_series = pd.DataFrame(state, columns=point_cols, index=[self.idx])
+
+        self.structure.point_df = self.structure.point_df.append(point_series)
+
+        attribute = pd.DataFrame(dict(color=color), index=[self.idx])
+        self.structure.attributes_df = self.structure.attributes_df.append(attribute)
+
+        self.structure.points[idx] = self
 
     @property
     def pos(self):
@@ -196,11 +212,11 @@ class Point:
 
     @property
     def color(self):
-        return self._color
+        return self.structure.attributes_df.loc[self.idx, 'color']
 
     @color.setter
     def color(self, color):
-        self._color = color
+        self.structure.attributes_df.loc[self.idx, 'color'] = color
 
 
 class Link:

@@ -338,9 +338,6 @@ class Metaphase(object):
 
         fig = plt.figure(figsize=(18, 12))
 
-        cm = matplotlib.cm.get_cmap('Set1')
-        colors = [cm(1 * i / len(self.spindle.chromosomes)) for i in range(len(self.spindle.chromosomes))]
-
         coords = ['x', 'y', 'z']
         if 'x_proj' in self.spindle.point_hist.axes[2]:
             coords.append('x_proj')
@@ -353,15 +350,15 @@ class Metaphase(object):
 
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
-            ax.plot(self.time, self.spindle.spbL.traj[coord], color="black", lw=2)
-            ax.plot(self.time, self.spindle.spbR.traj[coord], color="black", lw=2)
+            ax.plot(self.time, self.spindle.spbL.traj[coord], color=self.spindle.spbL.color, lw=2)
+            ax.plot(self.time, self.spindle.spbR.traj[coord], color=self.spindle.spbL.color, lw=2)
 
             ax.set_xlabel("Time (s)", fontsize=18)
             ax.set_ylabel("{} (um)".format(coord), fontsize=18)
 
-            for ch, color in zip(self.spindle.chromosomes, colors):
-                ax.plot(self.time, ch.cen_A.traj[coord], color=color, lw=2)
-                ax.plot(self.time, ch.cen_B.traj[coord], color=color, lw=2)
+            for ch in self.spindle.chromosomes:
+                ax.plot(self.time, ch.cen_A.traj[coord], color=ch.cen_A.color, lw=2)
+                ax.plot(self.time, ch.cen_B.traj[coord], color=ch.cen_B.color, lw=2)
 
             ax.set_ylim(-max_pos, max_pos)
             ax.set_xlim(0, self.time[-1])

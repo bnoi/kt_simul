@@ -3,6 +3,8 @@ import logging
 import numpy as np
 from scipy import stats
 
+from vispy.color import get_colormap
+
 from ..mecabio import Structure
 from ..mecabio import Point
 
@@ -31,18 +33,26 @@ class Spindle(Structure):
         self.duration = self.params['span']
         self.dt = self.params['dt']
 
-        self.spbL = Point(idx=0, structure=self)
-        self.spbR = Point(idx=1, structure=self)
-        self.add_point(self.spbL, pos0=[-L/2, 0, 0])
-        self.add_point(self.spbR, pos0=[L/2, 0, 0])
+        self.point_df['plug_state'] = np.nan
+
+        self.spbL = self.add_point(idx=0, init_pos=[-L/2, 0, 0], color="gray")
+        self.spbR = self.add_point(idx=1, init_pos=[L/2, 0, 0], color="gray")
         self.add_link(self.spbL, self.spbR)
 
-        self.point_df['plug_state'] = np.nan
         self.initial_plug = initial_plug
         self.chromosomes = []
 
-        for n in range(N):
-            ch = Chromosome(n, self)
+        # Generate colors
+        cmap = get_colormap("husl")
+        colors = cmap.map(np.linspace(0, 1, 3))
+
+        # Convert colors to html
+        def _c(color):
+            return "#{0:02x}{1:02x}{2:02x}".format(*np.round(color*255).astype('int'))
+        colors = [_c(color) for color in colors]
+
+        for color, n in zip(colors, range(N)):
+            ch = Chromosome(n, self, color)
             self.chromosomes.append(ch)
 
         self.update_geometry()
@@ -56,7 +66,7 @@ class Spindle(Structure):
 
 class Chromosome():
 
-    def __init__(self, idx, spindle):
+    def __init__(self, idx, spindle, color=None):
         self.id = idx
         d0 = spindle.params['d0']
         L0 = spindle.params['L0']
@@ -67,8 +77,8 @@ class Chromosome():
                                     self.spindle.prng.normal(0, d0)])
         # spindle.add_point(idx=idx, center_pos)
 
-        self.cen_A = Centromere(self, 'A')
-        self.cen_B = Centromere(self, 'B')
+        self.cen_A = Centromere(self, 'A', color)
+        self.cen_B = Centromere(self, 'B', color)
         self.spindle.add_link(self.cen_A, self.cen_B)
 
     def is_right_A(self):
@@ -161,7 +171,7 @@ class Chromosome():
 
 class Centromere(Point):
 
-    def __init__(self, chromosome, tag):
+    def __init__(self, chromosome, tag, color=None):
         self.tag = tag
         self.chromosome = chromosome
         self.spindle = chromosome.spindle
@@ -177,8 +187,8 @@ class Centromere(Point):
         else:
             raise ValueError("the `tag` attribute must be 'A' or 'B'.")
 
-        Point.__init__(self, idx, self.spindle)
-        self.spindle.add_point(self, pos0=init_pos)
+        Point.__init__(self, self.spindle, idx, init_pos=init_pos, color=color)
+
         self.toa = 0  # time of arrival at pole
         self.plug_vector = np.zeros(Mk, dtype=np.int)
         self.plugsites = []
@@ -275,8 +285,8 @@ class PlugSite(Point):
         d0 = self.spindle.params['d0']
         init_pos = centromere.pos + self.spindle.prng.normal(0, 0.1*d0, 3)
 
-        Point.__init__(self, idx, self.spindle)
-        self.spindle.add_point(self, pos0=init_pos)
+        Point.__init__(self, self.spindle, idx, init_pos=init_pos)
+
         self.spindle.add_link(self.centromere, self)
         self.spindle.add_link(self.spindle.spbL, self)
         self.spindle.add_link(self.spindle.spbR, self)
