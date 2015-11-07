@@ -123,7 +123,7 @@ class StructureViewer():
 
     def move(self, time_point):
 
-        if time_point == self.duration:
+        if time_point == self.duration + 1:
             time_point = 0
 
         mess = "Time point : {:.0f}/{:.0f}".format(time_point, self.duration)
@@ -180,10 +180,10 @@ class StructureWidget(StructureViewer, QtGui.QWidget):
     >>> w.show()
     """
 
-    def __init__(self):
+    def __init__(self, structure=None):
 
         QtGui.QWidget.__init__(self)
-        StructureViewer.__init__(self)
+        StructureViewer.__init__(self, structure)
 
         self.setMinimumSize(800, 600)
         self.setWindowTitle("Structure's points trajectories")
