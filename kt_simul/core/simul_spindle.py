@@ -207,6 +207,7 @@ class Metaphase(object):
         with pd.HDFStore(fname) as store:
             store["point_hist"] = self.spindle.point_hist
             store["link_df"] = self.spindle.link_df
+            store["attributes_df"] = self.spindle.attributes_df
 
             store["general_params"] = pd.Series(dict(initial_plug=self.spindle.initial_plug))
             store["analysis"] = pd.Series(self.analysis)
@@ -475,6 +476,7 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
 
         point_hist = store["point_hist"]
         link_df = store["link_df"]
+        attributes_df = store["attributes_df"]
 
         general_params = store["general_params"]
         analysis = store["analysis"]
@@ -486,6 +488,7 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
 
     meta.spindle.link_df = link_df
     meta.spindle.point_hist = point_hist
+    meta.spindle.attributes_df = attributes_df
 
     meta.analysis = analysis
 
