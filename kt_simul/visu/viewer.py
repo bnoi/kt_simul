@@ -48,7 +48,7 @@ class StructureViewer():
         self.view = self.canvas.central_widget.add_view()
         self.view.camera = scene.cameras.TurntableCamera()
 
-        self.points = []
+        self.points = {}
         self.time_point = 0
         self.coords = ['x', 'y', 'z']
         self.save = None
@@ -114,7 +114,7 @@ class StructureViewer():
         sphere.transform = t
         sphere.transform.translate(point.traj.loc[time_point, self.coords].values)
 
-        self.points.append((sphere, point))
+        self.points[point.idx] = (sphere, point)
         self.view.add(sphere)
         return sphere
 
@@ -127,7 +127,7 @@ class StructureViewer():
         mess = "Time point : {:.0f}/{:.0f}".format(time_point, self.duration)
         self.set_status(mess, 'Time')
 
-        for sphere, point in self.points:
+        for idx, (sphere, point) in self.points.items():
             sphere.transform.reset()
             sphere.transform.translate(point.traj.loc[time_point, self.coords].values)
 
