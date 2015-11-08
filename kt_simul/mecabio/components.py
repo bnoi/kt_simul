@@ -37,7 +37,7 @@ class Structure:
                                   labels=[[], []],
                                   names=['srce', 'trgt'])
         self.link_df = pd.DataFrame(columns=link_cols, index=_link_idx)
-        self.point_hist = None
+        self.point_hist = []
 
     def add_point(self, idx=None, init_pos=None, init_speed=None, color=None):
         """Add a point to the structure
@@ -88,10 +88,16 @@ class Structure:
         """Save points history for re-use after the simulation
         """
 
-        if isinstance(self.point_hist, type(None)):
-            self.point_hist = pd.Panel({step: self.point_df})
-        else:
-            self.point_hist[step] = self.point_df
+        if isinstance(self.point_hist, pd.Panel):
+            self.point_hist = []
+
+        self.point_hist.append(self.point_df.copy())
+
+    def end_history(self):
+        """Various attributes conversion
+        """
+
+        self.point_hist = pd.Panel({i: p for i, p in enumerate(self.point_hist)})
 
     def show(self):
         """Basic plot for points trajectories over time

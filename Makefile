@@ -5,10 +5,10 @@ flake8:
 	flake8 --max-line-length=100 --count --statistics --exit-zero kt_simul/
 
 test:
-	nosetests kt_simul/mecabio -v
+	nosetests kt_simul/ -v
 
 coverage:
-	nosetests kt_simul/mecabio --with-coverage --cover-package=kt_simul.mecabio -v
+	nosetests kt_simul/ --with-coverage --cover-package=kt_simul -v
 
 clean:
 	find . -name "*.pyc" -exec rm -rf {} \;

@@ -1,3 +1,5 @@
+import pandas as pd
+
 from kt_simul.mecabio import Structure
 from kt_simul.mecabio import Point
 
@@ -34,20 +36,71 @@ def test_datastructure():
     assert struct.link_df.shape == (1, 7)
 
 
-def test_spring():
-
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+def test_history():
+    """
+    """
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
         m.Bvect *= 0
         spring(m, lnk, 0.1, 1)
-        sprg.register_history(step)
+        struct.register_history(step)
+
+    for i in range(30):
+        m.solve()
+        model_update(i)
+
+    struct.end_history()
+
+    assert struct.point_hist.shape == (30, 2, 6)
+    assert isinstance(struct.point_hist, pd.Panel)
+
+
+def test_projection():
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
+
+    def model_update(step):
+
+        m.Bvect *= 0
+        spring(m, lnk, 0.1, 1)
+        struct.register_history(step)
+
+    for i in range(30):
+        m.solve()
+        model_update(i)
+
+    struct.end_history()
+    struct.project(0, 1)
+
+    assert set(['x_proj', 'y_proj', 'z_proj']).issubset(set(struct.point_hist.loc[0].columns))
+    assert_almost_equal(struct.point_hist.loc[0]['x_proj'].values, [0, -2])
+
+
+def test_spring():
+
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
+
+    def model_update(step):
+
+        m.Bvect *= 0
+        spring(m, lnk, 0.1, 1)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()
@@ -58,18 +111,18 @@ def test_spring():
 
 def test_dampedspring():
 
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
         m.Bvect *= 0
         dampedspring(m, lnk, 0.1, 0.1, 1)
-        sprg.register_history(step)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()
@@ -80,12 +133,12 @@ def test_dampedspring():
 
 def test_viscous():
 
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
@@ -93,7 +146,7 @@ def test_viscous():
         contraction(m, lnk, 1)
         viscous(m, p0, 100)
         viscous(m, p1, 100)
-        sprg.register_history(step)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()
@@ -104,19 +157,19 @@ def test_viscous():
 
 def test_dashpot():
 
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
         m.Bvect *= 0
         dashpot(m, lnk, 1)
         contraction(m, lnk, 1)
-        sprg.register_history(step)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()
@@ -126,18 +179,18 @@ def test_dashpot():
 
 
 def test_linear_fv():
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
         m.Bvect *= 0
         linear_fv(m, lnk, 1, 1, 1)
-        sprg.register_history(step)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()
@@ -147,18 +200,18 @@ def test_linear_fv():
 
 
 def test_contraction():
-    sprg = Structure('')
-    p0 = sprg.add_point(0, init_pos=[0, 0, 0])
-    p1 = sprg.add_point(1, init_pos=[2, 0, 0])
-    lnk = sprg.add_link(p0, p1)
-    sprg.update_geometry()
-    m = Model(sprg)
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
 
     def model_update(step):
 
         m.Bvect *= 0
         contraction(m, lnk, 0.05)
-        sprg.register_history(step)
+        struct.register_history(step)
 
     for i in range(30):
         m.solve()

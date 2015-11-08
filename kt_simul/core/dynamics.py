@@ -83,3 +83,6 @@ class SpindleModel(Model):
         self.update_AB()
         self.solve()
         self.spindle.register_history(step)
+
+        if step == self.duration - 1:
+            self.spindle.end_history()
