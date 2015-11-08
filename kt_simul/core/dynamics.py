@@ -84,5 +84,5 @@ class SpindleModel(Model):
         self.solve()
         self.spindle.register_history(step)
 
-        if step == self.duration - 1:
+        if step == self.num_steps - 1:
             self.spindle.end_history()

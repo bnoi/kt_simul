@@ -37,7 +37,8 @@ class Structure:
                                   labels=[[], []],
                                   names=['srce', 'trgt'])
         self.link_df = pd.DataFrame(columns=link_cols, index=_link_idx)
-        self.point_hist = []
+        self.point_hist = pd.Panel
+        self._point_hist = []
 
     def add_point(self, idx=None, init_pos=None, init_speed=None, color=None):
         """Add a point to the structure
@@ -88,16 +89,14 @@ class Structure:
         """Save points history for re-use after the simulation
         """
 
-        if isinstance(self.point_hist, pd.Panel):
-            self.point_hist = []
-
-        self.point_hist.append(self.point_df.copy())
+        self._point_hist.append(self.point_df.copy())
 
     def end_history(self):
         """Various attributes conversion
         """
 
-        self.point_hist = pd.Panel({i: p for i, p in enumerate(self.point_hist)})
+        self.point_hist = pd.Panel({i: p for i, p in enumerate(self._point_hist)})
+        self._point_hist = []
 
     def show(self):
         """Basic plot for points trajectories over time
@@ -135,15 +134,15 @@ class Structure:
         trajs = self.point_hist.to_frame()
         trajs = trajs.stack().unstack('minor')
         trajs = trajs.reorder_levels([1, 0]).sortlevel()
-        trajs.index.names = ['times', 'points']
+        trajs.index.names = ['time_point', 'points']
 
         for coord in coords:
             trajs['{}_proj'.format(coord)] = np.nan
 
-        duration = trajs.index.get_level_values('times').max()
+        n_steps = trajs.index.get_level_values('time_point').shape[0]
 
-        iterator = tqdm.tqdm(enumerate(trajs.groupby(level='times')),
-                             disable=not progress, total=duration)
+        iterator = tqdm.tqdm(enumerate(trajs.groupby(level='time_point')),
+                             disable=not progress, total=n_steps)
 
         for i, (t, points) in iterator:
 
@@ -160,7 +159,7 @@ class Structure:
             for i, coord in enumerate(coords):
                 trajs.loc[t, '{}_proj'.format(coord)] = projected_points[:, i]
 
-        trajs = trajs.stack().unstack('times')
+        trajs = trajs.stack().unstack('time_point')
         self.point_hist = trajs.to_panel()
 
 
