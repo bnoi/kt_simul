@@ -1,49 +1,44 @@
 # `kt_simul` - Python model of chromosome mouvements during mitosis
 [![Build Status](https://travis-ci.org/bnoi/kt_simul.svg)](https://travis-ci.org/bnoi/kt_simul)
 
-Python model of chromosome mouvements during mitosis in Fission Yeast (http://damcb.org).
+Python model of chromosome mouvements during mitosis in Fission Yeast.
 
-This python module provides the simulation of mitotic spindle elements (for now,
-the kinetochore and the spindle pole bodies), during cell division in fission
-yeast. For more details see [online documentation](http://bnoi.github.io/kt_simul/ "kt_simul documentation").
+This python module provides the simulation of mitotic spindle elements, during cell division.
 
 If you're interested in this work, please contact :
 
-- Sylvie Tournier (sylvie.tournier-gachet@univ-tlse3.fr) for
-  all aspects related to the biology and for academical collaboration purposes.
-- Guillaume Gay (guillaume@damcb.com) for all aspects related to the code
+- __Sylvie Tournier__ (sylvie.tournier-gachet@univ-tlse3.fr) for all aspects related to the biology and for academical collaboration purposes.
+- __Guillaume Gay__ (guillaume@damcb.com and http://damcb.org) for all aspects related to the physics and the code.
 
 The underlying model is fully described in:
 
-G. Gay, T.Courthéoux, C. Reyes, S. Tournier, Y. Gachet. *A stochastic model of
-kinetochore–microtubule attachment accurately describes fission yeast chromosome
-segregation* J. Cell Biol 2012 [(link to article)](http://jcb.rupress.org/content/196/6/757.abstract).
+[G. Gay, T.Courthéoux, C. Reyes, S. Tournier, Y. Gachet. A stochastic model of kinetochore–microtubule attachment accurately describes fission yeast chromosome segregation J. Cell Biol 2012](http://jcb.rupress.org/content/196/6/757.abstract)
 
 This article should be used for any citation of this work.
 
-Funding
--------
+The 1D version has been used to describe chromosome congression in the following article : [Mary, H., Fouchard, J., Gay, G., Reyes, C., Gauthier, T., Gruget, C., Pecreaux, J., Tournier, S. and Gachet, Y. (2015). Fission yeast kinesin-8 controls chromosome congression independently of oscillations. J. Cell Sci](http://jcs.biologists.org/content/128/20/3720)
 
-This project is funded by the French National Research Agency as:
-   *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
+The original version in 1D is available in the git branch `simu_1D`. The main branch `master` uses a new geometry system to simulate chromosomes in 3D.
 
-Contributors
-------------
+Some code example and documentation con be found here : http://nbviewer.ipython.org/github/bnoi/kt_simul/tree/master/doc/notebooks/.
 
-- Guillaume Gay <gllm.gay@gmail.com> : main author
+Mathematical documentation about the 1D model is available at [doc/simu_spindle_1d.pdf](doc/simu_spindle_1d.pdf).
+
+## Funding
+
+This project is funded by the French National Research Agency as : *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
+
+## Contributors
+
+- Guillaume Gay <guillaume@damcb.com> : main author
 - Hadrien Mary <hadrien.mary@gmail.com> : contributor
 
-`kt_simul` is part of the BNOI Project <https://github.com/bnoi>.
-
-
-Licence
--------
+## Licence
 
 This code is provided under the GPL compatible CeCILL licence (see
-LICENCE for full details).
+[LICENCE](LICENSE) for full details).
 
-Dependencies
-------------
+## Dependencies
 
 - Python 3.4
 - numpy
@@ -53,56 +48,8 @@ Dependencies
 - PyQt4 (optional)
 - vispy (optional)
 
-Installation
-------------
+## Installation
 
 You can install `kt_simul` via pip :
 
     pip install -e git+https://github.com/bnoi/kt_simul.git#egg=master
-
-Usage
------
-
-```python
-from kt_simul.core.simul_spindle import Metaphase
-from kt_simul.io.simuio import SimuIO
-from kt_simul.core import parameters
-
-paramtree = parameters.get_default_paramtree()
-paramtree['dt'] = 10
-paramtree['span'] = 2000
-paramtree['t_A'] = 1750
-
-measuretree = parameters.get_default_measuretree()
-measuretree['mean_metaph_k_dist'] = 0.3  # 0.3
-
-# Init simu
-meta = Metaphase(verbose=True,
-                 paramtree=paramtree,
-                 measuretree=measuretree,
-                 initial_plug='random',
-                 keep_same_random_seed=False,
-                 force_parameters=[])
-
-# Launch simu
-meta.simul()
-
-# Save results
-SimuIO(meta).save("simu.h5")
-
-# Show trajectories (matplotlib needed)
-fig = meta.show()
-```
-
-![Chromosomes trajectories](examples/trajectories.png "Chromosomes trajectories")
-
-Simulation can be "played" with Qt based GUI:
-
-```python
-from kt_simul.gui.animation import Animator
-
-anim = Animator(meta)
-anim.play()
-```
-
-![GUI](examples/gui.gif "GUI")
