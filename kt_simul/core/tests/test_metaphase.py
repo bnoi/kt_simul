@@ -3,7 +3,7 @@ from kt_simul.core import parameters
 
 
 def test_metaphase():
-    """Only check is basic spindle simulation end without exception
+    """Only check wether basic spindle simulation end without exception
     """
 
     params = parameters.get_default_params()
