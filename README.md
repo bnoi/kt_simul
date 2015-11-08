@@ -1,4 +1,5 @@
 # `kt_simul` - Python model of chromosome mouvements during mitosis
+[![Build Status](https://travis-ci.org/bnoi/kt_simul.svg)](https://travis-ci.org/bnoi/kt_simul)
 
 Python model of chromosome mouvements during mitosis in Fission Yeast (http://damcb.org).
 
