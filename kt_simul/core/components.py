@@ -246,7 +246,6 @@ class Centromere(Point):
 
     def at_rightpole(self, tol=0.01):
 
-        rightpole_pos = self.spindle.spbR.pos
         if self.dist(self.spindle.spbR) < tol:
             return True
         return False

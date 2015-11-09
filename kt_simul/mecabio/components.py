@@ -47,7 +47,8 @@ class Structure:
 
         self.links = {}
         self.links_idx = {}
-        self.link_df = pd.DataFrame(columns=link_cols)
+        # self.link_df = pd.DataFrame(columns=link_cols)
+        self.link_df = None
         self._links_idx_srce = []
         self._links_idx_trgt = []
 
@@ -62,10 +63,12 @@ class Structure:
         """Add a link between two point to the structure
         """
 
-        state = np.zeros((1, self.link_df.shape[1]))
-        self.link_df = self.link_df.append(
-            pd.DataFrame(data=state, columns=self.link_df.columns),
-            ignore_index=True)
+        state = np.zeros((1, len(link_cols)))
+
+        if isinstance(self.link_df, type(None)):
+            self.link_df = state
+        else:
+            self.link_df = np.vstack([self.link_df, state])
 
         link = Link(point_i, point_j, self)
 
@@ -90,14 +93,14 @@ class Structure:
         """Update link vectors according to new positions and speeds of points
         """
 
-        self.link_df[dcoords] = (
+        self.link_df[:, dcoords_idxs] = (
             self.point_df[coords].loc[self.trgt_idx].values -
             self.point_df[coords].loc[self.srce_idx].values)
 
-        self.link_df['length'] = (self.link_df[dcoords]**2).sum(axis=1)**0.5
+        self.link_df[:, length_idx] = (self.link_df[:, dcoords_idxs]**2).sum(axis=1)**0.5
 
-        self.link_df[ucoords] = (self.link_df[dcoords] /
-                                 _to_3d(self.link_df['length']))
+        self.link_df[:, ucoords_idxs] = (self.link_df[:, dcoords_idxs] /
+                                         _to_3d(self.link_df[:, length_idx]))
 
         for link_idx, link in self.links.items():
             link.outer = np.outer(link.unit, link.unit)
@@ -269,16 +272,16 @@ class Link:
 
     @property
     def data(self):
-        return self.structure.link_df.values[self.link_idx]
+        return self.structure.link_df[self.link_idx]
 
     @property
     def dcoords(self):
-        return self.structure.link_df.values[self.link_idx, dcoords_idxs]
+        return self.structure.link_df[self.link_idx, dcoords_idxs]
 
     @property
     def length(self):
-        return self.structure.link_df.values[self.link_idx, length_idx]
+        return self.structure.link_df[self.link_idx, length_idx]
 
     @property
     def unit(self):
-        return self.structure.link_df.values[self.link_idx, ucoords_idxs]
+        return self.structure.link_df[self.link_idx, ucoords_idxs]
