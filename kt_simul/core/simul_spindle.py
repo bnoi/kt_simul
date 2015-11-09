@@ -351,15 +351,15 @@ class Metaphase(object):
 
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
-            ax.plot(self.time, self.spindle.spbL.traj[coord], color=self.spindle.spbL.color, lw=2)
-            ax.plot(self.time, self.spindle.spbR.traj[coord], color=self.spindle.spbL.color, lw=2)
+            ax.plot(self.time, self.spindle.spbL.traj[coord], color=self.spindle.spbL['color'], lw=2)
+            ax.plot(self.time, self.spindle.spbR.traj[coord], color=self.spindle.spbL['color'], lw=2)
 
             ax.set_xlabel("Time (s)", fontsize=18)
             ax.set_ylabel("{} (um)".format(coord), fontsize=18)
 
             for ch in self.spindle.chromosomes:
-                ax.plot(self.time, ch.cen_A.traj[coord], color=ch.cen_A.color, lw=2)
-                ax.plot(self.time, ch.cen_B.traj[coord], color=ch.cen_B.color, lw=2)
+                ax.plot(self.time, ch.cen_A.traj[coord], color=ch.cen_A['color'], lw=2)
+                ax.plot(self.time, ch.cen_B.traj[coord], color=ch.cen_B['color'], lw=2)
 
             ax.set_ylim(-max_pos, max_pos)
             ax.set_xlim(0, self.time[-1])

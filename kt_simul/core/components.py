@@ -33,10 +33,6 @@ class Spindle(Structure):
         self.duration = self.params['span']
         self.dt = self.params['dt']
 
-        self.attributes_df['plug_state'] = np.nan
-        self.attributes_df['plug_state'] = self.attributes_df['plug_state'].astype("float")
-        self.plug_state_idx = 1
-
         self.spbL = self.add_point(idx=0, init_pos=[-L/2, 0, 0], color="gray")
         self.spbR = self.add_point(idx=1, init_pos=[L/2, 0, 0], color="gray")
         self.add_link(self.spbL, self.spbR)
@@ -213,7 +209,7 @@ class Centromere(Point):
 
     def calc_plug_vector(self):
         idxs = slice(self.plugsites_idx[0], self.plugsites_idx[-1])
-        state = self.spindle.attributes_df.values[idxs, self.spindle.plug_state_idx]
+        state = self.spindle.attributes["plug_state"][idxs]
         self.plug_vector = state
 
     def calc_plug_history(self):
@@ -320,12 +316,12 @@ class PlugSite(Point):
 
     @property
     def plug_state(self):
-        return self.structure.attributes_df.at[self.idx, "plug_state"]
+        return self["plug_state"]
 
     @plug_state.setter
     def plug_state(self, state):
         self.plugged = 0 if state == 0 else 1
-        self.structure.attributes_df.at[self.idx, 'plug_state'] = state
+        self["plug_state"] = state
 
     @property
     def state_hist(self):

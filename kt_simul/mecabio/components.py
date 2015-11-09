@@ -38,7 +38,7 @@ class Structure:
         self.point_idx = {}
         self.point_df = None
 
-        self.attributes_df = pd.DataFrame(columns=['color'])
+        self.attributes = {}
         self.attributes_hist = pd.Panel()
         self._attributes_hist = []
         self.color_idx = 0
@@ -110,7 +110,7 @@ class Structure:
         """
 
         self._point_hist.append(self.point_df.copy())
-        self._attributes_hist.append(self.attributes_df.copy())
+        self._attributes_hist.append(self.attributes.copy())
 
     def end_history(self):
         """Various attributes conversion
@@ -119,7 +119,7 @@ class Structure:
         self.point_hist = pd.Panel({i: pd.DataFrame(p, columns=point_cols) for i, p in enumerate(self._point_hist)})
         self._point_hist = []
 
-        self.attributes_hist = pd.Panel({i: p for i, p in enumerate(self._attributes_hist)})
+        self.attributes_hist = pd.Panel({i: pd.DataFrame(p) for i, p in enumerate(self._attributes_hist)})
         self._attributes_hist = []
 
     def show(self):
@@ -138,8 +138,8 @@ class Structure:
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
-                if isinstance(p.color, str):
-                    ax.plot(p.traj[coord], 'o-', color=p.color)
+                if isinstance(p['color'], str):
+                    ax.plot(p.traj[coord], 'o-', color=p['color'])
                 else:
                     ax.plot(p.traj[coord], 'o-')
 
@@ -187,7 +187,7 @@ class Structure:
         self.point_hist = trajs.to_panel()
 
 
-class Point:
+class Point(object):
 
     def __init__(self, structure, idx=None, init_pos=None, init_speed=None, color=None):
 
@@ -213,8 +213,7 @@ class Point:
         else:
             self.structure.point_df = np.vstack([self.structure.point_df, state])
 
-        attribute = pd.DataFrame(dict(color=color), index=[self.idx])
-        self.structure.attributes_df = self.structure.attributes_df.append(attribute)
+        self['color'] = color
 
         self.structure.points[idx] = self
 
@@ -241,13 +240,21 @@ class Point:
     def dist(self, other):
         return np.linalg.norm(self.pos - other.pos)
 
-    @property
-    def color(self):
-        return self.structure.attributes_df.loc[self.idx, 'color']
+    def __getitem__(self, label):
+        return self.structure.attributes[label][self.idx]
 
-    @color.setter
-    def color(self, color):
-        self.structure.attributes_df.loc[self.idx, 'color'] = color
+    def __setitem__(self, label, value):
+        if label not in self.structure.attributes.keys():
+            self.structure.attributes[label] = np.zeros(self.idx + 1) * np.nan
+
+        if isinstance(value, str):
+            self.structure.attributes[label] = self.structure.attributes[label].astype('object')
+
+        if self.idx >= self.structure.attributes[label].shape[0]:
+            values = np.zeros(self.idx + 1 - self.structure.attributes[label].shape[0]) * np.nan
+            self.structure.attributes[label] = np.hstack([self.structure.attributes[label], values])
+
+        self.structure.attributes[label][self.idx] = value
 
 
 class Link:
