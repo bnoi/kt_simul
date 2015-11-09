@@ -336,7 +336,7 @@ class Metaphase(object):
         """Quickly show kymograph of current simulation.
         """
 
-        fig = plt.figure(figsize=(18, 12))
+        fig = plt.figure(figsize=(16, 10))
 
         coords = ['x', 'y', 'z']
         if 'x_proj' in self.spindle.point_hist.axes[2]:
@@ -366,6 +366,42 @@ class Metaphase(object):
             ax.set_xlim(0, self.time[-1])
 
             ax.axvline(self.time_anaphase, lw=1, alpha=0.8, color="black")
+
+        fig.tight_layout()
+
+        return fig
+
+    def show_attachments(self):
+        """
+        """
+
+        fig, (ax1, ax2) = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
+
+        for ch in self.spindle.chromosomes:
+            ax1.plot(self.time, ch.correct_history[:, 0],
+                     color=ch.cen_A['color'], lw=3)
+            ax2.plot(self.time, ch.correct_history[:, 1],
+                     color=ch.cen_B['color'], lw=3)
+
+            ax1.plot(self.time, ch.erroneous_history[:, 0],
+                     color=ch.cen_A['color'], lw=3, ls="--")
+            ax2.plot(self.time, ch.erroneous_history[:, 1],
+                     color=ch.cen_B['color'], lw=3, ls="--")
+
+        ax1.axhline(self.spindle.params['Mk'] + 0.2, lw=2, color='black')
+        ax2.axhline(self.spindle.params['Mk'] + 0.2, lw=2, color='black')
+
+        ax1.set_ylim(-0.5, self.spindle.params['Mk'] + 0.5)
+        ax2.set_ylim(-0.5, self.spindle.params['Mk'] + 0.5)
+
+        ax1.set_yticks(np.arange(0, self.spindle.params['Mk'] + 1))
+        ax2.set_yticks(np.arange(0, self.spindle.params['Mk'] + 1))
+
+        ax1.set_title("Centromere A")
+        ax2.set_title("Centromere B")
+
+        ax1.set_xlabel("Time (s)")
+        ax2.set_xlabel("Time (s)")
 
         fig.tight_layout()
 
