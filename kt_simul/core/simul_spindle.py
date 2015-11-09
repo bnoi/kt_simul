@@ -7,15 +7,11 @@ Civelekoglu-Scholey et al. Biophys. J. 90(11), 2006
 http://dx.doi.org/10.1529/biophysj.105.078691
 """
 
-from __future__ import unicode_literals
-from __future__ import division
-from __future__ import absolute_import
-from __future__ import print_function
+import warnings
 
 import logging
 import numpy as np
 
-import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -207,7 +203,10 @@ class Metaphase(object):
         with pd.HDFStore(fname) as store:
             store["point_hist"] = self.spindle.point_hist
             store["link_df"] = pd.DataFrame(self.spindle.link_df)
-            store["attributes_df"] = self.spindle.attributes_df
+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                store["attributes_hist"] = self.spindle.attributes_hist
 
             store["general_params"] = pd.Series(dict(initial_plug=self.spindle.initial_plug))
             store["analysis"] = pd.Series(self.analysis)
@@ -478,7 +477,7 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
 
         point_hist = store["point_hist"]
         link_df = store["link_df"].values
-        attributes_df = store["attributes_df"]
+        attributes_hist = store["attributes_hist"]
 
         general_params = store["general_params"]
         analysis = store["analysis"]
@@ -490,7 +489,7 @@ def load_metaphase(fname, params=None, measures=None, verbose=True):
 
     meta.spindle.link_df = link_df
     meta.spindle.point_hist = point_hist
-    meta.spindle.attributes_df = attributes_df
+    meta.spindle.attributes_hist = attributes_hist
 
     meta.analysis = analysis
 
