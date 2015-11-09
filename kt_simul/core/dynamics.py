@@ -72,7 +72,7 @@ class SpindleModel(Model):
         elif ps.plug_state == 1:
             ktMT = self.spindle.links[(self.spindle.spbR.idx, ps.idx)]
 
-        linear_fv(self, ktMT, 1, 1, -1)
+        linear_fv(self, ktMT, 1 * ps.calc_ldep(), 1, -1)
 
     def one_step(self, step):
 
