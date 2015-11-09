@@ -160,28 +160,36 @@ class Structure:
         trajs = trajs.reorder_levels([1, 0]).sortlevel()
         trajs.index.names = ['time_point', 'points']
 
+        pcoords = []
         for coord in coords:
-            trajs['{}_proj'.format(coord)] = np.nan
+            pcoord = '{}_proj'.format(coord)
+            pcoords.append(pcoord)
+            trajs[pcoord] = np.nan
 
         n_steps = trajs.index.get_level_values('time_point').shape[0]
 
         iterator = tqdm.tqdm(enumerate(trajs.groupby(level='time_point')),
                              disable=not progress, total=n_steps)
 
+        p1 = trajs.loc[pd.IndexSlice[:, idx_point1], coords].values
+        p2 = trajs.loc[pd.IndexSlice[:, idx_point2], coords].values
+
+        ref = (p1 + p2) / 2
+        vec = p1 - ref
+
+        proj_all_points = np.zeros((trajs.shape[0], len(coords)))
+
         for i, (t, points) in iterator:
 
-            p1 = points.loc[t, idx_point1][coords]
-            p2 = points.loc[t, idx_point2][coords]
+            A = transformations_matrix(ref[i], vec[i])
 
-            ref = (p1 + p2) / 2
-            vec = p1 - ref
+            proj_points = np.dot(points[coords], A)[:, :]
 
-            A = transformations_matrix(ref, vec)
+            idx_start = i * len(points)
+            idx_end = i * len(points) + len(points)
+            proj_all_points[idx_start:idx_end] = proj_points
 
-            projected_points = np.dot(points[coords], A)[:, :]
-
-            for i, coord in enumerate(coords):
-                trajs.loc[t, '{}_proj'.format(coord)] = projected_points[:, i]
+        trajs[pcoords] = proj_all_points
 
         trajs = trajs.stack().unstack('time_point')
         self.point_hist = trajs.to_panel()
