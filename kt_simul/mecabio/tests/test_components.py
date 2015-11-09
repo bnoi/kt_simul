@@ -12,7 +12,7 @@ def test_structure():
     p0 = struct.add_point(0, init_pos=[2, 0, 0], color="black")
 
     assert_almost_equal(struct.point_df[0], [2., 0., 0., 0., 0., 0.])
-    assert struct.attributes_df.loc[0, 'color'] == 'black'
+    assert struct.attributes['color'][0] == 'black'
 
     struct = Structure('')
     p0 = Point(struct, 0, init_pos=[2, 0, 0], color="black")
