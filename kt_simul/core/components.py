@@ -319,7 +319,7 @@ class PlugSite(Point):
 
     @property
     def plug_state(self):
-        return self.structure.attributes_df.values[self.idx, self.structure.plug_state_idx]
+        return self.structure.attributes_df.at[self.idx, "plug_state"]
 
     @plug_state.setter
     def plug_state(self, state):
