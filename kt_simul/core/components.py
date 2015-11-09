@@ -324,7 +324,7 @@ class PlugSite(Point):
     @plug_state.setter
     def plug_state(self, state):
         self.plugged = 0 if state == 0 else 1
-        self.structure.attributes_df.loc[self.idx, 'plug_state'] = state
+        self.structure.attributes_df.at[self.idx, 'plug_state'] = state
 
     @property
     def state_hist(self):
