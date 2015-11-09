@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 
 import logging
+import copy
 
 import tqdm
 
@@ -110,7 +111,7 @@ class Structure:
         """
 
         self._point_hist.append(self.point_df.copy())
-        self._attributes_hist.append(self.attributes.copy())
+        self._attributes_hist.append(copy.deepcopy(self.attributes))
 
     def end_history(self):
         """Various attributes conversion

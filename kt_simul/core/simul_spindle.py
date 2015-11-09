@@ -8,7 +8,6 @@ http://dx.doi.org/10.1529/biophysj.105.078691
 """
 
 import warnings
-
 import logging
 import numpy as np
 
