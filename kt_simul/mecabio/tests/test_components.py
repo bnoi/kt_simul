@@ -11,7 +11,7 @@ def test_structure():
     struct = Structure('')
     p0 = struct.add_point(0, init_pos=[2, 0, 0], color="black")
 
-    assert_almost_equal(struct.point_df.values[0], [2., 0., 0., 0., 0., 0.])
+    assert_almost_equal(struct.point_df[0], [2., 0., 0., 0., 0., 0.])
     assert struct.attributes_df.loc[0, 'color'] == 'black'
 
     struct = Structure('')
@@ -20,5 +20,5 @@ def test_structure():
 
     struct.add_link(p0, p1)
 
-    assert struct.point_df.index[0] == 0
+    assert struct.point_df.shape == (2, 6)
     assert struct.link_df.shape == (1, 7)

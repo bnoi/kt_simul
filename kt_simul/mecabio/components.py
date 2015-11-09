@@ -35,7 +35,8 @@ class Structure:
         self.name = name
 
         self.points = {}
-        self.point_df = pd.DataFrame(columns=point_cols)
+        self.point_idx = {}
+        self.point_df = None
 
         self.attributes_df = pd.DataFrame(columns=['color'])
         self.attributes_hist = pd.Panel()
@@ -47,7 +48,6 @@ class Structure:
 
         self.links = {}
         self.links_idx = {}
-        # self.link_df = pd.DataFrame(columns=link_cols)
         self.link_df = None
         self._links_idx_srce = []
         self._links_idx_trgt = []
@@ -94,8 +94,8 @@ class Structure:
         """
 
         self.link_df[:, dcoords_idxs] = (
-            self.point_df.values[self.trgt_idx, coords_idxs] -
-            self.point_df.values[self.srce_idx, coords_idxs])
+            self.point_df[self.trgt_idx, coords_idxs] -
+            self.point_df[self.srce_idx, coords_idxs])
 
         self.link_df[:, length_idx] = (self.link_df[:, dcoords_idxs]**2).sum(axis=1)**0.5
 
@@ -116,7 +116,7 @@ class Structure:
         """Various attributes conversion
         """
 
-        self.point_hist = pd.Panel({i: p for i, p in enumerate(self._point_hist)})
+        self.point_hist = pd.Panel({i: pd.DataFrame(p, columns=point_cols) for i, p in enumerate(self._point_hist)})
         self._point_hist = []
 
         self.attributes_hist = pd.Panel({i: p for i, p in enumerate(self._attributes_hist)})
@@ -207,9 +207,11 @@ class Point:
             color = np.nan
 
         state = np.concatenate((init_pos, init_speed)).reshape((1, len(coords)*2))
-        point_series = pd.DataFrame(state, columns=point_cols, index=[self.idx])
 
-        self.structure.point_df = self.structure.point_df.append(point_series)
+        if isinstance(self.structure.point_df, type(None)):
+            self.structure.point_df = state
+        else:
+            self.structure.point_df = np.vstack([self.structure.point_df, state])
 
         attribute = pd.DataFrame(dict(color=color), index=[self.idx])
         self.structure.attributes_df = self.structure.attributes_df.append(attribute)
@@ -218,19 +220,19 @@ class Point:
 
     @property
     def pos(self):
-        return self.structure.point_df.values[self.idx, coords_idxs]
+        return self.structure.point_df[self.idx, coords_idxs]
 
     @pos.setter
     def pos(self, position):
-        self.structure.point_df.values[self.idx, coords_idxs] = position
+        self.structure.point_df[self.idx, coords_idxs] = position
 
     @property
     def speed(self):
-        return self.structure.point_df.loc[self.idx, speed_coords]
+        return self.structure.point_df[self.idx, speed_coords_idxs]
 
     @speed.setter
     def speed(self, speed):
-        self.structure.point_df.loc[self.idx, speed_coords] = speed
+        self.structure.point_df[self.idx, speed_coords_idxs] = speed
 
     @property
     def traj(self):

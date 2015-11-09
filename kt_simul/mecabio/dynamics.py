@@ -1,6 +1,7 @@
 import numpy as np
 
 from . import coords
+from .components import point_cols
 
 
 class Model:
@@ -19,8 +20,8 @@ class Model:
     def solve(self):
         speeds = np.linalg.solve(self.Amat, -self.Bvect)
         for i, c in enumerate(coords):
-            self.structure.point_df['v'+c] = speeds[i::3]
-            self.structure.point_df[c] += speeds[i::3] * self.dt
+            self.structure.point_df[:, point_cols.index('v' + c)] = speeds[i::3]
+            self.structure.point_df[:, point_cols.index(c)] += speeds[i::3] * self.dt
         self.structure.update_geometry()
 
 
