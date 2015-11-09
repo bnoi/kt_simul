@@ -36,8 +36,7 @@ class Structure:
         self.name = name
 
         self.points = {}
-        self.point_idx = {}
-        self.point_df = None
+        self.point_df = np.array([])
 
         self.attributes = {}
         self.attributes_hist = pd.Panel()
@@ -217,14 +216,14 @@ class Point(object):
 
         state = np.concatenate((init_pos, init_speed)).reshape((1, len(coords)*2))
 
-        if isinstance(self.structure.point_df, type(None)):
+        if self.structure.point_df.shape[0] == 0:
             self.structure.point_df = state
         else:
             self.structure.point_df = np.vstack([self.structure.point_df, state])
 
         self['color'] = color
 
-        self.structure.points[idx] = self
+        self.structure.points[self.idx] = self
 
     @property
     def pos(self):
