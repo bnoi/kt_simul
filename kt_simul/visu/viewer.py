@@ -103,7 +103,7 @@ class StructureViewer():
 
         mdata = geometry.create_sphere(64, 64,  radius=radius)
 
-        color = point.color
+        color = point['color']
         if isinstance(color, type(None)):
             color = "gray"
 
