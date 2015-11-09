@@ -33,7 +33,8 @@ class Spindle(Structure):
         self.duration = self.params['span']
         self.dt = self.params['dt']
 
-        self.point_df['plug_state'] = np.nan
+        self.attributes_df['plug_state'] = np.nan
+        self.plug_state_idx = 1
 
         self.spbL = self.add_point(idx=0, init_pos=[-L/2, 0, 0], color="gray")
         self.spbR = self.add_point(idx=1, init_pos=[L/2, 0, 0], color="gray")
@@ -317,16 +318,16 @@ class PlugSite(Point):
 
     @property
     def plug_state(self):
-        return self.structure.point_df.loc[self.idx, 'plug_state']
+        return self.structure.attributes_df.values[self.idx, self.structure.plug_state_idx]
 
     @plug_state.setter
     def plug_state(self, state):
         self.plugged = 0 if state == 0 else 1
-        self.structure.point_df.loc[self.idx, 'plug_state'] = state
+        self.structure.attributes_df.loc[self.idx, 'plug_state'] = state
 
     @property
     def state_hist(self):
-        return self.structure.point_hist.xs(
+        return self.structure.attributes_hist.xs(
             self.idx, axis='major').T['plug_state']
 
     def calc_ldep(self):

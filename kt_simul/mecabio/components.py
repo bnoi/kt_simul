@@ -13,7 +13,13 @@ from ..utils.transformations import transformations_matrix
 log = logging.getLogger(__name__)
 
 point_cols = coords + speed_coords
+coords_idxs = slice(0, 3)
+speed_coords_idxs = slice(3, 6)
+
 link_cols = dcoords + ucoords + ['length', ]
+dcoords_idxs = slice(0, 3)
+ucoords_idxs = slice(3, 6)
+length_idx = 6
 
 
 def _to_3d(df):
@@ -27,18 +33,23 @@ class Structure:
 
     def __init__(self, name):
         self.name = name
+
         self.points = {}
-        self.links = {}
         self.point_df = pd.DataFrame(columns=point_cols)
 
         self.attributes_df = pd.DataFrame(columns=['color'])
+        self.attributes_hist = pd.Panel()
+        self._attributes_hist = []
+        self.color_idx = 0
 
-        _link_idx = pd.MultiIndex(levels=[[], []],
-                                  labels=[[], []],
-                                  names=['srce', 'trgt'])
-        self.link_df = pd.DataFrame(columns=link_cols, index=_link_idx)
-        self.point_hist = pd.Panel
+        self.point_hist = pd.Panel()
         self._point_hist = []
+
+        self.links = {}
+        self.links_idx = {}
+        self.link_df = pd.DataFrame(columns=link_cols)
+        self._links_idx_srce = []
+        self._links_idx_trgt = []
 
     def add_point(self, idx=None, init_pos=None, init_speed=None, color=None):
         """Add a point to the structure
@@ -53,20 +64,27 @@ class Structure:
 
         state = np.zeros((1, self.link_df.shape[1]))
         self.link_df = self.link_df.append(
-            pd.DataFrame(index=[(point_i.idx, point_j.idx)],
-                         data=state,
-                         columns=self.link_df.columns))
+            pd.DataFrame(data=state, columns=self.link_df.columns),
+            ignore_index=True)
+
         link = Link(point_i, point_j, self)
+
         self.links[(point_i.idx, point_j.idx)] = link
+
+        self._links_idx_srce.append(point_i.idx)
+        self._links_idx_trgt.append(point_j.idx)
+
+        self.links_idx[link.link_idx] = (point_i.idx, point_j.idx)
+
         return link
 
     @property
     def srce_idx(self):
-        return self.link_df.index.get_level_values('srce')
+        return np.array(self._links_idx_srce)
 
     @property
     def trgt_idx(self):
-        return self.link_df.index.get_level_values('trgt')
+        return np.array(self._links_idx_trgt)
 
     def update_geometry(self):
         """Update link vectors according to new positions and speeds of points
@@ -81,15 +99,15 @@ class Structure:
         self.link_df[ucoords] = (self.link_df[dcoords] /
                                  _to_3d(self.link_df['length']))
 
-        for idxs, link_values in self.link_df[ucoords].iterrows():
-            link = self.links[idxs]
-            link.outer = np.outer(link_values, link_values)
+        for link_idx, link in self.links.items():
+            link.outer = np.outer(link.unit, link.unit)
 
     def register_history(self, step):
         """Save points history for re-use after the simulation
         """
 
         self._point_hist.append(self.point_df.copy())
+        self._attributes_hist.append(self.attributes_df.copy())
 
     def end_history(self):
         """Various attributes conversion
@@ -97,6 +115,9 @@ class Structure:
 
         self.point_hist = pd.Panel({i: p for i, p in enumerate(self._point_hist)})
         self._point_hist = []
+
+        self.attributes_hist = pd.Panel({i: p for i, p in enumerate(self._attributes_hist)})
+        self._attributes_hist = []
 
     def show(self):
         """Basic plot for points trajectories over time
@@ -194,18 +215,22 @@ class Point:
 
     @property
     def pos(self):
-        return self.structure.point_df[coords].values[self.idx]
+        return self.structure.point_df.values[self.idx, coords_idxs]
+        #return self.structure.point_df.loc[self.idx, coords]
 
     @pos.setter
     def pos(self, position):
+        # self.structure.point_df.values[self.idx, coords_idxs] = position
         self.structure.point_df.loc[self.idx, coords] = position
 
     @property
     def speed(self):
+        # return self.structure.point_df.values[self.idx, speed_coords_idxs]
         return self.structure.point_df.loc[self.idx, speed_coords]
 
     @speed.setter
     def speed(self, speed):
+        # self.structure.point_df.values[self.idx, speed_coords_idxs] = speed
         self.structure.point_df.loc[self.idx, speed_coords] = speed
 
     @property
@@ -234,6 +259,9 @@ class Link:
         idx_i = point_i.idx
         idx_j = point_j.idx
 
+        # Automatic link index
+        self.link_idx = len(self.structure.links)
+
         self.idx = (idx_i, idx_j)
         self.idxs_i = point_i.idxs
         self.idxs_j = point_j.idxs
@@ -245,20 +273,16 @@ class Link:
 
     @property
     def data(self):
-        return self.structure.link_df.loc[self.idx]
+        return self.structure.link_df.values[self.link_idx]
 
     @property
     def dcoords(self):
-        return self.structure.link_df.loc[self.idx, dcoords]
+        return self.structure.link_df.values[self.link_idx, dcoords_idxs]
 
     @property
     def length(self):
-        return self.structure.link_df.loc[self.idx, 'length']
-
-    @property
-    def speed(self):
-        return self.structure.link_df.loc[self.idx, dspeeds]
+        return self.structure.link_df.values[self.link_idx, length_idx]
 
     @property
     def unit(self):
-        return self.structure.link_df.loc[self.idx][ucoords]
+        return self.structure.link_df.values[self.link_idx, ucoords_idxs]

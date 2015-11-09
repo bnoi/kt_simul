@@ -21,5 +21,5 @@ def test_structure():
     struct.add_link(p0, p1)
 
     assert struct.point_df.index[0] == 0
-    assert struct.link_df.index[0] == (0, 1)
+    assert struct.link_df.index[0] == 0
     assert struct.link_df.shape == (1, 7)
