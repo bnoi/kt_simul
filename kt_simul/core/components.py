@@ -34,6 +34,7 @@ class Spindle(Structure):
         self.dt = self.params['dt']
 
         self.attributes_df['plug_state'] = np.nan
+        self.attributes_df['plug_state'] = self.attributes_df['plug_state'].astype("float")
         self.plug_state_idx = 1
 
         self.spbL = self.add_point(idx=0, init_pos=[-L/2, 0, 0], color="gray")
@@ -193,9 +194,11 @@ class Centromere(Point):
         self.toa = 0  # time of arrival at pole
         self.plug_vector = np.zeros(Mk, dtype=np.int)
         self.plugsites = []
+        self.plugsites_idx = []
         for m in range(Mk):
             ps = PlugSite(self, m)
             self.plugsites.append(ps)
+            self.plugsites_idx.append(ps.idx)
         self.calc_plug_vector()
 
     def is_attached(self):
@@ -209,8 +212,7 @@ class Centromere(Point):
         return False
 
     def calc_plug_vector(self):
-        state = np.array([plugsite.plug_state for plugsite
-                          in self.plugsites])
+        state = self.spindle.attributes_df.values[self.plugsites_idx, self.spindle.plug_state_idx]
         self.plug_vector = state
 
     def calc_plug_history(self):
