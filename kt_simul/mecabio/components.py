@@ -94,8 +94,8 @@ class Structure:
         """
 
         self.link_df[:, dcoords_idxs] = (
-            self.point_df[coords].loc[self.trgt_idx].values -
-            self.point_df[coords].loc[self.srce_idx].values)
+            self.point_df.values[self.trgt_idx, coords_idxs] -
+            self.point_df.values[self.srce_idx, coords_idxs])
 
         self.link_df[:, length_idx] = (self.link_df[:, dcoords_idxs]**2).sum(axis=1)**0.5
 
@@ -222,7 +222,7 @@ class Point:
 
     @pos.setter
     def pos(self, position):
-        self.structure.point_df.loc[self.idx, coords] = position
+        self.structure.point_df.values[self.idx, coords_idxs] = position
 
     @property
     def speed(self):

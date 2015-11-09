@@ -212,7 +212,8 @@ class Centromere(Point):
         return False
 
     def calc_plug_vector(self):
-        state = self.spindle.attributes_df.values[self.plugsites_idx, self.spindle.plug_state_idx]
+        idxs = slice(self.plugsites_idx[0], self.plugsites_idx[-1])
+        state = self.spindle.attributes_df.values[idxs, self.spindle.plug_state_idx]
         self.plug_vector = state
 
     def calc_plug_history(self):
