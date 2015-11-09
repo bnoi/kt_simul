@@ -216,21 +216,17 @@ class Point:
     @property
     def pos(self):
         return self.structure.point_df.values[self.idx, coords_idxs]
-        #return self.structure.point_df.loc[self.idx, coords]
 
     @pos.setter
     def pos(self, position):
-        # self.structure.point_df.values[self.idx, coords_idxs] = position
         self.structure.point_df.loc[self.idx, coords] = position
 
     @property
     def speed(self):
-        # return self.structure.point_df.values[self.idx, speed_coords_idxs]
         return self.structure.point_df.loc[self.idx, speed_coords]
 
     @speed.setter
     def speed(self, speed):
-        # self.structure.point_df.values[self.idx, speed_coords_idxs] = speed
         self.structure.point_df.loc[self.idx, speed_coords] = speed
 
     @property
