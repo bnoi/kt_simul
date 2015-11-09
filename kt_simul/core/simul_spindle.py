@@ -351,8 +351,10 @@ class Metaphase(object):
 
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
-            ax.plot(self.time, self.spindle.spbL.traj[coord], color=self.spindle.spbL['color'], lw=2)
-            ax.plot(self.time, self.spindle.spbR.traj[coord], color=self.spindle.spbL['color'], lw=2)
+            ax.plot(self.time, self.spindle.spbL.traj[coord],
+                    color=self.spindle.spbL['color'], lw=2)
+            ax.plot(self.time, self.spindle.spbR.traj[coord],
+                    color=self.spindle.spbL['color'], lw=2)
 
             ax.set_xlabel("Time (s)", fontsize=18)
             ax.set_ylabel("{} (um)".format(coord), fontsize=18)
