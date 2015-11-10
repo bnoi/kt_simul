@@ -1,5 +1,3 @@
-import sys
-
 import numpy as np
 
 from . import coords
@@ -22,14 +20,13 @@ class Model:
 
     def solve(self):
 
-        # Check wether Amat is singular
-        if np.linalg.cond(self.Amat) < 1/sys.float_info.epsilon:
-            i = np.linalg.inv(self.Amat)
-        else:
-            raise PhysicsException("Each point in your structure need to have a viscosity.\n"
-                            "Please use `viscous(model, point, mu=1)`.")
+        try:
+            speeds = np.linalg.solve(self.Amat, -self.Bvect)
+        except:
+            mess = ("Each point in your structure need to have a viscosity.\n"
+                    "Please use `viscous(model, point, mu=1)`.")
+            raise PhysicsException(mess) from None
 
-        speeds = np.linalg.solve(self.Amat, -self.Bvect)
         for i, c in enumerate(coords):
             self.structure.point_df[:, point_cols.index('v' + c)] = speeds[i::3]
             self.structure.point_df[:, point_cols.index(c)] += speeds[i::3] * self.dt
