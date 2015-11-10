@@ -32,6 +32,9 @@ class Model:
             self.structure.point_df[:, point_cols.index(c)] += speeds[i::3] * self.dt
         self.structure.update_geometry()
 
+# Can probably be cythonized following this :
+# http://docs.cython.org/src/userguide/numpy_tutorial.html
+
 
 def viscous(model, point, mu):
     ''' Viscous drag with coeff mu on point '''
