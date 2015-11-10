@@ -1,7 +1,13 @@
+import sys
+
 import numpy as np
 
 from . import coords
 from .components import point_cols
+
+
+class PhysicsException(Exception):
+    pass
 
 
 class Model:
@@ -14,10 +20,15 @@ class Model:
         self.Amat = np.zeros((self.n_points * 3, self.n_points * 3))
         self.Bvect = np.zeros(self.n_points * 3)
 
-        for point in self.structure.points.values():
-            viscous(self, point, 1)
-
     def solve(self):
+
+        # Check wether Amat is singular
+        if np.linalg.cond(self.Amat) < 1/sys.float_info.epsilon:
+            i = np.linalg.inv(self.Amat)
+        else:
+            raise PhysicsException("Each point in your structure need to have a viscosity.\n"
+                            "Please use `viscous(model, point, mu=1)`.")
+
         speeds = np.linalg.solve(self.Amat, -self.Bvect)
         for i, c in enumerate(coords):
             self.structure.point_df[:, point_cols.index('v' + c)] = speeds[i::3]
@@ -63,4 +74,4 @@ def contraction(model, link, F):
 def linear_fv(model, link, F_stall, v_max, gamma=-1):
 
     dashpot(model, link, F_stall / v_max)
-    contraction(model, link, -gamma * F_stall)
+    contraction(model=model, link=link, F=-gamma * F_stall)

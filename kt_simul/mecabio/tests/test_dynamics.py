@@ -10,8 +10,11 @@ from kt_simul.mecabio import viscous
 from kt_simul.mecabio import dashpot
 from kt_simul.mecabio import linear_fv
 from kt_simul.mecabio import contraction
+from kt_simul.mecabio.dynamics import PhysicsException
 
 from numpy.testing import assert_almost_equal
+
+from nose.tools import raises
 
 
 def test_history():
@@ -23,6 +26,9 @@ def test_history():
     lnk = struct.add_link(p0, p1)
     struct.update_geometry()
     m = Model(struct)
+
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -47,6 +53,9 @@ def test_projection():
     lnk = struct.add_link(p0, p1)
     struct.update_geometry()
     m = Model(struct)
+
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -74,6 +83,9 @@ def test_spring():
     struct.update_geometry()
     m = Model(struct)
 
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
+
     def model_update(step):
 
         m.Bvect *= 0
@@ -96,6 +108,9 @@ def test_dampedspring():
     struct.update_geometry()
     m = Model(struct)
 
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
+
     def model_update(step):
 
         m.Bvect *= 0
@@ -117,6 +132,9 @@ def test_viscous():
     lnk = struct.add_link(p0, p1)
     struct.update_geometry()
     m = Model(struct)
+
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
 
     def model_update(step):
 
@@ -142,6 +160,9 @@ def test_dashpot():
     struct.update_geometry()
     m = Model(struct)
 
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
+
     def model_update(step):
 
         m.Bvect *= 0
@@ -164,6 +185,9 @@ def test_linear_fv():
     struct.update_geometry()
     m = Model(struct)
 
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
+
     def model_update(step):
 
         m.Bvect *= 0
@@ -185,6 +209,9 @@ def test_contraction():
     struct.update_geometry()
     m = Model(struct)
 
+    viscous(m, p0, 1)
+    viscous(m, p1, 1)
+
     def model_update(step):
 
         m.Bvect *= 0
@@ -196,3 +223,27 @@ def test_contraction():
         model_update(i)
 
     assert_almost_equal(p0.dist(p1), 0.10, decimal=2)
+
+
+@raises(PhysicsException)
+def test_viscous_points():
+    """
+    """
+    struct = Structure('')
+    p0 = struct.add_point(0, init_pos=[0, 0, 0])
+    p1 = struct.add_point(1, init_pos=[2, 0, 0])
+    lnk = struct.add_link(p0, p1)
+    struct.update_geometry()
+    m = Model(struct)
+
+    viscous(m, p0, 1)
+
+    def model_update(step):
+
+        m.Bvect *= 0
+        spring(m, lnk, 0.1, 1)
+        struct.register_history(step)
+
+    for i in range(5):
+        m.solve()
+        model_update(i)
