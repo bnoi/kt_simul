@@ -166,7 +166,7 @@ class Structure:
             pcoords.append(pcoord)
             trajs[pcoord] = np.nan
 
-        n_steps = trajs.index.get_level_values('time_point').shape[0]
+        n_steps = trajs.index.get_level_values('time_point').unique().shape[0]
 
         iterator = tqdm.tqdm(enumerate(trajs.groupby(level='time_point')),
                              disable=not progress, total=n_steps)
