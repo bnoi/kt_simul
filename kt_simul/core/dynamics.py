@@ -8,7 +8,7 @@ class SpindleModel(Model):
 
     def __init__(self, spindle):
         self.params = spindle.params
-        Model.__init__(self, spindle, dt=1) #, self.params['dt'])
+        Model.__init__(self, spindle, dt=1)
         self.prng = spindle.prng
         self.spindle = spindle
         self.duration = self.params['span']

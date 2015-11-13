@@ -122,7 +122,7 @@ class Structure:
         self.attributes_hist = pd.Panel({i: pd.DataFrame(p) for i, p in enumerate(self._attributes_hist)})
         self._attributes_hist = []
 
-    def show(self):
+    def show(self, dt=1):
         """Basic plot for points trajectories over time
         """
 
@@ -134,14 +134,16 @@ class Structure:
         if 'x_proj' in self.point_hist.axes[2]:
             used_coords.append('x_proj')
 
+        times = self.point_hist.keys().values * dt
+
         for i, coord in enumerate(used_coords):
             ax = fig.add_subplot(2, 2, i+1, sharex=ax, sharey=ax)
 
             for n, p in self.points.items():
                 if isinstance(p['color'], str):
-                    ax.plot(p.traj[coord], 'o-', color=p['color'])
+                    ax.plot(times, p.traj[coord], 'o-', color=p['color'])
                 else:
-                    ax.plot(p.traj[coord], 'o-')
+                    ax.plot(times, p.traj[coord], 'o-')
 
             ax.set_ylabel(coord)
 
