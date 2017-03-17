@@ -24,6 +24,21 @@ Some code example and documentation con be found here : http://nbviewer.ipython.
 
 Mathematical documentation about the 1D model is available at [doc/simu_spindle_1d.pdf](doc/simu_spindle_1d.pdf).
 
+## Installation
+
+The best way to install the dependencies is to use the [Anaconda Python distribution](https://www.continuum.io/downloads). Then use the following command lines :
+
+```bash
+conda config --add channels conda-forge
+conda install numpy scipy pandas matplotlib
+```
+
+To install the `kt_simul` model, do :
+
+```bash
+pip install -e git+https://github.com/bnoi/kt_simul.git#egg=master
+```
+
 ## Funding
 
 This project is funded by the French National Research Agency as : *ANR- BLAN 1206 01 Chromocatch, programme blanc 2010*
@@ -37,19 +52,3 @@ This project is funded by the French National Research Agency as : *ANR- BLAN 12
 
 This code is provided under the GPL compatible CeCILL licence (see
 [LICENCE](LICENSE) for full details).
-
-## Dependencies
-
-- Python 3.4
-- numpy
-- scipy
-- pandas
-- matplotlib
-- PyQt4 (optional)
-- vispy (optional)
-
-## Installation
-
-You can install `kt_simul` via pip :
-
-    pip install -e git+https://github.com/bnoi/kt_simul.git#egg=master
