@@ -159,7 +159,7 @@ class Structure:
         # Reorder Panel in DataFrame
         trajs = self.point_hist.to_frame()
         trajs = trajs.stack().unstack('minor')
-        trajs = trajs.reorder_levels([1, 0]).sortlevel()
+        trajs = trajs.reorder_levels([1, 0]).sort_index(level=0)
         trajs.index.names = ['time_point', 'points']
 
         pcoords = []
