@@ -14,7 +14,7 @@ from kt_simul.mecabio.dynamics import PhysicsException
 
 from numpy.testing import assert_almost_equal
 
-from nose.tools import raises
+from pytest import raises
 
 
 def test_history():
@@ -225,7 +225,7 @@ def test_contraction():
     assert_almost_equal(p0.dist(p1), 0.10, decimal=2)
 
 
-@raises(PhysicsException)
+#@raises(PhysicsException)
 def test_viscous_points():
     """
     """
@@ -244,6 +244,7 @@ def test_viscous_points():
         spring(m, lnk, 0.1, 1)
         struct.register_history(step)
 
-    for i in range(5):
-        m.solve()
-        model_update(i)
+    with raises(PhysicsException):
+        for i in range(5):
+            m.solve()
+            model_update(i)

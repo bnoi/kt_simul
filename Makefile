@@ -5,10 +5,7 @@ flake8:
 	flake8 --max-line-length=100 --count --statistics --exit-zero kt_simul/
 
 test:
-	nosetests kt_simul/ -v
-
-coverage:
-	nosetests kt_simul/ --with-coverage --cover-package=kt_simul -v
+	pytest
 
 clean:
 	find . -name "*.pyc" -exec rm -rf {} \;
