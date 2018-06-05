@@ -38,3 +38,6 @@ nosetests.xml
 doc/build/
 build/
 dist/
+
+# pycharm 
+.idea/

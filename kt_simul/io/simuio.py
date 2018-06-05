@@ -7,7 +7,6 @@ from __future__ import division
 from __future__ import absolute_import
 from __future__ import print_function
 
-import os
 import logging
 
 import pandas as pd
@@ -19,7 +18,7 @@ from . import ParamTree
 log = logging.getLogger(__name__)
 
 
-class SimuIO():
+class SimuIO:
     """
     Parameters
     ----------
@@ -84,7 +83,7 @@ class SimuIO():
 
         spbs = pd.concat({('spb', 'A'): spbL, ('spb', 'B'): spbR},
                          names=['label', 'side'])
-        spbs = spbs.reorder_levels([2, 0, 1]).sort()
+        spbs = spbs.reorder_levels([2, 0, 1]).sort_index()
 
         """
         kts DataFrame look like that:
@@ -157,12 +156,12 @@ class SimuIO():
                 plugsites_dic[(i, 'kt', 'B', j)] = psB_df
 
         kts = pd.concat(chromosomes_dic, names=['id', 'label', 'side'])
-        kts = kts.reorder_levels([3, 0, 1, 2]).sort()
+        kts = kts.reorder_levels([3, 0, 1, 2]).sort_index()
 
         plug_sites = pd.concat(plugsites_dic,
                                names=['id', 'label', 'side', 'plug_id'])
-        plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort()
-        plug_sites = plug_sites.reindex_axis(['x', 'state_hist'], axis=1)
+        plug_sites = plug_sites.reorder_levels([4, 0, 1, 2, 3]).sort_index()
+        plug_sites = plug_sites.reindex(['x', 'state_hist'], axis=1)
 
         store = pd.HDFStore(simufname)
         df_to_save = ['spbs', 'kts', 'plug_sites', 'analysis']
