@@ -8,7 +8,7 @@ This python module provides the simulation of mitotic spindle elements, during c
 If you're interested in this work, please contact :
 
 - __Sylvie Tournier__ (sylvie.tournier-gachet@univ-tlse3.fr) for all aspects related to the biology and for academical collaboration purposes.
-- __Guillaume Gay__ (guillaume@damcb.com and http://damcb.org) for all aspects related to the physics and the code.
+- __Guillaume Gay__ (guillaume@damcb.com and https://morphogenie.fr) for all aspects related to the physics and the code.
 
 The underlying model is fully described in:
 
