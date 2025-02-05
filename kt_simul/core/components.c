@@ -3466,7 +3466,6 @@ static const char __pyx_k__57[] = "?";
 static const char __pyx_k_abs[] = "abs";
 static const char __pyx_k_all[] = "__all__";
 static const char __pyx_k_exp[] = "exp";
-static const char __pyx_k_int[] = "int";
 static const char __pyx_k_k_a[] = "k_a";
 static const char __pyx_k_loc[] = "loc";
 static const char __pyx_k_nan[] = "nan";
@@ -4001,7 +4000,6 @@ typedef struct {
   PyObject *__pyx_n_s_init_pos;
   PyObject *__pyx_n_s_initial_plug;
   PyObject *__pyx_n_s_initializing;
-  PyObject *__pyx_n_s_int;
   PyObject *__pyx_n_s_is_attached;
   PyObject *__pyx_n_s_is_coroutine;
   PyObject *__pyx_n_s_is_correct;
@@ -4352,7 +4350,6 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_s_init_pos);
   Py_CLEAR(clear_module_state->__pyx_n_s_initial_plug);
   Py_CLEAR(clear_module_state->__pyx_n_s_initializing);
-  Py_CLEAR(clear_module_state->__pyx_n_s_int);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_attached);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_coroutine);
   Py_CLEAR(clear_module_state->__pyx_n_s_is_correct);
@@ -4681,7 +4678,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_s_init_pos);
   Py_VISIT(traverse_module_state->__pyx_n_s_initial_plug);
   Py_VISIT(traverse_module_state->__pyx_n_s_initializing);
-  Py_VISIT(traverse_module_state->__pyx_n_s_int);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_attached);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_coroutine);
   Py_VISIT(traverse_module_state->__pyx_n_s_is_correct);
@@ -5112,7 +5108,6 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_s_init_pos __pyx_mstate_global->__pyx_n_s_init_pos
 #define __pyx_n_s_initial_plug __pyx_mstate_global->__pyx_n_s_initial_plug
 #define __pyx_n_s_initializing __pyx_mstate_global->__pyx_n_s_initializing
-#define __pyx_n_s_int __pyx_mstate_global->__pyx_n_s_int
 #define __pyx_n_s_is_attached __pyx_mstate_global->__pyx_n_s_is_attached
 #define __pyx_n_s_is_coroutine __pyx_mstate_global->__pyx_n_s_is_coroutine
 #define __pyx_n_s_is_correct __pyx_mstate_global->__pyx_n_s_is_correct
@@ -14068,10 +14063,9 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
   PyObject *__pyx_t_4 = NULL;
   unsigned int __pyx_t_5;
   PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
-  Py_ssize_t __pyx_t_8;
-  PyObject *(*__pyx_t_9)(PyObject *);
-  int __pyx_t_10;
+  Py_ssize_t __pyx_t_7;
+  PyObject *(*__pyx_t_8)(PyObject *);
+  int __pyx_t_9;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -14254,7 +14248,7 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
  *         Organite.__init__(self, chromosome, init_pos)
  *         Mk = int(self.KD.params['Mk'])             # <<<<<<<<<<<<<<
  *         self.toa = 0  # time of arrival at pole
- *         self.plug_vector = np.zeros(Mk, dtype=np.int)
+ *         self.plug_vector = np.zeros(Mk, dtype=int)
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self->__pyx_base.KD, __pyx_n_s_params); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 282, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
@@ -14271,7 +14265,7 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
  *         Organite.__init__(self, chromosome, init_pos)
  *         Mk = int(self.KD.params['Mk'])
  *         self.toa = 0  # time of arrival at pole             # <<<<<<<<<<<<<<
- *         self.plug_vector = np.zeros(Mk, dtype=np.int)
+ *         self.plug_vector = np.zeros(Mk, dtype=int)
  *         self.plugsites = []
  */
   __pyx_v_self->toa = 0.0;
@@ -14279,7 +14273,7 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
   /* "kt_simul/core/components.pyx":284
  *         Mk = int(self.KD.params['Mk'])
  *         self.toa = 0  # time of arrival at pole
- *         self.plug_vector = np.zeros(Mk, dtype=np.int)             # <<<<<<<<<<<<<<
+ *         self.plug_vector = np.zeros(Mk, dtype=int)             # <<<<<<<<<<<<<<
  *         self.plugsites = []
  *         cdef PlugSite ps
  */
@@ -14295,39 +14289,33 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
   if (__Pyx_PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_v_Mk)) __PYX_ERR(0, 284, __pyx_L1_error);
   __pyx_t_4 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_np); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 284, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 284, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 284, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_t_6, __pyx_n_s_int); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 284, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 284, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 284, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 284, __pyx_L1_error)
-  __Pyx_GIVEREF(__pyx_t_7);
+  if (!(likely(((__pyx_t_6) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_6, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 284, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_6);
   __Pyx_GOTREF((PyObject *)__pyx_v_self->plug_vector);
   __Pyx_DECREF((PyObject *)__pyx_v_self->plug_vector);
-  __pyx_v_self->plug_vector = ((PyArrayObject *)__pyx_t_7);
-  __pyx_t_7 = 0;
+  __pyx_v_self->plug_vector = ((PyArrayObject *)__pyx_t_6);
+  __pyx_t_6 = 0;
 
   /* "kt_simul/core/components.pyx":285
  *         self.toa = 0  # time of arrival at pole
- *         self.plug_vector = np.zeros(Mk, dtype=np.int)
+ *         self.plug_vector = np.zeros(Mk, dtype=int)
  *         self.plugsites = []             # <<<<<<<<<<<<<<
  *         cdef PlugSite ps
  *         for m in range(Mk):
  */
-  __pyx_t_7 = PyList_New(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 285, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  __Pyx_GIVEREF(__pyx_t_7);
+  __pyx_t_6 = PyList_New(0); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 285, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  __Pyx_GIVEREF(__pyx_t_6);
   __Pyx_GOTREF(__pyx_v_self->plugsites);
   __Pyx_DECREF(__pyx_v_self->plugsites);
-  __pyx_v_self->plugsites = ((PyObject*)__pyx_t_7);
-  __pyx_t_7 = 0;
+  __pyx_v_self->plugsites = ((PyObject*)__pyx_t_6);
+  __pyx_t_6 = 0;
 
   /* "kt_simul/core/components.pyx":287
  *         self.plugsites = []
@@ -14336,33 +14324,33 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
  *             ps = PlugSite(self, m)
  *             self.plugsites.append(ps)
  */
-  __pyx_t_7 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_Mk); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
-  if (likely(PyList_CheckExact(__pyx_t_7)) || PyTuple_CheckExact(__pyx_t_7)) {
-    __pyx_t_4 = __pyx_t_7; __Pyx_INCREF(__pyx_t_4);
-    __pyx_t_8 = 0;
-    __pyx_t_9 = NULL;
+  __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_builtin_range, __pyx_v_Mk); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_6);
+  if (likely(PyList_CheckExact(__pyx_t_6)) || PyTuple_CheckExact(__pyx_t_6)) {
+    __pyx_t_4 = __pyx_t_6; __Pyx_INCREF(__pyx_t_4);
+    __pyx_t_7 = 0;
+    __pyx_t_8 = NULL;
   } else {
-    __pyx_t_8 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 287, __pyx_L1_error)
+    __pyx_t_7 = -1; __pyx_t_4 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 287, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_9 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 287, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetIterNextFunc(__pyx_t_4); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 287, __pyx_L1_error)
   }
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   for (;;) {
-    if (likely(!__pyx_t_9)) {
+    if (likely(!__pyx_t_8)) {
       if (likely(PyList_CheckExact(__pyx_t_4))) {
         {
           Py_ssize_t __pyx_temp = __Pyx_PyList_GET_SIZE(__pyx_t_4);
           #if !CYTHON_ASSUME_SAFE_MACROS
           if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
           #endif
-          if (__pyx_t_8 >= __pyx_temp) break;
+          if (__pyx_t_7 >= __pyx_temp) break;
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_8); __Pyx_INCREF(__pyx_t_7); __pyx_t_8++; if (unlikely((0 < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
+        __pyx_t_6 = PyList_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
         #else
-        __pyx_t_7 = __Pyx_PySequence_ITEM(__pyx_t_4, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_6 = __Pyx_PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 287, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_6);
         #endif
       } else {
         {
@@ -14370,18 +14358,18 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
           #if !CYTHON_ASSUME_SAFE_MACROS
           if (unlikely((__pyx_temp < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
           #endif
-          if (__pyx_t_8 >= __pyx_temp) break;
+          if (__pyx_t_7 >= __pyx_temp) break;
         }
         #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-        __pyx_t_7 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_8); __Pyx_INCREF(__pyx_t_7); __pyx_t_8++; if (unlikely((0 < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_4, __pyx_t_7); __Pyx_INCREF(__pyx_t_6); __pyx_t_7++; if (unlikely((0 < 0))) __PYX_ERR(0, 287, __pyx_L1_error)
         #else
-        __pyx_t_7 = __Pyx_PySequence_ITEM(__pyx_t_4, __pyx_t_8); __pyx_t_8++; if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 287, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
+        __pyx_t_6 = __Pyx_PySequence_ITEM(__pyx_t_4, __pyx_t_7); __pyx_t_7++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 287, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_6);
         #endif
       }
     } else {
-      __pyx_t_7 = __pyx_t_9(__pyx_t_4);
-      if (unlikely(!__pyx_t_7)) {
+      __pyx_t_6 = __pyx_t_8(__pyx_t_4);
+      if (unlikely(!__pyx_t_6)) {
         PyObject* exc_type = PyErr_Occurred();
         if (exc_type) {
           if (likely(__Pyx_PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
@@ -14389,10 +14377,10 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
         }
         break;
       }
-      __Pyx_GOTREF(__pyx_t_7);
+      __Pyx_GOTREF(__pyx_t_6);
     }
-    __Pyx_XDECREF_SET(__pyx_v_m, __pyx_t_7);
-    __pyx_t_7 = 0;
+    __Pyx_XDECREF_SET(__pyx_v_m, __pyx_t_6);
+    __pyx_t_6 = 0;
 
     /* "kt_simul/core/components.pyx":288
  *         cdef PlugSite ps
@@ -14401,17 +14389,17 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
  *             self.plugsites.append(ps)
  *         self.calc_plug_vector()
  */
-    __pyx_t_7 = PyTuple_New(2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 288, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_7);
+    __pyx_t_6 = PyTuple_New(2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 288, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
     __Pyx_INCREF((PyObject *)__pyx_v_self);
     __Pyx_GIVEREF((PyObject *)__pyx_v_self);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 0, ((PyObject *)__pyx_v_self))) __PYX_ERR(0, 288, __pyx_L1_error);
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 0, ((PyObject *)__pyx_v_self))) __PYX_ERR(0, 288, __pyx_L1_error);
     __Pyx_INCREF(__pyx_v_m);
     __Pyx_GIVEREF(__pyx_v_m);
-    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_v_m)) __PYX_ERR(0, 288, __pyx_L1_error);
-    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_8kt_simul_4core_10components_PlugSite), __pyx_t_7, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 288, __pyx_L1_error)
+    if (__Pyx_PyTuple_SET_ITEM(__pyx_t_6, 1, __pyx_v_m)) __PYX_ERR(0, 288, __pyx_L1_error);
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_8kt_simul_4core_10components_PlugSite), __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 288, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_XDECREF_SET(__pyx_v_ps, ((struct __pyx_obj_8kt_simul_4core_10components_PlugSite *)__pyx_t_2));
     __pyx_t_2 = 0;
 
@@ -14426,7 +14414,7 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
       PyErr_Format(PyExc_AttributeError, "'NoneType' object has no attribute '%.30s'", "append");
       __PYX_ERR(0, 289, __pyx_L1_error)
     }
-    __pyx_t_10 = __Pyx_PyList_Append(__pyx_v_self->plugsites, ((PyObject *)__pyx_v_ps)); if (unlikely(__pyx_t_10 == ((int)-1))) __PYX_ERR(0, 289, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyList_Append(__pyx_v_self->plugsites, ((PyObject *)__pyx_v_ps)); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 289, __pyx_L1_error)
 
     /* "kt_simul/core/components.pyx":287
  *         self.plugsites = []
@@ -14447,14 +14435,14 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
  */
   __pyx_t_2 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_calc_plug_vector); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 290, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = NULL;
+  __pyx_t_6 = NULL;
   __pyx_t_5 = 0;
   #if CYTHON_UNPACK_METHODS
   if (likely(PyMethod_Check(__pyx_t_2))) {
-    __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_2);
-    if (likely(__pyx_t_7)) {
+    __pyx_t_6 = PyMethod_GET_SELF(__pyx_t_2);
+    if (likely(__pyx_t_6)) {
       PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_2);
-      __Pyx_INCREF(__pyx_t_7);
+      __Pyx_INCREF(__pyx_t_6);
       __Pyx_INCREF(function);
       __Pyx_DECREF_SET(__pyx_t_2, function);
       __pyx_t_5 = 1;
@@ -14462,9 +14450,9 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
   }
   #endif
   {
-    PyObject *__pyx_callargs[2] = {__pyx_t_7, NULL};
+    PyObject *__pyx_callargs[2] = {__pyx_t_6, NULL};
     __pyx_t_4 = __Pyx_PyObject_FastCall(__pyx_t_2, __pyx_callargs+1-__pyx_t_5, 0+__pyx_t_5);
-    __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
+    __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
     if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 290, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -14487,7 +14475,6 @@ static int __pyx_pf_8kt_simul_4core_10components_10Centromere___init__(struct __
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("kt_simul.core.components.Centromere.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -17619,7 +17606,6 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
   int __pyx_t_6;
   PyObject *__pyx_t_7 = NULL;
   float __pyx_t_8;
-  PyObject *__pyx_t_9 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -18090,7 +18076,7 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
  *             self.plug_state = initial_plug
  * 
  *         self.set_pos(init_pos)             # <<<<<<<<<<<<<<
- *         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+ *         self.state_hist = np.zeros(self.KD.num_steps, dtype=int)
  *         self.state_hist[:] = self.plug_state
  */
   __pyx_t_8 = __pyx_PyFloat_AsFloat(__pyx_v_init_pos); if (unlikely((__pyx_t_8 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 422, __pyx_L1_error)
@@ -18099,7 +18085,7 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
   /* "kt_simul/core/components.pyx":423
  * 
  *         self.set_pos(init_pos)
- *         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)             # <<<<<<<<<<<<<<
+ *         self.state_hist = np.zeros(self.KD.num_steps, dtype=int)             # <<<<<<<<<<<<<<
  *         self.state_hist[:] = self.plug_state
  * 
  */
@@ -18117,36 +18103,30 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
   __pyx_t_1 = 0;
   __pyx_t_1 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 423, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 423, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, ((PyObject *)(&PyInt_Type))) < 0) __PYX_ERR(0, 423, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 423, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_int); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 423, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_9);
-  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 423, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 423, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (!(likely(((__pyx_t_9) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_9, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 423, __pyx_L1_error)
-  __Pyx_GIVEREF(__pyx_t_9);
+  if (!(likely(((__pyx_t_7) == Py_None) || likely(__Pyx_TypeTest(__pyx_t_7, __pyx_ptype_5numpy_ndarray))))) __PYX_ERR(0, 423, __pyx_L1_error)
+  __Pyx_GIVEREF(__pyx_t_7);
   __Pyx_GOTREF((PyObject *)__pyx_v_self->state_hist);
   __Pyx_DECREF((PyObject *)__pyx_v_self->state_hist);
-  __pyx_v_self->state_hist = ((PyArrayObject *)__pyx_t_9);
-  __pyx_t_9 = 0;
+  __pyx_v_self->state_hist = ((PyArrayObject *)__pyx_t_7);
+  __pyx_t_7 = 0;
 
   /* "kt_simul/core/components.pyx":424
  *         self.set_pos(init_pos)
- *         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+ *         self.state_hist = np.zeros(self.KD.num_steps, dtype=int)
  *         self.state_hist[:] = self.plug_state             # <<<<<<<<<<<<<<
  * 
  *         self.tmp = []
  */
-  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_self->plug_state); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 424, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_9);
-  if (__Pyx_PyObject_SetSlice(((PyObject *)__pyx_v_self->state_hist), __pyx_t_9, 0, 0, NULL, NULL, &__pyx_slice__6, 0, 0, 1) < 0) __PYX_ERR(0, 424, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
+  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_self->plug_state); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 424, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  if (__Pyx_PyObject_SetSlice(((PyObject *)__pyx_v_self->state_hist), __pyx_t_7, 0, 0, NULL, NULL, &__pyx_slice__6, 0, 0, 1) < 0) __PYX_ERR(0, 424, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
   /* "kt_simul/core/components.pyx":426
  *         self.state_hist[:] = self.plug_state
@@ -18155,13 +18135,13 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
  * 
  *     cdef void set_plug_state(self, int state, int time_point=-1):
  */
-  __pyx_t_9 = PyList_New(0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 426, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_9);
-  __Pyx_GIVEREF(__pyx_t_9);
+  __pyx_t_7 = PyList_New(0); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 426, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_GIVEREF(__pyx_t_7);
   __Pyx_GOTREF(__pyx_v_self->tmp);
   __Pyx_DECREF(__pyx_v_self->tmp);
-  __pyx_v_self->tmp = ((PyObject*)__pyx_t_9);
-  __pyx_t_9 = 0;
+  __pyx_v_self->tmp = ((PyObject*)__pyx_t_7);
+  __pyx_t_7 = 0;
 
   /* "kt_simul/core/components.pyx":396
  *     """
@@ -18179,7 +18159,6 @@ static int __pyx_pf_8kt_simul_4core_10components_8PlugSite___init__(struct __pyx
   __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_7);
-  __Pyx_XDECREF(__pyx_t_9);
   __Pyx_AddTraceback("kt_simul.core.components.PlugSite.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
@@ -26830,7 +26809,6 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_s_init_pos, __pyx_k_init_pos, sizeof(__pyx_k_init_pos), 0, 0, 1, 1},
     {&__pyx_n_s_initial_plug, __pyx_k_initial_plug, sizeof(__pyx_k_initial_plug), 0, 0, 1, 1},
     {&__pyx_n_s_initializing, __pyx_k_initializing, sizeof(__pyx_k_initializing), 0, 0, 1, 1},
-    {&__pyx_n_s_int, __pyx_k_int, sizeof(__pyx_k_int), 0, 0, 1, 1},
     {&__pyx_n_s_is_attached, __pyx_k_is_attached, sizeof(__pyx_k_is_attached), 0, 0, 1, 1},
     {&__pyx_n_s_is_coroutine, __pyx_k_is_coroutine, sizeof(__pyx_k_is_coroutine), 0, 0, 1, 1},
     {&__pyx_n_s_is_correct, __pyx_k_is_correct, sizeof(__pyx_k_is_correct), 0, 0, 1, 1},
@@ -26999,7 +26977,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
 
   /* "kt_simul/core/components.pyx":424
  *         self.set_pos(init_pos)
- *         self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+ *         self.state_hist = np.zeros(self.KD.num_steps, dtype=int)
  *         self.state_hist[:] = self.plug_state             # <<<<<<<<<<<<<<
  * 
  *         self.tmp = []

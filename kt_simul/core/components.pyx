@@ -281,7 +281,7 @@ cdef class Centromere(Organite):
         Organite.__init__(self, chromosome, init_pos)
         Mk = int(self.KD.params['Mk'])
         self.toa = 0  # time of arrival at pole
-        self.plug_vector = np.zeros(Mk, dtype=np.int)
+        self.plug_vector = np.zeros(Mk, dtype=int)
         self.plugsites = []
         cdef PlugSite ps
         for m in range(Mk):
@@ -420,7 +420,7 @@ cdef class PlugSite(Organite):
             self.plug_state = initial_plug
 
         self.set_pos(init_pos)
-        self.state_hist = np.zeros(self.KD.num_steps, dtype=np.int)
+        self.state_hist = np.zeros(self.KD.num_steps, dtype=int)
         self.state_hist[:] = self.plug_state
 
         self.tmp = []

@@ -1774,7 +1774,7 @@ typedef __pyx_t_5numpy_float_t __pyx_t_8kt_simul_4core_10components_CTYPE_t;
 
 /* "kt_simul/core/spindle_dynamics.pyx":33
  * 
- * DTYPE = np.float
+ * DTYPE = np.float64
  * ctypedef np.float_t DTYPE_t             # <<<<<<<<<<<<<<
  * 
  * cdef class KinetoDynamics(object):
@@ -3359,6 +3359,7 @@ static const char __pyx_k_speeds[] = "speeds";
 static const char __pyx_k_update[] = "update";
 static const char __pyx_k_Spindle[] = "Spindle";
 static const char __pyx_k_disable[] = "disable";
+static const char __pyx_k_float64[] = "float64";
 static const char __pyx_k_kappa_c[] = "kappa_c";
 static const char __pyx_k_kappa_k[] = "kappa_k";
 static const char __pyx_k_spindle[] = "spindle";
@@ -3678,8 +3679,8 @@ typedef struct {
   PyObject *__pyx_n_u_dt;
   PyObject *__pyx_n_s_dtype;
   PyObject *__pyx_kp_u_enable;
-  PyObject *__pyx_n_s_float;
   PyObject *__pyx_n_u_float;
+  PyObject *__pyx_n_s_float64;
   PyObject *__pyx_kp_u_gc;
   PyObject *__pyx_n_s_get_all_plugsites;
   PyObject *__pyx_n_s_getstate;
@@ -3888,8 +3889,8 @@ static int __pyx_m_clear(PyObject *m) {
   Py_CLEAR(clear_module_state->__pyx_n_u_dt);
   Py_CLEAR(clear_module_state->__pyx_n_s_dtype);
   Py_CLEAR(clear_module_state->__pyx_kp_u_enable);
-  Py_CLEAR(clear_module_state->__pyx_n_s_float);
   Py_CLEAR(clear_module_state->__pyx_n_u_float);
+  Py_CLEAR(clear_module_state->__pyx_n_s_float64);
   Py_CLEAR(clear_module_state->__pyx_kp_u_gc);
   Py_CLEAR(clear_module_state->__pyx_n_s_get_all_plugsites);
   Py_CLEAR(clear_module_state->__pyx_n_s_getstate);
@@ -4076,8 +4077,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
   Py_VISIT(traverse_module_state->__pyx_n_u_dt);
   Py_VISIT(traverse_module_state->__pyx_n_s_dtype);
   Py_VISIT(traverse_module_state->__pyx_kp_u_enable);
-  Py_VISIT(traverse_module_state->__pyx_n_s_float);
   Py_VISIT(traverse_module_state->__pyx_n_u_float);
+  Py_VISIT(traverse_module_state->__pyx_n_s_float64);
   Py_VISIT(traverse_module_state->__pyx_kp_u_gc);
   Py_VISIT(traverse_module_state->__pyx_n_s_get_all_plugsites);
   Py_VISIT(traverse_module_state->__pyx_n_s_getstate);
@@ -4368,8 +4369,8 @@ static int __pyx_m_traverse(PyObject *m, visitproc visit, void *arg) {
 #define __pyx_n_u_dt __pyx_mstate_global->__pyx_n_u_dt
 #define __pyx_n_s_dtype __pyx_mstate_global->__pyx_n_s_dtype
 #define __pyx_kp_u_enable __pyx_mstate_global->__pyx_kp_u_enable
-#define __pyx_n_s_float __pyx_mstate_global->__pyx_n_s_float
 #define __pyx_n_u_float __pyx_mstate_global->__pyx_n_u_float
+#define __pyx_n_s_float64 __pyx_mstate_global->__pyx_n_s_float64
 #define __pyx_kp_u_gc __pyx_mstate_global->__pyx_kp_u_gc
 #define __pyx_n_s_get_all_plugsites __pyx_mstate_global->__pyx_n_s_get_all_plugsites
 #define __pyx_n_s_getstate __pyx_mstate_global->__pyx_n_s_getstate
@@ -16085,8 +16086,8 @@ static int __Pyx_CreateStringTabAndInitStrings(void) {
     {&__pyx_n_u_dt, __pyx_k_dt, sizeof(__pyx_k_dt), 0, 1, 0, 1},
     {&__pyx_n_s_dtype, __pyx_k_dtype, sizeof(__pyx_k_dtype), 0, 0, 1, 1},
     {&__pyx_kp_u_enable, __pyx_k_enable, sizeof(__pyx_k_enable), 0, 1, 0, 0},
-    {&__pyx_n_s_float, __pyx_k_float, sizeof(__pyx_k_float), 0, 0, 1, 1},
     {&__pyx_n_u_float, __pyx_k_float, sizeof(__pyx_k_float), 0, 1, 0, 1},
+    {&__pyx_n_s_float64, __pyx_k_float64, sizeof(__pyx_k_float64), 0, 0, 1, 1},
     {&__pyx_kp_u_gc, __pyx_k_gc, sizeof(__pyx_k_gc), 0, 1, 0, 0},
     {&__pyx_n_s_get_all_plugsites, __pyx_k_get_all_plugsites, sizeof(__pyx_k_get_all_plugsites), 0, 0, 1, 1},
     {&__pyx_n_s_getstate, __pyx_k_getstate, sizeof(__pyx_k_getstate), 0, 0, 1, 1},
@@ -16912,20 +16913,20 @@ if (!__Pyx_RefNanny) {
  * a = 0
  * b = 1             # <<<<<<<<<<<<<<
  * 
- * DTYPE = np.float
+ * DTYPE = np.float64
  */
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_b, __pyx_int_1) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
 
   /* "kt_simul/core/spindle_dynamics.pyx":32
  * b = 1
  * 
- * DTYPE = np.float             # <<<<<<<<<<<<<<
+ * DTYPE = np.float64             # <<<<<<<<<<<<<<
  * ctypedef np.float_t DTYPE_t
  * 
  */
   __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_DTYPE, __pyx_t_2) < 0) __PYX_ERR(0, 32, __pyx_L1_error)

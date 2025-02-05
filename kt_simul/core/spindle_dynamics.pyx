@@ -29,7 +29,7 @@ LEFT = -1
 a = 0
 b = 1
 
-DTYPE = np.float
+DTYPE = np.float64
 ctypedef np.float_t DTYPE_t
 
 cdef class KinetoDynamics(object):

@@ -17,7 +17,8 @@ import numpy as np
 import collections
 
 import pyximport
-pyximport.install(setup_args={'include_dirs': np.get_include()}, reload_support=True)
+
+pyximport.install(setup_args={"include_dirs": np.get_include()}, reload_support=True)
 
 from ..core.spindle_dynamics import KinetoDynamics
 from ..core import parameters
@@ -35,7 +36,6 @@ class SimulationAlreadyDone(Exception):
 
 
 class Metaphase(object):
-
     """
     An instance of the Metaphase class is a wrapper around
     the whole simulation.
@@ -72,11 +72,15 @@ class Metaphase(object):
 
     RANDOM_STATE = None
 
-    def __init__(self,  paramtree=None, measuretree=None,
-                 initial_plug='random', verbose=False,
-                 keep_same_random_seed=False,
-                 force_parameters=[]):
-
+    def __init__(
+        self,
+        paramtree=None,
+        measuretree=None,
+        initial_plug="random",
+        verbose=False,
+        keep_same_random_seed=False,
+        force_parameters=[],
+    ):
         # Enable or disable log console
         self.verbose = verbose
         log = logging.getLogger(__name__)
@@ -95,10 +99,11 @@ class Metaphase(object):
         else:
             self.measuretree = measuretree
 
-        parameters.reduce_params(self.paramtree, self.measuretree,
-                                 force_parameters=force_parameters)
+        parameters.reduce_params(
+            self.paramtree, self.measuretree, force_parameters=force_parameters
+        )
 
-        log.info('Parameters loaded')
+        log.info("Parameters loaded")
 
         if keep_same_random_seed:
             self.prng = self.__class__.get_random_state()
@@ -108,14 +113,14 @@ class Metaphase(object):
         params = self.paramtree.relative_dic
         # Reset explicitely the unit parameters to their
         # dimentionalized value
-        params['Vk'] = self.paramtree.absolute_dic['Vk']
-        params['Fk'] = self.paramtree.absolute_dic['Fk']
-        params['dt'] = self.paramtree.absolute_dic['dt']
+        params["Vk"] = self.paramtree.absolute_dic["Vk"]
+        params["Fk"] = self.paramtree.absolute_dic["Fk"]
+        params["dt"] = self.paramtree.absolute_dic["dt"]
 
         self.KD = KinetoDynamics(params, initial_plug=initial_plug, prng=self.prng)
 
-        dt = self.paramtree.absolute_dic['dt']
-        duration = self.paramtree.absolute_dic['span']
+        dt = self.paramtree.absolute_dic["dt"]
+        duration = self.paramtree.absolute_dic["span"]
 
         self.num_steps = int(duration / dt)
         self.KD.anaphase = False
@@ -125,17 +130,14 @@ class Metaphase(object):
         self.observations = {}
         self.analysis = {}
 
-        log.info('Simulation initialized')
+        log.info("Simulation initialized")
         log.disabled = False
 
-        self.chrom_colors = ["red",
-                             "green",
-                             "blue"]
+        self.chrom_colors = ["red", "green", "blue"]
 
     @classmethod
     def get_random_state(cls):
-        """
-        """
+        """ """
         prng = np.random.RandomState()
         if not cls.RANDOM_STATE:
             cls.RANDOM_STATE = prng.get_state()
@@ -145,29 +147,29 @@ class Metaphase(object):
 
     def __str__(self):
         lines = []
-        lines.append('Metaphase class')
+        lines.append("Metaphase class")
         try:
-            lines.append('Parameters:')
-            for line in str(self.paramtree.relative_dic).split(','):
+            lines.append("Parameters:")
+            for line in str(self.paramtree.relative_dic).split(","):
                 lines.append(line)
         except AttributeError:
             pass
         try:
-            lines.append('Measures:')
-            for line in str(self.measuretree.absolute_dic).split(','):
+            lines.append("Measures:")
+            for line in str(self.measuretree.absolute_dic).split(","):
                 lines.append(line)
         except AttributeError:
             pass
 
-        return '\n'.join(lines)
+        return "\n".join(lines)
 
     @property
     def time(self):
-        return np.arange(0, self.paramtree['span'], self.KD.dt)
+        return np.arange(0, self.paramtree["span"], self.KD.dt)
 
     @property
     def time_anaphase(self):
-        return self.analysis['real_t_A']
+        return self.analysis["real_t_A"]
 
     @property
     def index_anaphase(self):
@@ -176,7 +178,7 @@ class Metaphase(object):
     def index_anaphase_before(self, t_shift):
         return np.argwhere(self.time == (self.time_anaphase - t_shift))[0][0]
 
-    def simul(self, ablat=None, ablat_pos=0.):
+    def simul(self, ablat=None, ablat_pos=0.0):
         """
         The simulation main loop.
 
@@ -195,17 +197,16 @@ class Metaphase(object):
                 instance. Please create another Metaphase instance
                 to launch a new simulation.""")
 
-        kappa_c = self.KD.params['kappa_c']
+        kappa_c = self.KD.params["kappa_c"]
 
         if self.verbose:
-            log.info('Running simulation')
+            log.info("Running simulation")
         bef = 0
         log_anaphase_onset = False
 
-        self.analysis['real_t_A'] = self.KD.params['t_A']
+        self.analysis["real_t_A"] = self.KD.params["t_A"]
 
         for time_point in range(1, self.num_steps):
-
             progress = int((time_point * 100.0) / self.num_steps)
 
             if self.verbose and progress != bef:
@@ -223,20 +224,21 @@ class Metaphase(object):
                 if not log_anaphase_onset:
                     print_progress(-1)
                     if self.verbose:
-                        log.info("Anaphase onset at %i / %i" %
-                                   (time_point, self.num_steps))
+                        log.info(
+                            "Anaphase onset at %i / %i" % (time_point, self.num_steps)
+                        )
                     log_anaphase_onset = True
 
             self.KD.one_step(time_point)
             # if time_point % 100 == 0:
-                # print self.KD.At_mat
+            # print self.KD.At_mat
 
         if self.verbose:
             print_progress(-1)
 
         if self.verbose:
-            log.info('Simulation done')
-        self.KD.params['kappa_c'] = kappa_c
+            log.info("Simulation done")
+        self.KD.params["kappa_c"] = kappa_c
         delay_str = "delay = %2d seconds" % self.delay
         self.report.append(delay_str)
 
@@ -247,8 +249,7 @@ class Metaphase(object):
             ch.cen_B.calc_toa()
 
     def get_report(self, time=0):
-        """Print simulation state about a specific time point
-        """
+        """Print simulation state about a specific time point"""
         params = self.paramtree.relative_dic
 
         report = collections.OrderedDict()
@@ -275,8 +276,8 @@ class Metaphase(object):
                 cen_dict["position"] = round(cent.traj[time], 3)
                 for site in cent.plugsites:
                     site_dict = collections.OrderedDict()
-                    site_dict['position'] = round(site.traj[time], 3)
-                    site_dict['Plug state'] = site.state_hist[time]
+                    site_dict["position"] = round(site.traj[time], 3)
+                    site_dict["Plug state"] = site.state_hist[time]
 
                     cen_dict["PlugSite %i" % site.site_id] = site_dict
 
@@ -299,8 +300,8 @@ class Metaphase(object):
 
         """
 
-        t_A = int(self.KD.params['t_A'])
-        dt = self.KD.params['dt']
+        t_A = int(self.KD.params["t_A"])
+        dt = self.KD.params["dt"]
         t = time_point * dt
 
         if self.KD.anaphase:
@@ -308,15 +309,14 @@ class Metaphase(object):
 
         if t >= t_A and self._plug_checkpoint():
             self.delay = t - t_A
-            self.analysis['real_t_A'] = t
+            self.analysis["real_t_A"] = t
 
             # Then we just get rid of cohesin
-            self.KD.params['kappa_c'] = 0
+            self.KD.params["kappa_c"] = 0
             self.KD.calc_B()
             nb_mero = self._mero_checkpoint()
             if nb_mero:
-                s = ("There were %d merotelic MT at anaphase onset"
-                     % nb_mero)
+                s = "There were %d merotelic MT at anaphase onset" % nb_mero
                 self.report.append(s)
             self.KD.anaphase = True
             return True
@@ -337,15 +337,15 @@ class Metaphase(object):
         if pos is None:
             pos = self.KD.spbR.pos
         if not self.KD.spbL.pos <= pos <= self.KD.spbR.pos:
-            log.warning('Missed shot, same player play again!')
+            log.warning("Missed shot, same player play again!")
             return
-        self.KD.params['Fmz'] = 0.
-        self.KD.params['k_a'] = 0.
-        self.KD.params['k_d0'] = 0.
+        self.KD.params["Fmz"] = 0.0
+        self.KD.params["k_a"] = 0.0
+        self.KD.params["k_d0"] = 0.0
         self.KD.A0_mat = self.KD.time_invariantA()
 
         for plugsite in self.KD.spindle.all_plugsites:
-            if pos < plugsite.pos and plugsite.plug_state == - 1:
+            if pos < plugsite.pos and plugsite.plug_state == -1:
                 plugsite.set_plug_state(0, time_point)
             elif pos > plugsite.pos and plugsite.plug_state == 1:
                 plugsite.set_plug_state(0, time_point)
@@ -355,7 +355,7 @@ class Metaphase(object):
         if all chromosomes are plugged by at least one kMT, False
         otherwise.
         """
-        sac = self.KD.params['sac']
+        sac = self.KD.params["sac"]
         if sac == 0:
             return True
 
@@ -409,11 +409,15 @@ class Metaphase(object):
         kts = self.KD.chromosomes
         spbA = self.KD.spbL.traj
         spbB = self.KD.spbR.traj
-        anaphase = self.analysis['real_t_A']
+        anaphase = self.analysis["real_t_A"]
 
         total_subplots = len(kts) * 2 + 1
-        height_ratios = [1 for _ in range(len(kts))] + [len(kts) * 2] + [1 for _ in range(len(kts))]
-        gs = matplotlib.gridspec.GridSpec(total_subplots, 1, height_ratios=height_ratios)
+        height_ratios = (
+            [1 for _ in range(len(kts))] + [len(kts) * 2] + [1 for _ in range(len(kts))]
+        )
+        gs = matplotlib.gridspec.GridSpec(
+            total_subplots, 1, height_ratios=height_ratios
+        )
 
         h = len(kts) * 2 + 4
         fig = plt.figure(figsize=(12, h))
@@ -421,15 +425,22 @@ class Metaphase(object):
         # Plot kymo
         ax = plt.subplot(gs[len(kts)])
 
-        ax.plot(times, spbA, color='black', lw=2)
-        ax.plot(times, spbB, color='black', lw=2)
+        ax.plot(times, spbA, color="black", lw=2)
+        ax.plot(times, spbB, color="black", lw=2)
 
-        ax.axvline(anaphase, color='black')
+        ax.axvline(anaphase, color="black")
 
-        cm = matplotlib.cm.get_cmap('Set1')
+        cm = matplotlib.cm.get_cmap("Set1")
         colors = [cm(1 * i / len(kts)) for i in range(len(kts))]
         for i, (color, kt) in enumerate(zip(colors, kts)):
-            ax.plot(times, kt.cen_A.traj, color=color, alpha=0.8, lw=2, label='ch n°{}'.format(i))
+            ax.plot(
+                times,
+                kt.cen_A.traj,
+                color=color,
+                alpha=0.8,
+                lw=2,
+                label="ch n°{}".format(i),
+            )
             ax.plot(times, kt.cen_B.traj, color=color, alpha=0.8, lw=2)
 
         ax.legend()
@@ -440,9 +451,9 @@ class Metaphase(object):
             i.set_linewidth(0)
 
         # ax.xaxis.set_ticklabels([])
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.xaxis.set_ticks_position("none")
+        ax.yaxis.set_ticks_position("none")
+        ax.grid(which="major", color="#555555", linestyle="-", alpha=0.8)
 
         # Plot defects
         kwargs = dict(alpha=0.8, lw=2)
@@ -456,25 +467,25 @@ class Metaphase(object):
             errB = kt.erroneous_history.T[1]
 
             ax1.plot(times, correctA, color=color, **kwargs)
-            ax1.plot(times, errA, color=color, ls='--', **kwargs)
+            ax1.plot(times, errA, color=color, ls="--", **kwargs)
 
             ax2.plot(times, correctB, color=color, **kwargs)
-            ax2.plot(times, errB, color=color, ls='--', **kwargs)
+            ax2.plot(times, errB, color=color, ls="--", **kwargs)
 
-            ax1.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
-            ax2.set_yticks(np.arange(0, self.paramtree['Mk'] + 1))
+            ax1.set_yticks(np.arange(0, self.paramtree["Mk"] + 1))
+            ax2.set_yticks(np.arange(0, self.paramtree["Mk"] + 1))
 
             # ax1.xaxis.set_ticklabels([])
             # ax1.yaxis.set_ticklabels([])
-            ax1.xaxis.set_ticks_position('none')
-            ax1.yaxis.set_ticks_position('none')
-            ax1.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
+            ax1.xaxis.set_ticks_position("none")
+            ax1.yaxis.set_ticks_position("none")
+            ax1.grid(which="major", color="#555555", linestyle="-", alpha=0.6)
 
             # ax2.xaxis.set_ticklabels([])
             # ax2.yaxis.set_ticklabels([])
-            ax2.xaxis.set_ticks_position('none')
-            ax2.yaxis.set_ticks_position('none')
-            ax2.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.6)
+            ax2.xaxis.set_ticks_position("none")
+            ax2.yaxis.set_ticks_position("none")
+            ax2.grid(which="major", color="#555555", linestyle="-", alpha=0.6)
 
             for s in ax1.spines.values():
                 s.set_linewidth(0)
@@ -488,8 +499,7 @@ class Metaphase(object):
         return fig
 
     def kymo_figure(self):
-        """
-        """
+        """ """
 
         import matplotlib.pyplot as plt
         import matplotlib
@@ -504,13 +514,13 @@ class Metaphase(object):
         fig, ax = plt.subplots(figsize=(14, 12))
 
         # Plot kymo
-        colors = ['red', 'blue', 'green']
+        colors = ["red", "blue", "green"]
         for i, (color, kt) in enumerate(zip(colors, kts)):
             ax.plot(times, kt.cen_A.traj, color=color, alpha=1, lw=8)
             ax.plot(times, kt.cen_B.traj, color=color, alpha=1, lw=8)
 
-        ax.plot(times, spbA, color='black', lw=8)
-        ax.plot(times, spbB, color='black', lw=8)
+        ax.plot(times, spbA, color="black", lw=8)
+        ax.plot(times, spbB, color="black", lw=8)
 
         ax.set_yticks(np.arange(-4, 4, 2))
         ax.set_xticks(np.arange(0, 20, 5))
@@ -521,14 +531,14 @@ class Metaphase(object):
         ax.xaxis.set_major_formatter(nullform)
         ax.yaxis.set_major_formatter(nullform)
 
-        ax.xaxis.set_ticks_position('none')
-        ax.yaxis.set_ticks_position('none')
+        ax.xaxis.set_ticks_position("none")
+        ax.yaxis.set_ticks_position("none")
 
         for i in ax.spines.values():
             i.set_linewidth(8)
-            i.set_color('black')
+            i.set_color("black")
 
-        ax.grid(b=True, which='major', color='#555555', linestyle='-', alpha=0.8)
+        ax.grid(which="major", color="#555555", linestyle="-", alpha=0.8)
         ax.set_axisbelow(True)
 
         plt.tight_layout()
@@ -537,8 +547,7 @@ class Metaphase(object):
         return fig
 
     def get_attachment_vector(self):
-        """Get attachment states for all chromosomes and all timepoints.
-        """
+        """Get attachment states for all chromosomes and all timepoints."""
 
         att = []
 
@@ -549,7 +558,10 @@ class Metaphase(object):
             # Return attachment history for all timepoints
             c_hist = ch.correct_history
             e_hist = ch.erroneous_history
-            state = [self.get_attachment(np.concatenate((c, e))) for c, e in zip(c_hist, e_hist)]
+            state = [
+                self.get_attachment(np.concatenate((c, e)))
+                for c, e in zip(c_hist, e_hist)
+            ]
 
             att.append(state)
 
@@ -567,23 +579,19 @@ class Metaphase(object):
         """
 
         def amphitelic(state):
-            return (state[0] > 0 and state[1] > 0 and
-                    state[2] == 0 and state[3] == 0)
+            return state[0] > 0 and state[1] > 0 and state[2] == 0 and state[3] == 0
 
         def monotelic(state):
-            return (state[0] > 0 and state[1] == 0 and
-                    state[2] == 0 and state[3] == 0)
+            return state[0] > 0 and state[1] == 0 and state[2] == 0 and state[3] == 0
 
         def syntelic(state):
-            return (state[0] > 0 and state[1] == 0 and
-                    state[2] == 0 and state[3] > 0)
+            return state[0] > 0 and state[1] == 0 and state[2] == 0 and state[3] > 0
 
         def merotelic(state):
-            return (state[0] > 0 and state[2] > 0)
+            return state[0] > 0 and state[2] > 0
 
         def unattached(state):
-            return (state[0] == 0 and state[1] == 0 and
-                    state[2] == 0 and state[3] == 0)
+            return state[0] == 0 and state[1] == 0 and state[2] == 0 and state[3] == 0
 
         permuted_state = [state[1], state[0], state[3], state[2]]
 
@@ -601,21 +609,25 @@ class Metaphase(object):
             return 5
 
     def get_attachment_names(self):
-        """
-        """
+        """ """
 
-        names = ['amphitelic', 'monotelic', 'syntelic',
-                 'merotelic', 'unattached', 'error']
+        names = [
+            "amphitelic",
+            "monotelic",
+            "syntelic",
+            "merotelic",
+            "unattached",
+            "error",
+        ]
         return names
 
     def __del__(self):
-        """
-        """
-        if hasattr(self, 'KD'):
+        """ """
+        if hasattr(self, "KD"):
             del self.KD
-        if hasattr(self, 'analysis'):
+        if hasattr(self, "analysis"):
             del self.analysis
-        if hasattr(self, 'measuretree'):
+        if hasattr(self, "measuretree"):
             del self.measuretree
-        if hasattr(self, 'paramtree'):
+        if hasattr(self, "paramtree"):
             del self.paramtree
