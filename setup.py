@@ -5,11 +5,12 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 from setuptools import setup, find_packages
+import numpy
 
 import kt_simul
 
-install_requires = ['cython', 'numpy', 'numexpr',
-                    'tables', 'pandas', 'matplotlib']
+install_requires = ["cython", "numpy", "numexpr", "tables", "pandas", "matplotlib"]
+
 
 def install_requirements(install_requires):
     """
@@ -22,7 +23,8 @@ def install_requirements(install_requires):
         try:
             __import__(package)
         except:
-            pip.main(['install', package])
+            pip.main(["install", package])
+
 
 install_requirements(install_requires)
 
@@ -30,17 +32,17 @@ from Cython.Distutils import build_ext
 from Cython.Build import cythonize
 
 setup(
-    name='kt_simul',
+    name="kt_simul",
     version=kt_simul.__version__,
     packages=find_packages(),
     author="BNOI Project",
     author_email="bnoi.project@gmail.com",
     description="""Python model of chromosome mouvements during mitosis in
                    Fission Yeast""",
-    long_description=open('README.md').read(),
+    long_description=open("README.md").read(),
     install_requires=install_requires,
     include_package_data=True,
-    url='https://github.com/bnoi/kt_simul.git',
+    url="https://github.com/bnoi/kt_simul.git",
     classifiers=[
         "Programming Language :: Python",
         "Development Status :: 5 - Production/Stable",
@@ -52,10 +54,11 @@ setup(
     ],
     license="CeCILL",
     entry_points={
-        'console_scripts': [
+        "console_scripts": [
             #'proclame-sm = sm_lib.core:proclamer',
         ],
     },
-    cmdclass={'build_ext': build_ext},
+    cmdclass={"build_ext": build_ext},
     ext_modules=cythonize(["kt_simul/core/*.pyx"]),
+    include_dirs=[numpy.get_include()],
 )
